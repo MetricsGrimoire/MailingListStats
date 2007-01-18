@@ -1,0 +1,31 @@
+2006-12-29 Jorge Gascón  <jgascon@gsyc.escet.urjc.es>
+
+    * pyMLS/data_manager.py:
+      Changed multi-query implementation to one query per cursor.execute().
+          Changed query commits to connection.commit()
+    * pyMLS/parser.py: Parser class now purifies processed text (converts every
+          processed character to ASCII code).
+    * pyMLS/dump_db_transformer.py: Now this transformer uses announce method
+          using observer pattern characteristics.
+    * pyMLS/mls_structures.py: Parser class now purifies input text at
+           __init__method (converts every input character to ASCII code).
+    * pyMLS/utils.py: More effective purify_text method.
+    * pyMLS/message_parser.py: Now this class can process Brazilian emails.
+    * pyMLS/main_subsystem.py: More intuitive project directories hierarchy.
+    * pyMLS/basic_transformer.py: Now this transformer uses announce method
+          using observer pattern characteristics.
+    * pyMLS/stats_subsystem.py: Nows this class does one analysis per project,
+          nor per mailing_list.
+    * pyMLS/config_parser.py: Some unuseful tags removed.
+    * pyMLS/seal_xml_transformer.py: Now this transformer uses announce method
+          using observer pattern characteristics.
+
+
+2006-12-29 Jorge Gascón  <jgascon@gsyc.escet.urjc.es>
+
+	* ChangeLog: initial import
+	* pyMLS/data_manager.py: 
+	  Changed multi-query implementation to one query per cursor.execute().
+          Changed query commits to connection.commit()
+
+

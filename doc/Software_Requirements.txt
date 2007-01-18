@@ -1,0 +1,14 @@
+
+# You need to be installed next packages:
+
+    unrar
+    gunzip
+    bunzip2
+    unzip
+    md5
+
+# El usuario de la base de datos que se da tiene que tener el permiso de "crear bases de datos"
+
+    grant create database on *.* to operator@localhost identified by 'operator'
+
+

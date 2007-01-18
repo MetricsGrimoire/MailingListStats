@@ -1,0 +1,80 @@
+
+                                La aplicación:
+------------------------------------------------------------------------------
+
+La aplicación consiste en almacenar y procesar listas de correo, recogiendo
+tantos mensajes como sea posible.
+
+Todos los mensajes procesados se guardan en una base de datos.
+
+La aplicación debe ser independiente de un sistema de base de datos, para
+facilitar esta transparencia se usa python dbi.
+
+La aplicación tambien genera otros resultados (tablas, gráficas, informes)
+mediante unos módulos llamados "transformers".
+
+Para aumentar el rendimiento, algunas fases de la aplicación pueden ser
+optimizadas utilizando concurrencia.
+
+
+
+                    Modelo de datos de MailingListStat:
+------------------------------------------------------------------------------
+
+En principio se espera tener una base de datos por proyecto.
+
+Cada proyecto tiene una o varias listas de correo, cada una de estas es indicada
+mediante una url, como por ejemplo:
+
+            http://gsyc.escet.urjc.es/pipermail/libresoft-acad
+
+Cada una de estas urls es una página HTML que debe descargarse y analizarse, ya
+que cambia con el tiempo.
+
+En dicha página HTML hay muchos enlaces, algunos de ellos apuntan a ficheros
+comprimidos, estos son los ficheros que nos interesan, todos deben ser
+descargados, descomprimidos y analizados.
+
+Los ficheros no cambian con el tiempo, ello quiere decir que no hay que
+descargarse aquellos ficheros que ya se descargaron en el pasado, por lo que
+conviene guardar la url de cada fichero y un indicador de estado (nuevo,
+visitado o fallido).
+
+Cada fichero descargado debe ser analizado, para ello se utilizará un parser
+genérico que se ocupe de analizar cada mensaje contenido en el fichero.
+
+Para ver 
+
+------------------------------------------------
+
+Un proyecto (Nombre, url) tiene una o varias listas de correo.
+
+    - Cada lista de correo tiene uno o varios ficheros comprimidos, interesa
+      guardar esta informacion para no bajarnos varias veces el mismo proyecto.
+
+    - Cada fichero comprimido tiene varios mensajes de texto, cada mensaje de
+      texto tiene:
+            - Un identificador unico.
+            - Una fecha de envio (en tres formatos: datetime, integer, string).
+            - Una fecha de recepcion (en tres formatos: datetime, integer, string).
+            - Una escala horaria.
+            - Un emisor.
+            - Uno o varios receptores.
+            - Un titulo.
+            - Un identificador de mensaje del cual este es un reply.
+            - Un contenido.
+
+
+
+
+            Preguntas que la aplicacion debe contestar:
+------------------------------------------------------------------------
+
+- ¿Numero de personas que participan en cada lista de correo?
+
+- ¿Numero de mensajes que tiene cada lista de correo?
+
+- ¿Disposicion de threads de correo?
+
+- ¿Numero de mensajes que ha mandado cada persona?
+

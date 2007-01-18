@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2006 Jorge Gascon Perez
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Library General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# Authors : Jorge Gascon <jgascon@gsyc.escet.urjc.es>
+
+#Aplicacion principal:
+
+# Leer el archivo de configuracion.
+# Interpretar los parametros recibidos.
+import sys, os, string
+from pyMLS import main_subsystem
+from pyMLS import config_manager
+from pyMLS import utils
+
+
+def usage():
+  
+    print
+    print "           MailingListStat version 2 - authors: jgascon@gsyc.info"
+    print "----------------------------------------------------------------------"
+    print " USAGE:    "
+    print "        mailingListStat [OPTIONS] {mailing_list_url}"
+    print
+    print "    example)  mailingListStat http://my_project.org/myMailingList1 http://my_project.org/myMailingList2"
+    print
+    print " OPTIONS:"
+    print "     -F <file>:    This option is for analyzing many projects."
+    print "                   Into given file there is a line for every mailing list"
+    print "                   EXAMPLE: See 'doc/file_example.txt' for an example."
+    print ""
+    print "----------------------------------------------------------------------"
+    print
+    return
+
+
+
+
+def main():
+    
+    if len(sys.argv) < 2:
+        return usage()
+    else:
+        projects_file_name = ""
+        config_file   = "MailingListStat.conf"
+        projects_mail_url = []
+        
+        #Si -F option is given then a filename is expected.
+        if sys.argv[1] == '-F':
+            projects_file_name = sys.argv[2]
+        else:
+            # A mailing list url is expected at minimun.
+            for mailing_url in sys.argv[1:]:
+                if utils.is_valid_url(mailing_url):
+                    projects_mail_url.append(mailing_url)
+                else:
+                    print "ERROR: "+mailing_url+" is not a valid url."
+
+        # Creating config_manager object.
+        my_config = config_manager.config_manager(config_file)
+        my_config.set_value("projects_file_name",projects_file_name)
+        my_config.set_value("projects_mail_url",projects_mail_url)
+        my_config.set_value("results_directory", os.getcwd()+"/Results")
+
+        if projects_mail_url != [] or projects_file_name != "":
+            #project_name,  protocol,  protocol_project_url,  destiny_directory
+            m_system = main_subsystem.main_subsystem(my_config)
+            m_system.run()
+
+
+# Punto de comienzo del programa
+if __name__ == "__main__":
+    main()
+
+#examples:
+# python mailingListStat.py myProject http://myproject.org/mail_archives
+# python mailingListStat.py -F /home/john/my_projects_file
+

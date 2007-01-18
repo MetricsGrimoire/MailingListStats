@@ -1,0 +1,93 @@
+
+
+                    Modelo de datos de MailingListStat:
+------------------------------------------------------------------------------
+
+- Se guarda un proyecto por cada base de datos.
+
+- Un proyecto puede tener una o mas listas de correo (de usuarios,
+  desarrolladores, bugs, repositorio, etc...)
+
+- Cada lista de correo tiene uno o varios ficheros comprimidos, interesa
+  guardar informacion para evitar bajarnos varias veces el mismo fichero,
+  ya que estos ficheros permanecen invariables.
+
+- Cada lista de correo tiene uno o varios mensajes.
+
+- Un mensaje tiene:
+        - Un identificador unico.
+        - Un titulo.
+        - Un cuerpo.
+        - Uno o mas ficheros adjuntos.
+        - Una hora de salida.
+        - Una hora de llegada.
+        - Una procedencia geografica del mensaje.
+        - ¿Una procedencia geografica (obtenida a partir de la zona horaria)?
+
+- Un mensaje es enviado por una única persona.
+
+- Un mensaje es enviado a una o mas personas, estas pueden ser:
+        - Receptores directos (TO:)
+        - Receptores mediante copia (CC:)
+        - Receptores mediante copia oculta (BCC:)
+
+- Un mensaje puede ser respuesta de otro mensaje, si es asi entonces el mensaje
+  que inicia un hilo no es respuesta de nadie.
+
+- Si deseamos obtener un hilo completo se puede conseguir utilizando un algoritmo
+  llamado "mail-path" el cual se implementará a la hora de desarrollar la base de datos.
+
+- Cada persona se identifica con su direccion de correo, a cada direccion se le
+  asocia un nombre de persona, es posible que varias direcciones de correo pertenezcan
+  a la misma persona, pero no se puede saber a priori.
+
+- 
+
+
+
+                    Funcionamiento del mail-path:
+------------------------------------------------------------------------------
+
+Este algoritmo consiste en guardar en cada mensaje una cadena de texto de la
+siguiente forma:
+
+    - "<id_mensaje_creador_hilo>/<id_mensaje_respuesta>/<id_mensaje_respuesta_del_mensaje_respuesta>/..."
+
+    ej)  "3/127/134/200"
+
+        - Esto quiere decir que el mensaje 200 es una contestacion al mensaje
+          134, el cual es una contestacion al 127 y este último es una
+          contestación al mensaje 3.
+
+        - Si queremos todos los mensajes que forman el hilo nuestra select sería:
+
+                SELECT * FROM emails WHERE mail_path like '3/%';
+
+
+
+
+                    La aplicacion MailingListStat:
+------------------------------------------------------------------------------
+
+En principio se espera tener una base de datos por proyecto.
+
+Un proyecto (Nombre, url) tiene una o varias listas de correo.
+
+    - Cada lista de correo tiene uno o varios ficheros comprimidos, interesa
+      guardar esta informacion para no bajarnos varias veces el mismo fichero,
+      ya que estos ficheros permanecen invariables.
+
+    - Cada fichero comprimido tiene varios mensajes de texto, cada mensaje de
+      texto tiene:
+            - Un identificador unico.
+            - Una fecha de envio (en tres formatos: datetime, integer, string).
+            - Una fecha de recepcion (en tres formatos: datetime, integer, string).
+            - Una escala horaria.
+            - Un emisor.
+            - Uno o varios receptores.
+            - Un titulo.
+            - Un identificador de mensaje del cual este es un reply.
+            - Un contenido.
+
+    - 
+

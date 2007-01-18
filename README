@@ -1,0 +1,114 @@
+
+
+                            GENERAL INSTRUCTIONS
+--------------------------------------------------------------------------------
+
+
+    SOFTWARE REQUIREMENTS:
+--------------------------------------------------------------------------------
+
+    - You need a PC with FreeBSD, Linux Debian or Linux Ubuntu installed in it.
+
+    - You need next software installed:
+
+        python                    (version 2.4.1 or newer)
+        mysql server and client   (version 4 or newer)
+        mysql-python              (You can find this software in your debian
+                                   distribution or at
+                                   http://sourceforge.net/projects/mysql-python)
+        cPickle                   (It is a serialization library for python,
+                                   usually it's included into python software
+                                   package).
+        cvs                       (version 1.11 or newer)
+        svn                       (version 1.3 or newer)
+
+
+
+    INSTALLATION
+--------------------------------------------------------------------------------
+
+    You need a mysql user capable of databases creation, an easy way of doing
+    this consists in:
+
+        1) Open mysql using root user:
+                $ mysql -u root -p
+                $ Enter password:   (type your password)
+
+        2) In mysql create a new user and grant privileges to him, in this
+           example we will create a user called "operator" with password
+           "operator":
+
+            mysql> GRANT ALL PRIVILEGES ON *.* to operator@localhost identified
+                   BY 'operator';
+
+        3) Exit of mysql and open "MailingListStat.conf" file:
+
+            Look for "database_user=" key and ensure that "operator" is typed
+            after (if your mysql user is "operator")
+
+            Look for "database_password=" key and ensure that "operator" is typed
+            after (if your mysql user password is "operator")
+
+
+        Configuration finished!
+
+
+    USE
+--------------------------------------------------------------------------------
+
+    For mailingListStat help, go into "mailingListStat" directory and type:
+
+            ./mailingListStat
+
+    A USAGE page will appear.
+
+
+- MailingListStat has two modes of execution:
+
+        mode 1) You pass arguments to mailingListStat directly by command line.
+
+        mode 2) You can pass -F option and a filename for batch execution, file
+                contents is:
+   
+                http://my_project.org/myMailingList1
+                # This is a comment.
+                http://my_project.org/myMailingList2
+                http://my_project.org/myMailingList3
+                ...
+                http://my_project.org/myMailingListN
+                # This is another comment.
+
+
+    - MailingListStat will generate a database per project,
+      database name will be:
+
+                    mailingliststat_<project_name>
+
+
+
+    PLUGINS
+--------------------------------------------------------------------------------
+
+    MailingListStat has some plugins, you can enable or disable them using
+    "MailingListStat.conf" file, if you want disable a plugin simply look for
+    his line and put NO in its key:
+
+                            dump_db_transformer=NO
+
+
+
+
+    MAKE YOUR OWN PLUGINS
+--------------------------------------------------------------------------------
+
+    Sorry, in next version we will release "Plugin developer guide", thank for
+    your patience.
+
+    
+
+    BUGS AND DOUBTS
+--------------------------------------------------------------------------------
+
+    Send me an email, i will try help you:  jgascon@gsyc.escet.urjc.es
+
+    

@@ -1,0 +1,3 @@
+http://www.my_project_1.org/mailing_list_files.html
+http://www.my_project_2.org/mailing_list_files.html
+http://www.my_project_3.org/mailing_list_files.html
