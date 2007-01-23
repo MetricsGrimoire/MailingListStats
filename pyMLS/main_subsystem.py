@@ -45,11 +45,13 @@ class main_subsystem:
             project_names = self.get_project_names_from_urls(project_urls)
             mailing_names = self.get_mailing_names_from_urls(project_urls)
         else:
-            #Las listas de correo estan en un fichero pasado como parametro.
+            # Las listas de correo estan en un fichero pasado como parametro.
             project_urls  = self.get_all_urls_from_file(self.config.get_value("projects_file_name"))
             project_names = self.get_project_names_from_urls(project_urls)
             mailing_names = self.get_mailing_names_from_urls(project_urls)
 
+        self.config.set_value("projects_urls",project_urls+[])
+        # Introducimos en la configuracion todas las urls recibidas
         self.config.set_value('databases', [])
         # Se comienza el analisis de cada una de las listas de correo.
         while project_names != []:

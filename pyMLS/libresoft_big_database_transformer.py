@@ -34,6 +34,8 @@ class libresoft_big_database_transformer(transformer):
         self.config = config_object
         self.libresoft_connection = None
         self.local_connection = None
+        self.country = self.config.get_value('country')
+        self.urls    = self.config.get_value("projects_urls")
         try:
             self.libresoft_connection = \
                 connect (host   = self.config.get_value('libresoft_big_database_host'),
@@ -52,6 +54,8 @@ class libresoft_big_database_transformer(transformer):
         result_path  = data[0]
         database     = data[1]
         project_name = database.replace('mailingliststat_','')
+        project_id = '?'
+        forge      = '?'
         # Conectando a la base de datos local.
         self.local_connection = connect(host   = self.config.get_value('database_server'),\
                                         user   = self.config.get_value('database_user'),\
@@ -64,23 +68,26 @@ class libresoft_big_database_transformer(transformer):
         result_set = cursor.fetchall()
         number_messages = result_set[0][0]
         cursor.close()
-        
+
+        #Cogiendo la forja de este proyecto
+        forge = '?'
+        for url in self.urls:
+            if project_name in url:
+                forge = url.replace('http://','')
+                if '@' in forge:
+                    forge = forge.split('@')[1]
+                forge = forge.replace('lists.','')
+                forge = forge.replace('listas.','')
+                forge = forge.replace('www.','')
+                forge = forge.split('/')[0]
+                
         # Ahora hay que introducir por la "libresoft_connection" los datos del
         # proyecto (dentro de la tabla "projects").
         libresoft_cursor = self.libresoft_connection.cursor()
         libresoft_cursor.execute("INSERT IGNORE INTO projects "+\
-                                 "(project_name) VALUES ('"+\
-                                 project_name+"')")
-
+                                 "(project_name, country, forge_url) VALUES ('"+\
+                                 project_name+"','"+self.country+"','"+forge+"')")
         libresoft_cursor.close()
-        # Se coge el project_id de este proyecto que estamos mirando
-        libresoft_cursor = self.libresoft_connection.cursor()
-        libresoft_cursor.execute("SELECT id FROM projects "+\
-                                 "WHERE project_name='"+project_name+"'")
-        result_set = libresoft_cursor.fetchone()
-        project_id = result_set[0]
-        libresoft_cursor.close()
-
         # Se introduce el numero de mensajes
         libresoft_cursor = self.libresoft_connection.cursor()
         libresoft_cursor.execute("UPDATE projects SET total_messages="+\
@@ -88,6 +95,15 @@ class libresoft_big_database_transformer(transformer):
                                  " WHERE project_name = '"+project_name+"'")
         libresoft_cursor.close()
 
+
+        # Se coge el project_id de este proyecto que estamos mirando
+        libresoft_cursor = self.libresoft_connection.cursor()
+        libresoft_cursor.execute("SELECT id FROM projects "+\
+                                 "WHERE project_name='"+project_name+"'")
+        result_set = libresoft_cursor.fetchone()
+        project_id = result_set[0]
+        libresoft_cursor.close()
+        
         # Ahora cogemos cada una de las personas y los mensajes
         # en los que ha participado.
         cursor = self.local_connection.cursor()
@@ -99,13 +115,20 @@ class libresoft_big_database_transformer(transformer):
             email_address = row[0]
             messages_sent = row[1]
             libresoft_cursor = self.libresoft_connection.cursor()
-            libresoft_cursor.execute("INSERT IGNORE INTO mls_data "+\
-            " (author_email, messages_sent, project_name, project_id) "+\
-            " VALUES ('"+email_address+"',"+str(messages_sent)+",'"+\
+            libresoft_cursor.execute("INSERT IGNORE INTO posters "+\
+            " (author_email, author_country, messages_sent, project_name, project_id) "+\
+            " VALUES ('"+email_address+"','"+self.country+"',"+str(messages_sent)+",'"+\
                      project_name+"',"+str(project_id)+")")
+            libresoft_cursor.close()
+            
+            libresoft_cursor = self.libresoft_connection.cursor()
+            libresoft_cursor.execute("INSERT IGNORE INTO posters_projects "+\
+            " (project_name, author_email) VALUES "+\
+            " ('"+project_name+"','"+email_address+"')")
             libresoft_cursor.close()
         cursor.close()
         self.finalize_local_connection()
+
 
         
 
@@ -113,6 +136,7 @@ class libresoft_big_database_transformer(transformer):
         self.finalize_libresoft_connection()
         print "   - libresoft_big_database_transformer Finished"
         return
+
 
 
 

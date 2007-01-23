@@ -45,7 +45,7 @@ class config_manager:
         #---------------------- DEFAULT VALUES ----------------------
         if config_file == "":
             self.order_parameters.append('config_file')
-            self.parameters['config_file'] = "MailingListStat.conf"
+            self.parameters['config_file'] = "mailingListStat.conf"
         else:
             self.order_parameters.append('config_file')
             self.parameters['config_file'] = config_file
@@ -53,6 +53,14 @@ class config_manager:
         self.comments['config_file']   =\
         "#  MailingListStat configuration file"
 
+
+        self.order_parameters.append('country')
+        self.parameters['country'] = "india"
+        self.comments['country'] = \
+        "# This value is used for some transformers, for giving a \n"+\
+        "# country to every project."
+        
+        '''
         self.order_parameters.append('only_calculate_stats')
         self.parameters['only_calculate_stats'] = "NO"
         self.comments['only_calculate_stats'] = \
@@ -62,7 +70,18 @@ class config_manager:
         self.parameters['seal_xml_transformer'] = "NO"
         self.comments['seal_xml_transformer'] = \
         "# A generator that generates xml files for seal."
+        
+        self.order_parameters.append('send_to_seal_server')
+        self.parameters['send_to_seal_server'] = "127.0.0.1"
+        self.comments['send_to_seal_server'] = \
+        "# Sends generated XML file to SEAL server."
 
+        self.order_parameters.append('purge_temporal_data')
+        self.parameters['purge_temporal_data'] = "NO"
+        self.comments['purge_temporal_data'] = \
+        "# Delete temporal files after every analysis."
+        '''
+        
         self.order_parameters.append('basic_transformer')
         self.parameters['basic_transformer'] = "YES"
         self.comments['basic_transformer'] = \
@@ -74,16 +93,16 @@ class config_manager:
         "# A generator that dumps database to a compressed sql file."
 
         self.order_parameters.append('most_active_transformer')
-        self.parameters['most_active_transformer'] = "YES"
+        self.parameters['most_active_transformer'] = "NO"
         self.comments['most_active_transformer'] = \
-        "# Shows in a file stored in Results directory the most active "+\
+        "# Shows in a file stored in Results directory the most active \n"+\
         "# developers per project, see 'number_most_active_developers' option."
 
 
         self.order_parameters.append('libresoft_big_database_transformer')
         self.parameters['libresoft_big_database_transformer'] = "YES"
         self.comments['libresoft_big_database_transformer'] = \
-        "# This transformer sends relevant data about every project and "+\
+        "# This transformer sends relevant data about every project and \n"+\
         "# sends it to Libresoft central Database."
 
 
@@ -117,11 +136,6 @@ class config_manager:
         "# A parameter for 'most_active_transformer', indicates how many\n" + \
         "# developers should be shown."
 
-        self.order_parameters.append('send_to_seal_server')
-        self.parameters['send_to_seal_server'] = "127.0.0.1"
-        self.comments['send_to_seal_server'] = \
-        "# Sends generated XML file to SEAL server."
-
         self.order_parameters.append('database_system')
         self.parameters['database_system'] = "mysql"
         self.comments['database_system'] = \
@@ -147,11 +161,6 @@ class config_manager:
         self.comments['destiny_directory'] = \
         "# Directory where temporal results will be stored."
 
-        self.order_parameters.append('purge_temporal_data')
-        self.parameters['purge_temporal_data'] = "NO"
-        self.comments['purge_temporal_data'] = \
-        "# Delete temporal files after every analysis."
-        
         #-- PUT HERE YOUR DEFAULT VALUES
 
 

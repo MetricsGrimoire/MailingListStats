@@ -56,11 +56,10 @@ def main():
         return usage()
     else:
         projects_file_name = ""
-        config_file   = "MailingListStat.conf"
         projects_mail_url = []
         
         #Si -F option is given then a filename is expected.
-        if sys.argv[1] == '-F':
+        if sys.argv[1] == '-F' or sys.argv[1] == '-f':
             projects_file_name = sys.argv[2]
         else:
             # A mailing list url is expected at minimun.
@@ -71,7 +70,7 @@ def main():
                     print "ERROR: "+mailing_url+" is not a valid url."
 
         # Creating config_manager object.
-        my_config = config_manager.config_manager(config_file)
+        my_config = config_manager.config_manager()
         my_config.set_value("projects_file_name",projects_file_name)
         my_config.set_value("projects_mail_url",projects_mail_url)
         my_config.set_value("results_directory", os.getcwd()+"/Results")
