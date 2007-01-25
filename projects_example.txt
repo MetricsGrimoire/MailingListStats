@@ -4,16 +4,6 @@
 
 http://lists.sarovar.org/pipermail/oriya-group
 
-# http://lists.sarovar.org/pipermail/malayalam-users
-# http://gym-helpdesk@lists.sarovar.org/pipermail/yrif-devel
-# http://gym-helpdesk@lists.sarovar.org/pipermail/ijammer-devel
-# http://gym-helpdesk@lists.sarovar.org/pipermail/thanima-devel
-# http://lists.sarovar.org/pipermail/bhudrishti-pubqueries
-# http://lists.sarovar.org/pipermail/javadbf-users
-# http://lists.sarovar.org/pipermail/grade-devel
-# http://lists.sarovar.org/pipermail/grade-user
-# http://lists.sarovar.org/pipermail/linuxparichay-devel-hi
-# http://lists.sarovar.org/pipermail/sig9works-chat
 # http://maillists.adytum.us/pipermail/pyzope
 # http://lists.bestpractical.com/pipermail/svk-devel
 # http://lists.lug.fi.uba.ar/pipermail/freeprince-devel
@@ -21,62 +11,73 @@ http://lists.sarovar.org/pipermail/oriya-group
 # http://lists.lug.fi.uba.ar/pipermail/arrakis-devel
 # http://ns15.allytech.com/pipermail/olpc
 
-# http://lists.sarovar.org/pipermail/arce-announce/
-# http://lists.sarovar.org/pipermail/arce-developer/
-# http://lists.sarovar.org/pipermail/arce-user/
-# http://lists.sarovar.org/pipermail/bhudrishti-pubqueries/
-# http://lists.sarovar.org/pipermail/comskys-general/
-# http://lists.sarovar.org/pipermail/deadcrow-public/
-# http://lists.sarovar.org/pipermail/devnag-general/
-# http://lists.sarovar.org/pipermail/dots-devteam/
-# http://lists.sarovar.org/pipermail/elbert-cvslog/
-# http://lists.sarovar.org/pipermail/elbert-devel/
-# http://lists.sarovar.org/pipermail/grade-devel/
-# http://lists.sarovar.org/pipermail/grade-user/
-# http://lists.sarovar.org/pipermail/gtkhack-discuss/
-# http://lists.sarovar.org/pipermail/gym-helpdesk/
-# http://lists.sarovar.org/pipermail/hidi-nexgen/
-# http://lists.sarovar.org/pipermail/hidi-support/
-# http://lists.sarovar.org/pipermail/ijammer-devel/
-# http://lists.sarovar.org/pipermail/javadbf-users/
-# http://lists.sarovar.org/pipermail/jukenux-devel/
-# http://lists.sarovar.org/pipermail/jukenux-soundconfig/
-# http://lists.sarovar.org/pipermail/karthikkselvan-hyperc/
-# http://lists.sarovar.org/pipermail/learn-do-online-others/
-# http://lists.sarovar.org/pipermail/linux-india-editors/
-# http://lists.sarovar.org/pipermail/linuxparichay-devel-hi/
-# http://lists.sarovar.org/pipermail/linuxparichay-english/
-# http://lists.sarovar.org/pipermail/linuxparichay-users-hi/
-# http://lists.sarovar.org/pipermail/luitlinux-news/
-# http://lists.sarovar.org/pipermail/malayalam-users/
-# http://lists.sarovar.org/pipermail/ohsr-users/
-# http://lists.sarovar.org/pipermail/opos-news/
-# http://lists.sarovar.org/pipermail/oriya-group/
-# http://lists.sarovar.org/pipermail/osiris-announce/
-# http://lists.sarovar.org/pipermail/osiris-devel/
-# http://lists.sarovar.org/pipermail/pdfscreen-bugs/
-# http://lists.sarovar.org/pipermail/pdftex-devel/
-# http://lists.sarovar.org/pipermail/pdftex-user/
-# http://lists.sarovar.org/pipermail/pdftricks-bugs/
-# http://lists.sarovar.org/pipermail/pistas-public/
-# http://lists.sarovar.org/pipermail/plus-discuss/
-# http://lists.sarovar.org/pipermail/prox-devel/
-# http://lists.sarovar.org/pipermail/pstricks-tutorial/
-# http://lists.sarovar.org/pipermail/ptf-devel/
-# http://lists.sarovar.org/pipermail/ptf-users/
-# http://lists.sarovar.org/pipermail/rtda-admin/
-# http://lists.sarovar.org/pipermail/sig9works-chat/
-# http://lists.sarovar.org/pipermail/sslab-comskys/
-# http://lists.sarovar.org/pipermail/thanima-devel/
-# http://lists.sarovar.org/pipermail/usesctp-jeby/
-# http://lists.sarovar.org/pipermail/usesctp-jebyvipinaji/
-# http://lists.sarovar.org/pipermail/viettug-users/
-# http://lists.sarovar.org/pipermail/wajig-users/
-# http://lists.sarovar.org/pipermail/yis-announce/
-# http://lists.sarovar.org/pipermail/yis-devel/
-# http://lists.sarovar.org/pipermail/yrif-devel/
-# http://lists.sarovar.org/pipermail/yrif-people/
-# http://lists.sarovar.org/pipermail/yrif-pomo-devel/
+http://lists.sarovar.org/pipermail/malayalam-users
+http://gym-helpdesk@lists.sarovar.org/pipermail/yrif-devel
+http://gym-helpdesk@lists.sarovar.org/pipermail/ijammer-devel
+http://gym-helpdesk@lists.sarovar.org/pipermail/thanima-devel
+http://lists.sarovar.org/pipermail/bhudrishti-pubqueries
+http://lists.sarovar.org/pipermail/javadbf-users
+http://lists.sarovar.org/pipermail/grade-devel
+http://lists.sarovar.org/pipermail/grade-user
+http://lists.sarovar.org/pipermail/linuxparichay-devel-hi
+http://lists.sarovar.org/pipermail/sig9works-chat
+
+http://lists.sarovar.org/pipermail/arce-announce/
+http://lists.sarovar.org/pipermail/arce-developer/
+http://lists.sarovar.org/pipermail/arce-user/
+http://lists.sarovar.org/pipermail/bhudrishti-pubqueries/
+http://lists.sarovar.org/pipermail/comskys-general/
+http://lists.sarovar.org/pipermail/deadcrow-public/
+http://lists.sarovar.org/pipermail/devnag-general/
+http://lists.sarovar.org/pipermail/dots-devteam/
+http://lists.sarovar.org/pipermail/elbert-cvslog/
+http://lists.sarovar.org/pipermail/elbert-devel/
+http://lists.sarovar.org/pipermail/grade-devel/
+http://lists.sarovar.org/pipermail/grade-user/
+http://lists.sarovar.org/pipermail/gtkhack-discuss/
+http://lists.sarovar.org/pipermail/gym-helpdesk/
+http://lists.sarovar.org/pipermail/hidi-nexgen/
+http://lists.sarovar.org/pipermail/hidi-support/
+http://lists.sarovar.org/pipermail/ijammer-devel/
+http://lists.sarovar.org/pipermail/javadbf-users/
+http://lists.sarovar.org/pipermail/jukenux-devel/
+http://lists.sarovar.org/pipermail/jukenux-soundconfig/
+http://lists.sarovar.org/pipermail/karthikkselvan-hyperc/
+http://lists.sarovar.org/pipermail/learn-do-online-others/
+http://lists.sarovar.org/pipermail/linux-india-editors/
+http://lists.sarovar.org/pipermail/linuxparichay-devel-hi/
+http://lists.sarovar.org/pipermail/linuxparichay-english/
+http://lists.sarovar.org/pipermail/linuxparichay-users-hi/
+http://lists.sarovar.org/pipermail/luitlinux-news/
+http://lists.sarovar.org/pipermail/malayalam-users/
+http://lists.sarovar.org/pipermail/ohsr-users/
+http://lists.sarovar.org/pipermail/opos-news/
+http://lists.sarovar.org/pipermail/oriya-group/
+http://lists.sarovar.org/pipermail/osiris-announce/
+http://lists.sarovar.org/pipermail/osiris-devel/
+http://lists.sarovar.org/pipermail/pdfscreen-bugs/
+http://lists.sarovar.org/pipermail/pdftex-devel/
+http://lists.sarovar.org/pipermail/pdftex-user/
+http://lists.sarovar.org/pipermail/pdftricks-bugs/
+http://lists.sarovar.org/pipermail/pistas-public/
+http://lists.sarovar.org/pipermail/plus-discuss/
+http://lists.sarovar.org/pipermail/prox-devel/
+http://lists.sarovar.org/pipermail/pstricks-tutorial/
+http://lists.sarovar.org/pipermail/ptf-devel/
+http://lists.sarovar.org/pipermail/ptf-users/
+http://lists.sarovar.org/pipermail/rtda-admin/
+http://lists.sarovar.org/pipermail/sig9works-chat/
+http://lists.sarovar.org/pipermail/sslab-comskys/
+http://lists.sarovar.org/pipermail/thanima-devel/
+http://lists.sarovar.org/pipermail/usesctp-jeby/
+http://lists.sarovar.org/pipermail/usesctp-jebyvipinaji/
+http://lists.sarovar.org/pipermail/viettug-users/
+http://lists.sarovar.org/pipermail/wajig-users/
+http://lists.sarovar.org/pipermail/yis-announce/
+http://lists.sarovar.org/pipermail/yis-devel/
+http://lists.sarovar.org/pipermail/yrif-devel/
+http://lists.sarovar.org/pipermail/yrif-people/
+http://lists.sarovar.org/pipermail/yrif-pomo-devel/
 
 # http://listas.codigolivre.org.br/pipermail/ingres-utility-commits/
 # http://listas.codigolivre.org.br/pipermail/secretarianet-commits/

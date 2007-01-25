@@ -30,7 +30,7 @@ class email:
         self.mailing_list = ""
         self.to           = []
         self.carbon_copy  = []
-        self.first_date   = ""
+        #self.first_date   = ""
         self.arrival_date = ""
         self.subject      = ""
         self.body         = ""
@@ -40,7 +40,7 @@ class email:
     def generate_unique_id (self):
         m = md5.new()
         m.update(str(self.author_from) + str(self.to) +\
-                 str(self.carbon_copy) + str(self.first_date) + str(self.arrival_date))
+                 str(self.carbon_copy) + str(self.arrival_date))
         self.message_id = m.hexdigest()
         return self.message_id
     
@@ -52,7 +52,7 @@ class email:
         text += "Mailing List: "+self.mailing_list+"\n"
         text += "To          : "+str(self.to)+"\n"
         text += "Cc          : "+str(self.carbon_copy)+"\n"
-        text += "First Date  : "+self.first_date+"\n"
+        #text += "First Date  : "+self.first_date+"\n"
         text += "Arrival Date: "+self.arrival_date+"\n"
         text += "Subject     : "+self.subject+"\n"
         text += "BODY        : ["+self.body+"]\n"

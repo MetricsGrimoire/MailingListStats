@@ -82,13 +82,14 @@ class main_subsystem:
             mail_file_urls = self.get_mail_archive_urls (mail_url)
             
             # Se obtienen y preparan todos los archivos de la lista de correo.
-            print "   Step 3) Processing files."
+            print "   Step 3) Downloading files."
             if mail_file_urls == []:
                 self.m_data_manager.store_mailing_list (mail_url, mail_name, project, 'failed')
             else:
                 self.m_data_manager.store_mailing_list (mail_url, mail_name, project, 'visited')
                 self.processing_files(mail_file_urls, temp_destiny_dir)
                 analysis = analysis_subsystem.analysis_subsystem(self.config)
+                print "   Step 4) Processing..."
                 analysis.run(temp_destiny_dir)
             # Closing database connection
             self.m_data_manager.finalize ()

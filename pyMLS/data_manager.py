@@ -126,7 +126,6 @@ class data_manager(object):
         if 'messages' not in rows:            
             creation_queries = "CREATE TABLE IF NOT EXISTS messages( "+\
             "message_id char(128) primary key,  "+\
-            "first_date datetime,               "+\
             "arrival_date datetime,             "+\
             "subject varchar(200),              "+\
             "message_body text,                 "+\
@@ -312,11 +311,10 @@ class data_manager(object):
         cursor = self.m_connection.cursor()
 
         query = "INSERT IGNORE INTO messages "+\
-            "(message_id, first_date, arrival_date, subject, "+\
+            "(message_id, arrival_date, subject, "+\
             " message_body, mailing_list_url, is_response_of, mail_path)"+\
             " VALUES " +\
             "('" + new_email.generate_unique_id() + "', "+\
-            " '" + new_email.first_date + "' , "+\
             " '" + new_email.arrival_date + "', "+\
             " '" + new_email.subject + "', "+\
             " '" + new_email.body +"', "+\
@@ -330,11 +328,19 @@ class data_manager(object):
             como pueden aparecer varios mensajes, por defecto se coge el mas antiguo.
             
         '''
+        #print "    Subject: ",new_email.subject,"  date: ",new_email.arrival_date
+        if new_email.arrival_date == "":
+            print "        Nested message ignored: ",new_email.subject,"  date: ",new_email.arrival_date
+            return
         
-        cursor.execute(query)
-
+        try:
+            cursor.execute(query)
+        except:
+            print "ERROR: Se quiso ejecutar: ",query
+            
         self.m_connection.commit()
-        cursor.close()        
+        cursor.close()
+            
         '''
             new_email.author_from  = ""
             new_email.author_alias = ""

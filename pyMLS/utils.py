@@ -121,6 +121,8 @@ def correct_date(a_date):
     #Mon, 15 May 2006 17:37:00 -070
     #Fri, 1 Apr 2005 12:20:18 -0500
     #01 Apr 2005 14:26:14 -0500
+    #Fri Dec 16 20:09:03 2005
+    a_date = a_date.replace('  ',' ')
     debug("Correcting date 1: "+str(a_date))
     month = '00'
     m=re.search('Jan|Feb|Mar|Apr|May|Jun|Jul|Ago|Sep|Oct|Nov|Dec', a_date)

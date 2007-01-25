@@ -57,20 +57,23 @@ class message_parser(parser):
         #Cadenas de tokens que debe reconocer nuestro parser.
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From cartaoterra em terra.com.br  Wed May  4 20:37:08 2005
-        self.load_expression(r"^From\ [\d\w\.\-\_]+ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_from)
+        ###self.load_expression(r"^From\ [\d\w\.\-\_]+ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_from)
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
-        self.load_expression(r"^From\ [\d\w\.\_\-]+\@+[\d\w\.\_\-]+\ .", self.process_from)
+        ###self.load_expression(r"^From\ [\d\w\.\_\-]+\@+[\d\w\.\_\-]+\ .", self.process_from)
         #From =?UTF-8?Q?=E0=A5=80=E0=A4=A3=E0=A5=8D_=E0=A4=8F_?=  Fri Dec 16 20:17:34 2005
-        self.load_expression(r"^From\ [\d\w\.\_\-\=\?\@]+\ .", self.process_from)
+        self.load_expression(r"^From\:\ [\d\w\.\_\(\)\-\=\?\@]+\ .", self.process_from)
         #From: zch519 en gmail.com (Alice L.)
-        self.load_expression(r"^From\:\ [\d\w+\.\-\_] (em|en|at)\ [\d\w\.\_\-]+ .", self.process_from_alias)
+        #From: nab at kernel.org (Nicholas A. Bellinger)
+        #From: erkko.anttila at nokia.com (erkko.anttila@nokia.com)
+        #From: tapani.palli at nokia.com (=?UTF-8?B?VGFwYW5pIFDDpGxsaQ==?=)
+        self.load_expression(r"^From\:\ [\d\w\.\-\_]+\ (em|en|at)\ [\d\w\.\_\-]+\ \([\,\(\)\=\?\d\w\ \_\-\.\"\'\@]+\)$", self.process_from_alias)
         #From Maysa" <maysa@colorview.com.br  Tue Feb 11 20:15:06 2003
         self.load_expression(r"^From\:\ [\d\w\ \_\-\"\']+\<[\d\w\.\@]+\>? .", self.process_from)
         #From: Daniel Gryniewicz <dang@gentoo.org>
         self.load_expression(r"^From\:\ [\d\w\ ]+\<[\d\w\.\@]+\>", self.process_from_alias)
-
         #Date: Sun Oct  8 17:27:48 2006
         self.load_expression(r"Date\: .", self.process_date)
+        self.load_expression(r"Sent\: .", self.process_date)
         #Subject: [Libresoft-acad] Dinero extra en ratos libres
         self.load_expression(r"Subject\:\ .", self.process_subject)
         #Message-ID: <E4DF9CE3.AFE91E1@gmail.com>
@@ -110,6 +113,7 @@ class message_parser(parser):
         debug ("Processing FROM: " + text.replace("\n",""))
         text = text.replace("\n","")
         text = text.replace("'","''")
+        text = text.replace('"','')
         text = text.replace("From ","")
         if self.actual != None:
             self.result = self.actual
@@ -124,8 +128,8 @@ class message_parser(parser):
             #Eliminando el "en" o el "at"
             text.pop(0)
             self.actual.author_from += "@"+utils.purify_text(text.pop(0))
-        self.actual.first_date = " ".join(text)
-        self.actual.first_date = utils.correct_date(self.actual.first_date)
+        #self.actual.first_date = " ".join(text)
+        #self.actual.first_date = utils.correct_date(self.actual.first_date)
         #Sun Oct  8 17:27:48 2006
         #Mon, 15 May 2006 17:37:00 -070
         self.processing = ""
@@ -139,6 +143,25 @@ class message_parser(parser):
         text = text.replace("\n","")
         text = text.replace("'","''")
         text = text.replace('"','')
+        text = text.replace("From: ","")
+        text = text.replace("From:","")
+        text = text.replace("From","")
+        # ------------------- Trozo del From normal ----------------------------
+        if self.actual != None:
+            self.result = self.actual
+        self.actual = email()
+
+        if '@' in text:
+            text = text.split(' ')
+            self.actual.author_from = utils.purify_text(text.pop(0))
+        else:
+            text = text.split(' ')
+            self.actual.author_from = utils.purify_text(text.pop(0))
+            #Eliminando el "en" o el "at"
+            text.pop(0)
+            self.actual.author_from += "@"+utils.purify_text(text.pop(0))
+        self.processing = ""
+        # ----------------- FIN Trozo del From normal --------------------------
         try:
             if '(' in text:
                 text = text.split('(')[1]
@@ -157,6 +180,7 @@ class message_parser(parser):
 
 
 
+
     def process_date (self, text):
         #Date: Sun Oct  8 17:27:48 2006
         debug ("Processing DATE: " + text.replace("\n",""))
@@ -164,6 +188,7 @@ class message_parser(parser):
         text = text.replace("Date: ","")
         #Sun Oct  8 17:27:48 2006
         #Mon, 15 May 2006 17:37:00 -0700
+        #Fri Dec 16 20:09:03 2005
         try:
             self.actual.arrival_date = utils.correct_date(text)
         except:
@@ -314,6 +339,7 @@ class message_parser(parser):
         try:
             self.last_file_descriptor = open(filename, "r", 200000)
             self.last_filename = filename
+            print "      Parsing: ",filename
         except:
             print "message_parser->imposible abrir el fichero ",filename
             self.last_file_descriptor = None
