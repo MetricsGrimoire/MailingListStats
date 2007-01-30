@@ -57,10 +57,11 @@ class message_parser(parser):
         #Cadenas de tokens que debe reconocer nuestro parser.
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From cartaoterra em terra.com.br  Wed May  4 20:37:08 2005
-        ###self.load_expression(r"^From\ [\d\w\.\-\_]+ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_from)
+        self.load_expression(r"^From\ [\d\w\.\-\_]+ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
-        ###self.load_expression(r"^From\ [\d\w\.\_\-]+\@+[\d\w\.\_\-]+\ .", self.process_from)
+        self.load_expression(r"^From\ [\d\w\.\_\-]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
         #From =?UTF-8?Q?=E0=A5=80=E0=A4=A3=E0=A5=8D_=E0=A4=8F_?=  Fri Dec 16 20:17:34 2005
+
         self.load_expression(r"^From\:\ [\d\w\.\_\(\)\-\=\?\@]+\ .", self.process_from)
         #From: zch519 en gmail.com (Alice L.)
         #From: nab at kernel.org (Nicholas A. Bellinger)
@@ -107,6 +108,17 @@ class message_parser(parser):
 
 
 
+
+    def process_begin_from (self, text):
+	debug ("Processing Beggining FROM: " + text.replace("\n",""))
+	if self.actual != None:
+            self.result = self.actual
+        self.actual = email()
+
+
+
+
+
     def process_from (self, text):
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
@@ -115,9 +127,9 @@ class message_parser(parser):
         text = text.replace("'","''")
         text = text.replace('"','')
         text = text.replace("From ","")
-        if self.actual != None:
-            self.result = self.actual
-        self.actual = email()
+        #if self.actual != None:
+        #    self.result = self.actual
+        #self.actual = email()
 
         if '@' in text:
             text = text.split(' ')
@@ -337,7 +349,7 @@ class message_parser(parser):
             self.last_file_descriptor.close()
             self.last_file_descriptor = None
         try:
-            self.last_file_descriptor = open(filename, "r", 200000)
+            self.last_file_descriptor = open(filename, "r", 2000000)
             self.last_filename = filename
             print "      Parsing: ",filename
         except:
