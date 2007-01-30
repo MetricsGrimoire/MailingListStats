@@ -217,7 +217,7 @@ class message_parser(parser):
         text = text.replace("Subject: ","")
         self.actual.subject = utils.purify_text(text)
 
-        
+
     def process_strange_tag (self, text):
         debug ("Processing unknown: " + text.replace("\n",""))
 
@@ -230,7 +230,7 @@ class message_parser(parser):
         text = text.replace("List-Id: ","")
         self.actual.mailing_list = text
 
-        
+
 
     def process_begin_body (self, text):
         if self.actual != None:

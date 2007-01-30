@@ -1,0 +1,206 @@
+This is pdfeTeX, Version 3.141592-1.30.5-2.2 (Web2C 7.5.5) (format=latex 2007.1.30)  30 JAN 2007 16:13
+entering extended mode
+**mailingListStat_dev_guide.tex
+(./mailingListStat_dev_guide.tex
+LaTeX2e <2003/12/01>
+Babel <v3.8g> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, latin, loaded.
+(/usr/share/texmf-texlive/tex/latex/base/book.cls
+Document Class: book 2004/02/16 v1.4f Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/bk10.clo
+File: bk10.clo 2004/02/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf-texlive/tex/generic/babel/babel.sty
+Package: babel 2005/05/21 v3.8g The Babel package
+
+(/usr/share/texmf-texlive/tex/generic/babel/spanish.ldf
+Language: spanish.ldf 2005/03/31 v4.2b Spanish support from the babel system
+
+(/usr/share/texmf-texlive/tex/generic/babel/babel.def
+File: babel.def 2005/05/21 v3.8g Babel common definitions
+\babel@savecnt=\count88
+\U@D=\dimen103
+)
+
+Package babel Warning: No hyphenation patterns were loaded for
+(babel)                the language `Spanish'
+(babel)                I will use the patterns loaded for \language=0 instead.
+
+\l@spanish = a dialect from \language0
+\es@quottoks=\toks14
+\es@quotdepth=\count89
+Package babel Info: Making . an active character on input line 509.
+Package babel Info: Making " an active character on input line 540.
+Package babel Info: Making < an active character on input line 641.
+Package babel Info: Making > an active character on input line 642.
+)) (/usr/share/texmf-texlive/tex/latex/base/inputenc.sty
+Package: inputenc 2004/02/05 v1.0d Input encoding file
+
+(/usr/share/texmf-texlive/tex/latex/base/latin1.def
+File: latin1.def 2004/02/05 v1.0d Input encoding file
+))
+(/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
+Package: graphics 2001/07/07 v1.0n Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/share/texmf-texlive/tex/latex/config/graphics.cfg
+File: graphics.cfg 2001/08/31 v1.1 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: dvips.def on input line 80.
+
+(/usr/share/texmf-texlive/tex/latex/graphics/dvips.def
+File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+))
+\Gin@req@height=\dimen104
+\Gin@req@width=\dimen105
+)
+(./mailingListStat_dev_guide.aux)
+\openout1 = `mailingListStat_dev_guide.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+
+Cap\'{\i }tulo 1.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 19.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 19.
+
+Underfull \hbox (badness 10000) in paragraph at lines 30--33
+
+ []
+
+
+Overfull \hbox (10.26718pt too wide) in paragraph at lines 45--49
+\OT1/cmr/m/n/10 Lo mis-mo sucede con el nom-bre de la clase, debe ten-er el su-
+fi-jo ''[]transformer''
+ []
+
+[1
+
+
+]
+Overfull \hbox (10.74715pt too wide) in paragraph at lines 85--85
+ []        \OT1/cmtt/m/n/10 def __init__(self, config_object, output_directory=
+""):[] 
+ []
+
+
+Overfull \hbox (5.4972pt too wide) in paragraph at lines 85--85
+ []    \OT1/cmtt/m/n/10 #---------------------- UNITY TESTS -------------------
+---[] 
+ []
+
+
+Overfull \hbox (78.99655pt too wide) in paragraph at lines 95--95
+ []    \OT1/cmtt/m/n/10 # ------------- END OF PUT YOUR TRANSFORMER CODE ------
+-----------------[] 
+ []
+
+
+Overfull \hbox (10.74715pt too wide) in paragraph at lines 105--105
+ []    \OT1/cmtt/m/n/10 if type_of_transformer.upper() == "NOMBRE_DEL_TRANSFORM
+ER":[] 
+ []
+
+
+Overfull \hbox (84.2465pt too wide) in paragraph at lines 105--105
+ []        \OT1/cmtt/m/n/10 return my_transformer.my_transformer(config_object,
+ output_directory)[] 
+ []
+
+
+Overfull \hbox (56.93735pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10 2 \OT1/cmr/m/sl/10 CAP[]ITULO 1.  CREACI[]ON DE UN TRANSFORMADO
+R DE EXTRACCI[]ON DE DATOS
+ []
+
+[2]
+Overfull \hbox (66.98972pt too wide) in paragraph at lines 111--114
+\OT1/cmr/m/n/10 trans-for-mador ex-iste, por lo tan-to hay que abrir el fichero
+ ''py-Who-line/config[]manager.py''
+ []
+
+
+Overfull \hbox (57.99673pt too wide) in paragraph at lines 118--118
+ []    \OT1/cmtt/m/n/10 #---------------------- END OF DEFAULT VALUES ---------
+-------------[] 
+ []
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 139.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 139.
+
+Overfull \hbox (26.24515pt too wide) in paragraph at lines 142--147
+\OT1/cmr/m/n/10 ma-do ''who-line.conf'') y eje-cu-tar la her-ramien-ta, se gene
+r-ar^^?^^P?`$[]$autom^^?^^P?`$[]$icamente
+ []
+
+[3]
+Overfull \hbox (79.99673pt too wide) in paragraph at lines 174--174
+ []    \OT1/cmtt/m/n/10 #---------------------- END OF DEFAULT VALUES ---------
+-------------[] 
+ []
+
+
+Overfull \hbox (106.2465pt too wide) in paragraph at lines 184--184
+ []    \OT1/cmtt/m/n/10 self.parameters['NOMBRE_DE_LA_OPCION'] = "VALOR POR DEF
+ECTO DE LA OPCION"[] 
+ []
+
+
+Overfull \hbox (6.49738pt too wide) in paragraph at lines 195--195
+ []    \OT1/cmtt/m/n/10 value = self.m_config.get_value('NOMBRE_DE_LA_OPCION')[
+] 
+ []
+
+
+Overfull \hbox (56.93735pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10 4 \OT1/cmr/m/sl/10 CAP[]ITULO 1.  CREACI[]ON DE UN TRANSFORMADO
+R DE EXTRACCI[]ON DE DATOS
+ []
+
+[4] (./mailingListStat_dev_guide.aux) ) 
+Here is how much of TeX's memory you used:
+ 1155 strings out of 95209
+ 13817 string characters out of 1185355
+ 69109 words of memory out of 1000000
+ 4325 multiletter control sequences out of 10000+50000
+ 8156 words of font info for 29 fonts, out of 500000 for 2000
+ 28 hyphenation exceptions out of 8191
+ 25i,8n,25p,202b,363s stack positions out of 1500i,500n,5000p,200000b,5000s
+
+Output written on mailingListStat_dev_guide.dvi (4 pages, 12868 bytes).

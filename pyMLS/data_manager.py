@@ -277,20 +277,20 @@ class data_manager(object):
 
         query = "INSERT IGNORE INTO people "+\
                     "(email_address, alias) "+\
-                    "VALUES ('"+person.email_address+"','"+person.alias+"');"
+                    "VALUES ('"+person.email_address[:100]+"','"+person.alias[:100]+"');"
         cursor.execute(query)
                     
         if person.mailing_list != '':
             query = "INSERT IGNORE INTO mailing_lists_people "+\
                     "(email_address, mailing_list_url) "+\
-                    "VALUES ('"+person.email_address+"','"+person.mailing_list+"');"
+                    "VALUES ('"+person.email_address[:100]+"','"+person.mailing_list[:100]+"');"
             cursor.execute(query)
 
-                
+
         if person.associated_message_id != "":
             query = "INSERT IGNORE INTO messages_people "+\
                     "(email_address, type_of_recipient, message_id) "+\
-                    "VALUES ('"+person.email_address+"',"+\
+                    "VALUES ('"+person.email_address[:100]+"',"+\
                             "'"+person.type_recipient+"',"+\
                             "'"+person.associated_message_id+"');"
             cursor.execute(query)
@@ -302,7 +302,7 @@ class data_manager(object):
 
 
 
-      
+
     def store_email (self, new_email, file_processed = ''):
 
         # Quitando caracteres indeseables
@@ -330,7 +330,7 @@ class data_manager(object):
         '''
         #print "    Subject: ",new_email.subject,"  date: ",new_email.arrival_date
         if new_email.arrival_date == "":
-            print "        Nested message ignored: ",new_email.subject,"  date: ",new_email.arrival_date
+            debug("        Nested message ignored: "+new_email.subject+"  date: "+new_email.arrival_date)
             return
         
         try:
