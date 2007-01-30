@@ -125,7 +125,8 @@ class data_manager(object):
             
         if 'messages' not in rows:            
             creation_queries = "CREATE TABLE IF NOT EXISTS messages( "+\
-            "message_id char(128) primary key,  "+\
+            "message_id integer primary key auto_increment,  "+\
+            "message_md5 char(128),  "+\
             "arrival_date datetime,             "+\
             "subject varchar(200),              "+\
             "message_body text,                 "+\
@@ -134,6 +135,7 @@ class data_manager(object):
             "mail_path text,                    "+\
             "foreign key (mailing_list_url) references "+\
             " mailing_lists(mailing_list_url) on delete cascade) ENGINE=INNODB;"
+            #"unique (arrival_date, subject, mailing_list_url), "+\
             cursor = self.m_connection.cursor ()
             cursor.execute(creation_queries)
             self.m_connection.commit()
@@ -153,7 +155,7 @@ class data_manager(object):
             creation_queries = "CREATE TABLE IF NOT EXISTS  messages_people( "+\
             "email_address varchar(100),                  "+\
             "type_of_recipient enum(\'From\',\'To\',\'Cc\',\'Bcc\'), "+\
-            "message_id char(128),                    "+\
+            "message_id integer,                   "+\
             "foreign key (email_address) references   "+\
             "     people(email_address) on delete cascade, "+\
             "foreign key (message_id) references      "+\
@@ -286,13 +288,12 @@ class data_manager(object):
                     "VALUES ('"+person.email_address[:100]+"','"+person.mailing_list[:100]+"');"
             cursor.execute(query)
 
-
         if person.associated_message_id != "":
             query = "INSERT IGNORE INTO messages_people "+\
                     "(email_address, type_of_recipient, message_id) "+\
                     "VALUES ('"+person.email_address[:100]+"',"+\
                             "'"+person.type_recipient+"',"+\
-                            "'"+person.associated_message_id+"');"
+                            str(person.associated_message_id)+");"
             cursor.execute(query)
 
         self.m_connection.commit()
@@ -311,7 +312,7 @@ class data_manager(object):
         cursor = self.m_connection.cursor()
 
         query = "INSERT IGNORE INTO messages "+\
-            "(message_id, arrival_date, subject, "+\
+            "(message_md5, arrival_date, subject, "+\
             " message_body, mailing_list_url, is_response_of, mail_path)"+\
             " VALUES " +\
             "('" + new_email.generate_unique_id() + "', "+\
@@ -330,16 +331,22 @@ class data_manager(object):
         '''
         #print "    Subject: ",new_email.subject,"  date: ",new_email.arrival_date
         if new_email.arrival_date == "":
-            debug("        Nested message ignored: "+new_email.subject+"  date: "+new_email.arrival_date)
+            print "        Nested message ignored: "+new_email.subject+"  date: "+new_email.arrival_date
             return
         
         try:
             cursor.execute(query)
         except:
             print "ERROR: Se quiso ejecutar: ",query
-            
+
+        new_email.message_id = self.m_connection.insert_id()
         self.m_connection.commit()
         cursor.close()
+
+        # Si el mensaje tiene un id de 0 significa que no ha sido introducido
+        # (porque ya estaba) entonces no hace falta seguir metiendo mas cosas.
+        if new_email.message_id == 0:
+            return
             
         '''
             new_email.author_from  = ""

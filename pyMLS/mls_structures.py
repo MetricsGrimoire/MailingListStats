@@ -24,7 +24,8 @@ import utils
 
 class email:
     def __init__(self):
-        self.message_id   = ""
+        self.message_id   = 0
+        self.message_md5  = ""
         self.author_from  = ""
         self.author_alias = ""
         self.mailing_list = ""
@@ -40,9 +41,9 @@ class email:
     def generate_unique_id (self):
         m = md5.new()
         m.update(str(self.author_from) + str(self.to) +\
-                 str(self.carbon_copy) + str(self.arrival_date))
-        self.message_id = m.hexdigest()
-        return self.message_id
+                 str(self.carbon_copy) + str(self.arrival_date) + str(self.body))
+        self.message_md5 = m.hexdigest()
+        return self.message_md5
     
 
   
@@ -66,7 +67,7 @@ class person:
         self.email_address = utils.purify_text(email.strip(' '))
         self.alias         = utils.purify_text(alias.strip(' '))
         self.mailing_list  = utils.purify_text(mailing_list.strip(' '))
-        self.associated_message_id = utils.purify_text(associated_message.strip(' '))
+        self.associated_message_id = associated_message
         self.type_recipient = utils.purify_text(type_recipient.strip(' '))
 
         

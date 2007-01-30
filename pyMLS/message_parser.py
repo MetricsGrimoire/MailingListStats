@@ -52,6 +52,7 @@ class message_parser(parser):
         self.last_file_descriptor = None
         self.last_filename = ""
         self.processing = ""
+        self.number_messages = 0
         self.actual = None
         self.result = None
         #Cadenas de tokens que debe reconocer nuestro parser.
@@ -110,10 +111,15 @@ class message_parser(parser):
 
 
     def process_begin_from (self, text):
-	debug ("Processing Beggining FROM: " + text.replace("\n",""))
-	if self.actual != None:
+        debug ("Processing Beggining FROM: " + text.replace("\n",""))
+        # En primer lugar si aun no tenemos ningun objeto mensaje creamos uno.
+        if self.actual == None:
+            self.actual = email()
+        else:
+            # Si tenemos ya un objeto mensaje entonces lo cargamos al resultado
+            # y creamos un nuevo objeto mensaje para procesar.
             self.result = self.actual
-        self.actual = email()
+            self.actual = email()
 
 
 
@@ -122,6 +128,7 @@ class message_parser(parser):
     def process_from (self, text):
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
+        self.number_messages += 1
         debug ("Processing FROM: " + text.replace("\n",""))
         text = text.replace("\n","")
         text = text.replace("'","''")
@@ -209,13 +216,17 @@ class message_parser(parser):
             raise
 
 
+
     def process_subject (self, text):
         #Subject: [Libresoft-acad] Dinero extra en ratos libres
         debug ("Processing Subject: " + text.replace("\n",""))
+        # Traceando mensajes.
+        #self.debug_file.write(text)
         text = text.replace("\n","")
         text = text.replace("'","''")
         text = text.replace("Subject: ","")
         self.actual.subject = utils.purify_text(text)
+
 
 
     def process_strange_tag (self, text):
@@ -255,7 +266,8 @@ class message_parser(parser):
         text = text.replace("Cc: ","")
         text = text.split(',')
         self.actual.carbon_copy = text
-        
+
+
 
     def process_to (self, text):
         debug ("Processing TO: " + text.replace("\n",""))
@@ -264,7 +276,8 @@ class message_parser(parser):
         text = text.replace("To: ","")
         text = text.split(',')
         self.actual.to = text
-        
+
+
 
     def process_message_id (self, text):
         debug ("Processing Message_id: " + text.replace("\n",""))
@@ -358,8 +371,13 @@ class message_parser(parser):
 
 
 
+    #def __del__(self):
+    #    #print "Cerrando el fichero de trazas"
+    #    #self.debug_file.close()
+
 
     def finish(self):
+        #print "         - Parsed (for now) a total of ",self.number_messages," messages."
         if self.last_file_descriptor != None:
             self.last_file_descriptor.close()
             self.last_file_descriptor = None

@@ -87,7 +87,7 @@ class main_subsystem:
                 self.m_data_manager.store_mailing_list (mail_url, mail_name, project, 'failed')
             else:
                 self.m_data_manager.store_mailing_list (mail_url, mail_name, project, 'visited')
-                self.processing_files(mail_file_urls, temp_destiny_dir)
+                self.executing_downloads(mail_file_urls, temp_destiny_dir)
                 analysis = analysis_subsystem.analysis_subsystem(self.config)
                 print "   Step 4) Processing..."
                 analysis.run(temp_destiny_dir)
@@ -203,7 +203,7 @@ class main_subsystem:
 
 
 
-    def processing_files(self, mail_file_urls, destiny_dir):
+    def executing_downloads(self, mail_file_urls, destiny_dir):
         # Creando un directorio para cada lista de correo.
         previous_directory = os.getcwd()
         for url in mail_file_urls:

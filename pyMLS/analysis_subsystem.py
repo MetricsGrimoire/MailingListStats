@@ -35,9 +35,11 @@ class analysis_subsystem:
         self.m_data_manager = data_manager.data_manager()
 
 
+
     def run (self, path):
         #print "Comenzando a trabajar en ",path
         utils.for_every_file (path, self.analyze_file)
+        #print "    - Parsed a total of ",self.mail_parser.number_messages," messages."
 
 
 
