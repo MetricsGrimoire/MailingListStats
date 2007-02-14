@@ -33,7 +33,7 @@ class dump_db_transformer(transformer):
     def __init__(self, config_object, output_directory=""):
         self.config = config_object
 
-                  
+
     def announce(self, data):
         # El dato recibido es una lista que guarda:
         #  [path_donde_guardar_resultados, base_de_datos]

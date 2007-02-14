@@ -52,15 +52,16 @@ class message_parser(parser):
         self.last_file_descriptor = None
         self.last_filename = ""
         self.processing = ""
-        self.number_messages = 0
-        self.actual = None
+        self.actual_message = None
         self.result = None
+        self.messages_in_this_file = 0
+        self.total_number_messages = 0
         #Cadenas de tokens que debe reconocer nuestro parser.
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From cartaoterra em terra.com.br  Wed May  4 20:37:08 2005
-        self.load_expression(r"^From\ [\d\w\.\-\_]+ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
+        self.load_expression(r"^From\ [\d\w\.\-\_\+]+ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
-        self.load_expression(r"^From\ [\d\w\.\_\-]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
+        self.load_expression(r"^From\ [\d\w\.\_\-\+]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
         #From =?UTF-8?Q?=E0=A5=80=E0=A4=A3=E0=A5=8D_=E0=A4=8F_?=  Fri Dec 16 20:17:34 2005
 
         self.load_expression(r"^From\:\ [\d\w\.\_\(\)\-\=\?\@]+\ .", self.process_from)
@@ -112,14 +113,24 @@ class message_parser(parser):
 
     def process_begin_from (self, text):
         debug ("Processing Beggining FROM: " + text.replace("\n",""))
+        self.messages_in_this_file += 1
+        self.total_number_messages += 1
+
+        '''
+        # Esto es un capturador de cabeceras.
+        f = open('/home/jgascon/prueba_mls.txt','a')
+        f.write(text)
+        f.close()
+        '''
+        
         # En primer lugar si aun no tenemos ningun objeto mensaje creamos uno.
-        if self.actual == None:
-            self.actual = email()
+        if self.actual_message == None:
+            self.actual_message = email()
         else:
             # Si tenemos ya un objeto mensaje entonces lo cargamos al resultado
             # y creamos un nuevo objeto mensaje para procesar.
-            self.result = self.actual
-            self.actual = email()
+            self.result = self.actual_message
+            self.actual_message = email()
 
 
 
@@ -128,27 +139,23 @@ class message_parser(parser):
     def process_from (self, text):
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
-        self.number_messages += 1
         debug ("Processing FROM: " + text.replace("\n",""))
         text = text.replace("\n","")
         text = text.replace("'","''")
         text = text.replace('"','')
         text = text.replace("From ","")
-        #if self.actual != None:
-        #    self.result = self.actual
-        #self.actual = email()
 
         if '@' in text:
             text = text.split(' ')
-            self.actual.author_from = utils.purify_text(text.pop(0))
+            self.actual_message.author_from = utils.purify_text(text.pop(0))
         else:
             text = text.split(' ')
-            self.actual.author_from = utils.purify_text(text.pop(0))
+            self.actual_message.author_from = utils.purify_text(text.pop(0))
             #Eliminando el "en" o el "at"
             text.pop(0)
-            self.actual.author_from += "@"+utils.purify_text(text.pop(0))
-        #self.actual.first_date = " ".join(text)
-        #self.actual.first_date = utils.correct_date(self.actual.first_date)
+            self.actual_message.author_from += "@"+utils.purify_text(text.pop(0))
+        #self.actual_message.first_date = " ".join(text)
+        #self.actual_message.first_date = utils.correct_date(self.actual_message.first_date)
         #Sun Oct  8 17:27:48 2006
         #Mon, 15 May 2006 17:37:00 -070
         self.processing = ""
@@ -166,32 +173,29 @@ class message_parser(parser):
         text = text.replace("From:","")
         text = text.replace("From","")
         # ------------------- Trozo del From normal ----------------------------
-        if self.actual != None:
-            self.result = self.actual
-        self.actual = email()
 
         if '@' in text:
             text = text.split(' ')
-            self.actual.author_from = utils.purify_text(text.pop(0))
+            self.actual_message.author_from = utils.purify_text(text.pop(0))
         else:
             text = text.split(' ')
-            self.actual.author_from = utils.purify_text(text.pop(0))
+            self.actual_message.author_from = utils.purify_text(text.pop(0))
             #Eliminando el "en" o el "at"
             text.pop(0)
-            self.actual.author_from += "@"+utils.purify_text(text.pop(0))
+            self.actual_message.author_from += "@"+utils.purify_text(text.pop(0))
         self.processing = ""
         # ----------------- FIN Trozo del From normal --------------------------
         try:
             if '(' in text:
                 text = text.split('(')[1]
                 text = text.rstrip(')')
-                self.actual.author_alias = utils.purify_text(text)
+                self.actual_message.author_alias = utils.purify_text(text)
             if '<' in text:
                 text = text.replace('From: ','')
                 text = text.replace('From ','')
                 text = text.split('<')[0]
                 text = text.strip(' ')
-                self.actual.author_alias = utils.purify_text(text)
+                self.actual_message.author_alias = utils.purify_text(text)
         except:
             print "ERROR producido al procesar un supuesto alias: ",text
             print "Se estaba procesando el fichero ",self.last_filename
@@ -209,7 +213,7 @@ class message_parser(parser):
         #Mon, 15 May 2006 17:37:00 -0700
         #Fri Dec 16 20:09:03 2005
         try:
-            self.actual.arrival_date = utils.correct_date(text)
+            self.actual_message.arrival_date = utils.correct_date(text)
         except:
             print "ERROR producido al procesar una supuesta fecha: ",text
             print "Se estaba procesando el fichero ",self.last_filename
@@ -225,7 +229,7 @@ class message_parser(parser):
         text = text.replace("\n","")
         text = text.replace("'","''")
         text = text.replace("Subject: ","")
-        self.actual.subject = utils.purify_text(text)
+        self.actual_message.subject = utils.purify_text(text)
 
 
 
@@ -239,12 +243,12 @@ class message_parser(parser):
         text = text.replace("\n","")
         text = text.replace("'","''")
         text = text.replace("List-Id: ","")
-        self.actual.mailing_list = text
+        self.actual_message.mailing_list = text
 
 
 
     def process_begin_body (self, text):
-        if self.actual != None:
+        if self.actual_message != None:
             if self.processing == "BODY":
                 debug ("            " + text.replace("\n",""))
             if self.processing == "DISPOSED BODY":
@@ -253,9 +257,9 @@ class message_parser(parser):
                 self.processing = "BODY"
                 debug ("Begin BODY: ")
                 debug ("            " + text.replace("\n",""))
-            self.actual.body += utils.purify_text(text)
-            if len(self.actual.body) > 64000:
-                self.actual.body = self.actual.body[:63999]
+            self.actual_message.body += utils.purify_text(text)
+            if len(self.actual_message.body) > 64000:
+                self.actual_message.body = self.actual_message.body[:63999]
 
 
 
@@ -265,7 +269,7 @@ class message_parser(parser):
         text = text.replace("'","''")
         text = text.replace("Cc: ","")
         text = text.split(',')
-        self.actual.carbon_copy = text
+        self.actual_message.carbon_copy = text
 
 
 
@@ -275,7 +279,7 @@ class message_parser(parser):
         text = text.replace("'","''")
         text = text.replace("To: ","")
         text = text.split(',')
-        self.actual.to = text
+        self.actual_message.to = text
 
 
 
@@ -287,7 +291,7 @@ class message_parser(parser):
         text = text.replace("Message-ID: <","")
         text = text.replace("Message-Id: <","")
         text = text.replace(">","")
-        self.actual.message_id = text
+        self.actual_message.message_id = text
 
 
 
@@ -301,63 +305,58 @@ class message_parser(parser):
     def process_unknown (self, text):
         if self.processing == "BODY":
             debug ("            " + text.replace("\n",""))
-            self.actual.body += utils.purify_text(text)
-            if len(self.actual.body) > 64000:
-                self.actual.body = self.actual.body[:63999]
+            self.actual_message.body += utils.purify_text(text)
+            if len(self.actual_message.body) > 64000:
+                self.actual_message.body = self.actual_message.body[:63999]
         else:
             debug ("Processing unknown: " + text.replace("\n",""))
-    '''
-    En CVS comenzamos a leer la historia de un fichero, y cuando leermos toda
-    su historia y todas sus revisiones entonces devolvemos el resultado.
 
-    - Al comenzar el get_result aun no tenemos ningun resultado disponible.
-    - Si no hubiese fichero abierto devolveriamos [].
-    - Mientras no tengamos resultado listo seguiremos leyendo el fichero.
-    '''
+
+
     def get_result(self):
         '''
-        La primera vez tanto self.actual como self.result estan a None, por lo que
-        hay que empezar a leer lineas.
-        
-        Se leen lineas hasta que self.result != None o bien llegamos al fin del fichero.
+        Este metodo solamente funciona si hay un fichero del que se pueda leer.
 
-        Caso fichero vacio: Llegamos al final del fichero y tanto "self.result"
-                            como "self.actual" estan a None
+        La primera vez que se lee no hay mensajes por leer, por lo que leemos
+        lineas hasta que pon fin tenemos un mensaje complejo, es decir, que
+        self.result != None
 
-        Caso fichero con un mensaje: llegamos al final con "self.result" a None
-                            pero "self.actual" tiene algo.
-
-        Caso fichero con varios mensajes: se nos indica que "self.result" tiene algo.
+        Si llegamos a fin de fichero antes de que eso ocurra, entonces miramos
+        en self.actual_message por si tenemos dentro un mensaje completo que
+        podamos usar.
         '''
         read_line = " "
-        if self.last_file_descriptor != None:
-            while True:
-                read_line = self.last_file_descriptor.readline()
-                if read_line == "":
-                    # Hemos llegado al final del fichero, podemos tener dos casos:
-                    # 1- Que self.result este vacio pero que self.actual no.
-                    # 2- Que ambos esten vacios.
-                    if self.actual != None:
-                        resultado = self.actual
-                        self.finish()
-                        return resultado
-                    else:
-                        self.finish()
-                        return None
-                self.match_string(read_line)
-                if self.result != None:
-                    break
-            resultado = self.result
-            self.result = None
-            return resultado
-        else:
+        if self.last_file_descriptor == None:
             return None
 
+        # Leemos lineas hasta que tenemos algo en self.result o llegamos al
+        # final del fichero.
+        while True:
+            read_line = self.last_file_descriptor.readline()
+
+            if read_line == "":
+                # Hemos llegado al fin de fichero, acabamos y devolvemos lo que
+                # tengamos.
+                self.finish()
+                return self.actual_message
+            else:
+                # Aun hay lineas por leer, parseamos la linea leida
+                self.match_string(read_line)
+                # Miramos si hay algo en self.result y lo devolvemos en su caso
+                if self.result != None:
+                    myResult = self.result
+                    self.result = None
+                    return myResult
 
 
 
 
     def match_file(self, filename):
+        # Inicializando datos
+        self.processing = ""
+        self.actual_message = None
+        self.result = None
+        # Inicializando el descriptor de fichero
         if self.last_file_descriptor != None:
             self.last_file_descriptor.close()
             self.last_file_descriptor = None
@@ -374,17 +373,15 @@ class message_parser(parser):
     #def __del__(self):
     #    #print "Cerrando el fichero de trazas"
     #    #self.debug_file.close()
-
-
     def finish(self):
-        #print "         - Parsed (for now) a total of ",self.number_messages," messages."
+        print "         - Parsed in this file a total of ",self.messages_in_this_file," messages."
+        self.messages_in_this_file = 0
+        print "         - Total of messages parsed ",self.total_number_messages
         if self.last_file_descriptor != None:
             self.last_file_descriptor.close()
             self.last_file_descriptor = None
-        # Inicializando datos
-        self.processing = ""
-        self.actual = None
-        self.result = None
+
+
 
 
 #---------------------- UNITY TESTS ----------------------

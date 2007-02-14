@@ -34,7 +34,7 @@ class data_manager(object):
             type._the_instance = object.__new__(type)
         return type._the_instance
     ###################### FIN CODIGO DEL SINGLETON ############################
-        
+
     def initialize (self, user, password, database, host="localhost"):
         # Se crea una conexion a la base de datos
         # Se comprueba que existe la base de datos, en caso de no existir se crea.
@@ -44,6 +44,9 @@ class data_manager(object):
         self.m_database = database
         self.m_host     = host
         self.last_mailing_list = ""
+        self.valid_messages    = 0
+        self.nested_messages   = 0
+        self.duplicated_messages   = 0
         # Cerrando la anterior conexion (si la habia)
         try:
             if self.m_connection != None:
@@ -85,8 +88,13 @@ class data_manager(object):
         cursor.close()
         self.m_connection.close()
         self.m_connection = None
+        print "\n\n--------------- RESULTS ----------------------------------"
+        print "Total messages: ",self.valid_messages+self.nested_messages+self.duplicated_messages
+        print "Valid Messages: ",self.valid_messages
+        print "Ignored Messages ",self.nested_messages," because were nested messages."
+        print "Ignored Messages ",self.duplicated_messages," because were duplicated messages."
+        print "\n\n"
 
-        
 
     def ensure_tables_creation (self):
         print "Creating Tables"
@@ -97,8 +105,8 @@ class data_manager(object):
         for row in result_set:
             rows.append(row[0])
         cursor.close()
-        
-        if 'mailing_lists' not in rows:            
+
+        if 'mailing_lists' not in rows:
             creation_queries = "CREATE TABLE IF NOT EXISTS mailing_lists("+\
             "mailing_list_url varchar(400) primary key, "+\
             "mailing_list_name varchar(60) unique, "+\
@@ -109,7 +117,7 @@ class data_manager(object):
             cursor.execute(creation_queries)
             self.m_connection.commit()
             cursor.close()
-            
+
         if 'compressed_files' not in rows:            
             creation_queries = "CREATE TABLE IF NOT EXISTS compressed_files( "+\
             "url varchar(500) primary key,             "+\
@@ -122,7 +130,7 @@ class data_manager(object):
             cursor.execute(creation_queries)
             self.m_connection.commit()
             cursor.close()
-            
+
         if 'messages' not in rows:            
             creation_queries = "CREATE TABLE IF NOT EXISTS messages( "+\
             "message_id integer primary key auto_increment,  "+\
@@ -133,6 +141,7 @@ class data_manager(object):
             "mailing_list_url varchar(400),     "+\
             "is_response_of char(128) default '',"+\
             "mail_path text,                    "+\
+            "unique (arrival_date, subject, mailing_list_url), "+\
             "foreign key (mailing_list_url) references "+\
             " mailing_lists(mailing_list_url) on delete cascade) ENGINE=INNODB;"
             #"unique (arrival_date, subject, mailing_list_url), "+\
@@ -140,7 +149,7 @@ class data_manager(object):
             cursor.execute(creation_queries)
             self.m_connection.commit()
             cursor.close()
-            
+
         if 'people' not in rows:
             creation_queries = "CREATE TABLE IF NOT EXISTS people( "+\
             "email_address varchar(100), "+\
@@ -179,7 +188,7 @@ class data_manager(object):
             cursor.close()
 
 
-            
+
         if 'libresoft' not in rows:
             creation_queries = "CREATE TABLE IF NOT EXISTS libresoft( "+\
                 "id smallint unsigned primary key auto_increment, "+\
@@ -236,13 +245,12 @@ class data_manager(object):
         result_set = cursor.fetchall ()
         self.last_mailing_list = result_set[0][0]
         cursor.close()
-        
 
-        
+
+
 
     def set_compressed_file_status (self, file_url, status):
         cursor = self.m_connection.cursor()
-
         query = "INSERT IGNORE INTO compressed_files "+\
                     "(url, status, last_analysis, mailing_list_url) "+\
                     "VALUES ('"+ file_url+"','"+status+"',now(),'"+\
@@ -255,7 +263,7 @@ class data_manager(object):
         cursor.close()
 
 
-           
+
     def get_url_compressed_files_by_status (self, mailing_list_url, status):
         compressed_files = []
         query = "SELECT url FROM compressed_files "+\
@@ -267,8 +275,7 @@ class data_manager(object):
             compressed_files.append(row[0])
         cursor.close()
         return compressed_files
-      
-            
+
 
 
     def store_person (self, person):
@@ -281,7 +288,7 @@ class data_manager(object):
                     "(email_address, alias) "+\
                     "VALUES ('"+person.email_address[:100]+"','"+person.alias[:100]+"');"
         cursor.execute(query)
-                    
+
         if person.mailing_list != '':
             query = "INSERT IGNORE INTO mailing_lists_people "+\
                     "(email_address, mailing_list_url) "+\
@@ -305,12 +312,10 @@ class data_manager(object):
 
 
     def store_email (self, new_email, file_processed = ''):
-
         # Quitando caracteres indeseables
         #new_email.subject = new_email.subject.replace("'","''")
         #new_email.body = new_email.body.replace("'","''")
         cursor = self.m_connection.cursor()
-
         query = "INSERT IGNORE INTO messages "+\
             "(message_md5, arrival_date, subject, "+\
             " message_body, mailing_list_url, is_response_of, mail_path)"+\
@@ -321,24 +326,22 @@ class data_manager(object):
             " '" + new_email.body +"', "+\
             " '" + self.last_mailing_list + "', "+\
             " '', '');"
-
         '''
         # Sistema de hilos:
             Para que un email consiga un mensaje, lo que se hace es buscar todos
             los mensajes cuyo subject sea el mismo que este sin la "Re: " inicial,
             como pueden aparecer varios mensajes, por defecto se coge el mas antiguo.
-            
         '''
         #print "    Subject: ",new_email.subject,"  date: ",new_email.arrival_date
         if new_email.arrival_date == "":
-            print "        Nested message ignored: "+new_email.subject+"  date: "+new_email.arrival_date
+            #print "Nested message ignored: "+new_email.subject+"  date: "+new_email.arrival_date
+            self.nested_messages += 1
             return
         
         try:
             cursor.execute(query)
         except:
             print "ERROR: Se quiso ejecutar: ",query
-
         new_email.message_id = self.m_connection.insert_id()
         self.m_connection.commit()
         cursor.close()
@@ -346,8 +349,10 @@ class data_manager(object):
         # Si el mensaje tiene un id de 0 significa que no ha sido introducido
         # (porque ya estaba) entonces no hace falta seguir metiendo mas cosas.
         if new_email.message_id == 0:
+            self.duplicated_messages += 1
             return
-            
+        else:
+            self.valid_messages += 1
         '''
             new_email.author_from  = ""
             new_email.author_alias = ""
