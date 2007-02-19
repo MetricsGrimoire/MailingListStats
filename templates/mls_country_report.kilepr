@@ -25,8 +25,8 @@ open=false
 
 [item:mls_country_report.tex]
 archive=true
-column=42
+column=36
 encoding=UTF-8
 highlight=LaTeX
-line=60
+line=134
 open=true

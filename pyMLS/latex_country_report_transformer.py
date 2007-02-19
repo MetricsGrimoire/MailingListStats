@@ -271,6 +271,7 @@ class latex_country_report_transformer(transformer):
             self.all_mailing_lists = do_select_query(self.country_db_connection,
                     "SELECT project_name,mailing_list_name,posters,messages "+\
                     "FROM mailing_lists "+\
+                    "WHERE posters > 3 "+\
                     "ORDER BY posters DESC ")
             latex_table = ""
             counter = 0
@@ -289,6 +290,35 @@ class latex_country_report_transformer(transformer):
                     latex_table +="         \\begin{tabular}[t]{|l|l|c|c|}\n"
                     latex_table += "                                \hline \n"
                     counter = 0
+
+            count_posters = do_count_query(self.country_db_connection,
+                                    "SELECT sum(posters) "+\
+                                    "FROM mailing_lists "+\
+                                    "WHERE posters <= 3 ")
+
+            count_messages = do_count_query(self.country_db_connection,
+                                    "SELECT sum(messages) "+\
+                                    "FROM mailing_lists "+\
+                                    "WHERE posters <= 3 ")
+
+            latex_table += "                                "
+            latex_table += "\\textbf{Others} & \\textbf{Others} & "+str(count_posters)+" & "+str(count_messages)+" \\\\ \n"
+            latex_table += "                                \hline \n"
+
+
+            # Grand Total:
+            count_posters = do_count_query(self.country_db_connection,
+                                    "SELECT sum(posters) "+\
+                                    "FROM mailing_lists ")
+
+            count_messages = do_count_query(self.country_db_connection,
+                                    "SELECT sum(messages) "+\
+                                    "FROM mailing_lists ")
+
+            latex_table += "                                "
+            latex_table += "\\textbf{Total} & \\textbf{Total} & \\textbf{"+\
+                str(count_posters)+"} & \\textbf{"+str(count_messages)+"} \\\\ \n"
+            latex_table += "                                \hline \n"
 
             latex_table = latexfy_text(latex_table)
             final_text = final_text.replace("$<$put-all-mailing-lists$>$",
@@ -327,6 +357,15 @@ class latex_country_report_transformer(transformer):
             latex_table += "                                "
             latex_table += "\\textbf{Others} & "+other_posters+" \\\\ \n"
             latex_table += "                                \hline \n"
+
+            #Grand total for posters
+            other_posters = do_count_query(self.country_db_connection,
+                                "SELECT count(*) "+\
+                                "FROM posters ")
+            latex_table += "                                "
+            latex_table += "\\textbf{Total Posters} & \\textbf{"+other_posters+"} \\\\ \n"
+            latex_table += "                                \hline \n"
+            
             latex_table = latexfy_text(latex_table)
             final_text = final_text.replace("$<$put-all-posters$>$",latex_table)
 
