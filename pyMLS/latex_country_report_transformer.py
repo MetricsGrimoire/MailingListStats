@@ -47,6 +47,8 @@ class latex_country_report_transformer(transformer):
     def __init__(self, config_object, output_directory=""):
         self.config               = config_object
         self.country              = self.config.get_value("country")
+        self.country_database     = "mailingliststat_"+self.country
+        self.country_database     = self.country_database.replace(" ","_")
         self.mailing_lists_number = 0
         self.projects_number      = 0
         self.posters_number       = 0
@@ -66,7 +68,7 @@ class latex_country_report_transformer(transformer):
                                         self.config.get_value('database_server'),
                                         self.config.get_value('database_user'),
                                         self.config.get_value('database_password'),
-                                        "mailingliststat_"+self.country)
+                                        self.country_database)
         # Necesitamos crear una base de datos, conseguir una conexion a la misma
         # y tambien hace falta crear dos tablas:
         
@@ -323,13 +325,14 @@ class latex_country_report_transformer(transformer):
                                 "FROM posters "+\
                                 "WHERE messages <= 3 ")
             latex_table += "                                "
-            latex_table += "Others & "+other_posters+" \\\\ \n"
+            latex_table += "\\textbf{Others} & "+other_posters+" \\\\ \n"
             latex_table += "                                \hline \n"
             latex_table = latexfy_text(latex_table)
             final_text = final_text.replace("$<$put-all-posters$>$",latex_table)
 
-
-        g = open(working_path + self.country + '_mls_report.tex', 'w')
+        output_filename = working_path + self.country + '_mls_report.tex'
+        output_filename = output_filename.replace(" ","_")
+        g = open(output_filename, 'w')
         g.write(final_text)
         g.close()
 
@@ -337,10 +340,10 @@ class latex_country_report_transformer(transformer):
         previous_path = os.getcwd()
         os.chdir(working_path)
 
-        os.system("latex   " + self.country + '_mls_report.tex')
-        os.system("bibtex  " + self.country + '_mls_report.aux')
-        os.system("latex   " + self.country + '_mls_report.tex')
-        os.system("dvipdft " + self.country + '_mls_report.dvi')
+        os.system("latex   " + output_filename)
+        os.system("bibtex  " + output_filename.replace('.tex','.aux'))
+        os.system("latex   " + output_filename)
+        os.system("dvipdft " + output_filename.replace('.tex','.dvi'))
 
         os.system("rm -f *.aux *.bbl *.blg *.dvi *.log")
         os.chdir(previous_path)

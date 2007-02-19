@@ -81,7 +81,7 @@ lists, people who send e-mail to these mailing lists and so on...
                                         lists (data at  $<$put-date$>$):}
                             \begin{tabular}[t]{|l|l|c|c|}
                                 \hline
-                                Project & Mailing List & Posters & Messages \\
+                                \textbf{Project} & \textbf{Mailing List} & \textbf{Posters} & \textbf{Messages} \\
                                 \hline
 $<$put-top10-mailing-lists$>$
                             \end{tabular}
@@ -94,10 +94,10 @@ $<$put-top10-mailing-lists$>$
 
                     \begin{table}[h]
                         \begin{center}
-                            \caption{\label{TopPosters} Top 10 of mailing list posters:}
+                            \caption{\label{TopPosters} Top 10 of mailing list posters  (data at  $<$put-date$>$):}
                             \begin{tabular}[t]{|l|c|}
                                 \hline
-                                Poster alias & Messages posted\\
+                                \textbf{Poster alias} & \textbf{Messages posted}\\
                                 \hline
 $<$put-top10-posters$>$
                             \end{tabular}
@@ -123,15 +123,13 @@ $<$put-top10-posters$>$
                             lists found at $<$put-a-country-here$>$ (data at  $<$put-date$>$):}
                             \begin{tabular}[t]{|l|l|c|c|}
                                 \hline
-                                Project & Mailing List & Posters & Messages \\
+                                \textbf{Project} & \textbf{Mailing List} & \textbf{Posters} & \textbf{Messages} \\
                                 \hline
 $<$put-all-mailing-lists$>$
                             \end{tabular}
                         \end{center}
                     \end{table}
 
-
-                \newpage
 
                 \item Table total representative posters:
                     \begin{table}[h]
@@ -140,7 +138,7 @@ $<$put-all-mailing-lists$>$
                             found at $<$put-a-country-here$>$ (data at  $<$put-date$>$):}
                             \begin{tabular}[t]{|l|c|}
                                 \hline
-                                Poster alias & Messages posted\\
+                                \textbf{Poster alias} & \textbf{Messages posted}\\
                                 \hline
 $<$put-all-posters$>$
                             \end{tabular}
