@@ -58,9 +58,10 @@ class message_parser(parser):
         #Cadenas de tokens que debe reconocer nuestro parser.
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From cartaoterra em terra.com.br  Wed May  4 20:37:08 2005
-        self.load_expression(r"^From\ [\d\w\.\-\_\+]+\ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
+        self.load_expression(r"^From\ [\d\w\.\-\_\+\"]+\ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
+        self.load_expression(r"^From\ [\d\w\.\-\_\+\"]+\ \ [\d\w\.\-\_]+ .", self.process_begin_from)
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
-        self.load_expression(r"^From\ [\d\w\.\_\-\+]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
+        self.load_expression(r"^From\ [\d\w\.\_\-\+\"]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
         
         # Esto sirve para procesar un alias
         self.load_expression(r"^From\:\ .", self.process_alias)
@@ -163,6 +164,7 @@ class message_parser(parser):
             email_address = email_address.replace(" at ", "@")
             email_address = email_address.replace(" en ", "@")
             email_address = email_address.replace(" em ", "@")
+            email_address = email_address.replace("  ", "@")
             self.actual_message.author_from = email_address
 
 
