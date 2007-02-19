@@ -54,7 +54,11 @@ class transformer_factory:
         if type_of_transformer.lower() == "libresoft_big_database_transformer":
             import libresoft_big_database_transformer
             return libresoft_big_database_transformer.libresoft_big_database_transformer(config_object, output_directory)
-        
+
+        if type_of_transformer.lower() == "latex_country_report_transformer":
+            import latex_country_report_transformer
+            return latex_country_report_transformer.latex_country_report_transformer(config_object, output_directory)
+
         # ------------- END OF PUT YOUR TRANSFORMER CODE -----------------------
 
         print "ERROR: Transformer_Factory->"+type_of_transformer.lower()+" no present."

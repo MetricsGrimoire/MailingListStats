@@ -49,10 +49,23 @@ def usage():
 
 
 
+def country_usage():
+    print
+    print "           MailingListStat version 2 - authors: jgascon@gsyc.info"
+    print "----------------------------------------------------------------------"
+    print " WARNING:    "
+    print "       Please open 'mailingListStat.conf' file and put a valid country"
+    print "       in country section."
+    print ""
+    print "----------------------------------------------------------------------"
+    print
+    return
+
 
 def main():
     
     if len(sys.argv) < 2:
+        config_manager.config_manager()
         return usage()
     else:
         projects_file_name = ""
@@ -74,6 +87,10 @@ def main():
         my_config.set_value("projects_file_name",projects_file_name)
         my_config.set_value("projects_mail_url",projects_mail_url)
         my_config.set_value("results_directory", os.getcwd()+"/Results")
+
+        if my_config.get_value("country") == "<put_a_country_here>":
+            return country_usage()
+
 
         if projects_mail_url != [] or projects_file_name != "":
             #project_name,  protocol,  protocol_project_url,  destiny_directory

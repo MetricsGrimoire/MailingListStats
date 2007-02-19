@@ -63,7 +63,7 @@ class stats_subsystem:
         # Para cada transformador elegido se instancia
         for project in self.projects:
             self.my_observer.announce(\
-                [self.base_destiny_directory+'/'+project+'/results', \
+                [self.base_destiny_directory+'/'+project + '/', \
                  'mailingliststat_'+project])
         # Finishing
         self.my_observer.finish()

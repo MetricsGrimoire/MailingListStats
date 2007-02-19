@@ -53,32 +53,15 @@ class data_manager(object):
                 self.finalize()
         except:
             None
-        # Realizando una conexion nueva
-        try:
-            self.m_connection = connect (host   = self.m_host,
-                                         user   = self.m_user,
-                                         passwd = self.m_password,
-                                         db     = self.m_database)
-        except Error, e:
-            self.m_connection = connect (host   = self.m_host,
-                                         user   = self.m_user,
-                                         passwd = self.m_password,
-                                         db     = "mysql")
-            try:
-                cursor = self.m_connection.cursor ()
-                cursor.execute("create database "+self.m_database)
-                print "Created database ",self.m_database
-                cursor.close()
-                self.m_connection.close()
-                self.m_connection = connect (host   = self.m_host,
-                                             user   = self.m_user,
-                                             passwd = self.m_password,
-                                             db     = self.m_database)
-            except Error, e:
-                print "Error %d: %s" % (e.args[0], e.args[1])
-                sys.exit (1)  
+
+        # Creating database
+        self.m_connection = create_database(self.m_host,
+                                            self.m_user,
+                                            self.m_password,
+                                            self.m_database)
         # Momento de crear las tablas, si no estan creadas
         self.ensure_tables_creation()
+
 
 
 
@@ -94,6 +77,8 @@ class data_manager(object):
         print "Ignored Messages ",self.nested_messages," because were nested messages."
         print "Ignored Messages ",self.duplicated_messages," because were duplicated messages."
         print "\n\n"
+
+
 
 
     def ensure_tables_creation (self):
@@ -221,9 +206,7 @@ class data_manager(object):
     '''
     def store_mailing_list (self, new_mailing_list, mailing_list_name, project, status):
         self.last_mailing_list = new_mailing_list
-
         cursor = self.m_connection.cursor()
-
         query = "INSERT IGNORE INTO mailing_lists "+\
                     "(mailing_list_url, mailing_list_name, project_name, status, last_analysis) "+\
                     "VALUES ('"+ new_mailing_list+"', '"+mailing_list_name+"', '"+project+"', '"+status+"',"+\
@@ -371,14 +354,16 @@ class data_manager(object):
             receiver_email = receiver
             receiver_alias = ""
             #"Nickolay V. Shmyrev" <nshmyrev@yandex.ru>
-            if '"' in receiver:
-                receiver = receiver.replace('"','')
+            receiver = receiver.replace('"','')
             if '<' in receiver:
-                receiver = receiver.rstrip('>')
-                receiver = receiver.split('<')
-                receiver_email = receiver[1].strip(' ')
-                receiver_alias = receiver[0].strip(' ')
-                debug(receiver_email+"  -->  "+receiver_alias)
+                # La direccion esta entre los < y >
+                receiver_email = receiver.split('<')[1]
+                receiver_email = receiver_email.replace('>','')
+                receiver_email = receiver_email.strip(' ')
+                # El alias esta fuera
+                receiver_alias = receiver.split('<')[0]
+                receiver_alias = receiver_alias.strip(' ')
+
             self.store_person( person(receiver_email,\
                                       receiver_alias,\
                                       self.last_mailing_list,\
@@ -391,20 +376,22 @@ class data_manager(object):
             receiver_alias = ""
             #"Nickolay V. Shmyrev" <nshmyrev@yandex.ru>
             #evince-list@gnome.org
-            if '"' in receiver:
-                receiver = receiver.replace('"','')
+            receiver = receiver.replace('"','')
+            receiver = receiver.replace('"','')
             if '<' in receiver:
-                receiver = receiver.rstrip('>')
-                receiver = receiver.split('<')
-                receiver_email = receiver[1].strip(' ')
-                receiver_alias = receiver[0].strip(' ')
-                debug(receiver_email+"  -->  "+receiver_alias)
+                # La direccion esta entre los < y >
+                receiver_email = receiver.split('<')[1]
+                receiver_email = receiver_email.replace('>','')
+                receiver_email = receiver_email.strip(' ')
+                # El alias esta fuera
+                receiver_alias = receiver.split('<')[0]
+                receiver_alias = receiver_alias.strip(' ')
+
             self.store_person( person(receiver_email,\
                                       receiver_alias,\
                                       self.last_mailing_list,\
                                       new_email.message_id,\
                                       'Cc') )
-
 
 
 #---------------------- UNITY TESTS ----------------------

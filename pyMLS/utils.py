@@ -234,6 +234,14 @@ def purify_text(text):
     text = text.replace("'","''")
     return text
           
+
+          
+def latexfy_text(text):
+    text = latin1_to_ascii (text)
+    text = text.replace("_","\_")
+    return text
+
+          
           
 
 
@@ -244,7 +252,99 @@ def is_valid_url(url):
     return False
 
 
-        
+
+
+
+def create_database(host, user, passwd, db):
+    # Realizando una conexion nueva
+    try:
+        m_connection = connect (host,
+                                user,
+                                passwd,
+                                db)
+    except Error, e:
+        m_connection = connect (host,
+                                user,
+                                passwd,
+                                "mysql")
+        try:
+            cursor = m_connection.cursor ()
+            cursor.execute("create database "+db)
+            print "Created database ",db
+            cursor.close()
+            m_connection.close()
+            m_connection = connect (host,
+                                    user,
+                                    passwd,
+                                    db)
+        except Error, e:
+            print "Error %d: %s" % (e.args[0], e.args[1])
+            sys.exit (1)
+    return m_connection
+
+
+
+
+
+
+def ensure_table_creation(connection, table_definition):
+
+    table_name = table_definition.split('(')[0]
+    table_name = table_name.strip(" ")
+    table_name = table_name.split(" ")[-1]
+    print "Creating Table: ",table_name
+    rows = []
+    cursor = connection.cursor ()
+    cursor.execute("show tables")
+    result_set = cursor.fetchall ()
+    for row in result_set:
+        rows.append(row[0])
+    cursor.close()
+
+    if table_name not in rows:
+        cursor = connection.cursor ()
+        cursor.execute(table_definition)
+        connection.commit()
+        cursor.close()
+
+
+
+
+
+
+def do_input_query (connection, insert_query):
+    cursor = connection.cursor ()
+    cursor.execute(insert_query)
+    connection.commit()
+    cursor.close()
+
+
+
+def do_count_query (connection, count_query):
+    cursor = connection.cursor ()
+    cursor.execute(count_query)
+    result_set = cursor.fetchall()
+    result = str(result_set[0][0])
+    cursor.close()
+    return result
+
+
+
+def do_select_query (connection, count_query):
+    result = []
+    cursor = connection.cursor ()
+    cursor.execute(count_query)
+    result_set = cursor.fetchall()
+    for row in result_set:
+        mini_result = []
+        for field in row:
+            mini_result.append(str(field))
+        result.append(mini_result)
+    cursor.close()
+    return result
+
+
+
 #---------------------- UNITY TESTS ----------------------
 
 def test():

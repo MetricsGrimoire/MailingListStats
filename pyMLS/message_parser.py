@@ -26,7 +26,7 @@
 '''
 
 from parser import *
-from mls_structures import email
+from mls_structures import *
 import utils
 from utils import debug
 
@@ -44,7 +44,6 @@ class message_parser(parser):
     Texto del mensajeTexto del mensajeTexto del mensaje
     Texto del mensajeTexto del mensajeTexto del mensaje
     '''
-    
     def __init__(self):
         #Constructor de la clase madre:
         parser.__init__(self)
@@ -59,32 +58,18 @@ class message_parser(parser):
         #Cadenas de tokens que debe reconocer nuestro parser.
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From cartaoterra em terra.com.br  Wed May  4 20:37:08 2005
-        self.load_expression(r"^From\ [\d\w\.\-\_\+]+ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
+        self.load_expression(r"^From\ [\d\w\.\-\_\+]+\ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
         self.load_expression(r"^From\ [\d\w\.\_\-\+]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
-        #From =?UTF-8?Q?=E0=A5=80=E0=A4=A3=E0=A5=8D_=E0=A4=8F_?=  Fri Dec 16 20:17:34 2005
+        
+        # Esto sirve para procesar un alias
+        self.load_expression(r"^From\:\ .", self.process_alias)
 
-        self.load_expression(r"^From\:\ [\d\w\.\_\(\)\-\=\?\@]+\ .", self.process_from)
-        #From: zch519 en gmail.com (Alice L.)
-        #From: nab at kernel.org (Nicholas A. Bellinger)
-        #From: erkko.anttila at nokia.com (erkko.anttila@nokia.com)
-        #From: tapani.palli at nokia.com (=?UTF-8?B?VGFwYW5pIFDDpGxsaQ==?=)
-        self.load_expression(r"^From\:\ [\d\w\.\-\_]+\ (em|en|at)\ [\d\w\.\_\-]+\ \([\,\(\)\=\?\d\w\ \_\-\.\"\'\@]+\)$", self.process_from_alias)
-        #From Maysa" <maysa@colorview.com.br  Tue Feb 11 20:15:06 2003
-        self.load_expression(r"^From\:\ [\d\w\ \_\-\"\']+\<[\d\w\.\@]+\>? .", self.process_from)
-        #From: Daniel Gryniewicz <dang@gentoo.org>
-        self.load_expression(r"^From\:\ [\d\w\ ]+\<[\d\w\.\@]+\>", self.process_from_alias)
         #Date: Sun Oct  8 17:27:48 2006
         self.load_expression(r"Date\: .", self.process_date)
         self.load_expression(r"Sent\: .", self.process_date)
         #Subject: [Libresoft-acad] Dinero extra en ratos libres
         self.load_expression(r"Subject\:\ .", self.process_subject)
-        #Message-ID: <E4DF9CE3.AFE91E1@gmail.com>
-        self.load_expression(r"Message\-I[Dd]\:\ .", self.process_message_id)
-        
-        #List-Id: evince-list.gnome.org
-        self.load_expression(r"List\-Id\:\ .", self.process_list_id)
-
         #
         self.load_expression(r"^\n$", self.process_begin_body)
         
@@ -98,9 +83,6 @@ class message_parser(parser):
         #To: evince-list@gnome.org
         self.load_expression(r"To\:\ [\d\w\ \-\@\.]+", self.process_to)
         
-        #References: <200605291526.35846.aj504@student.cs.york.ac.uk
-        self.load_expression(r"X\-[\w\-]+\:\ .", self.process_strange_tag)
-
         #Content-Type: application/octet-stream; name="p59_1"
         self.load_expression(r"Content-Type: application/octet-stream;\ ", self.process_end_of_body)
         self.load_expression(r"Content-Disposition: attachment;", self.process_end_of_body)
@@ -111,18 +93,17 @@ class message_parser(parser):
 
 
 
+
     def process_begin_from (self, text):
         debug ("Processing Beggining FROM: " + text.replace("\n",""))
         self.messages_in_this_file += 1
         self.total_number_messages += 1
-
         '''
         # Esto es un capturador de cabeceras.
         f = open('/home/jgascon/prueba_mls.txt','a')
         f.write(text)
         f.close()
         '''
-        
         # En primer lugar si aun no tenemos ningun objeto mensaje creamos uno.
         if self.actual_message == None:
             self.actual_message = email()
@@ -132,75 +113,57 @@ class message_parser(parser):
             self.result = self.actual_message
             self.actual_message = email()
 
-
-
-
-
-    def process_from (self, text):
-        #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
-        #From dang@gentoo.org  Wed May  3 12:27:49 2006
-        debug ("Processing FROM: " + text.replace("\n",""))
-        text = text.replace("\n","")
-        text = text.replace("'","''")
-        text = text.replace('"','')
+        # Ahora cogemos la direccion email del emisor, porque provisionalmente
+        # va a ser nuestro emisor del mensaje:
+        
+        #From pablo em solis.coop.br  Sat Apr  2 10:37:26 2005
+        #From evolution-hackers-admin@trna.helixcode.com  Wed May 31 10:41:29 2000
+        #From miolo-devel@codigolivre.org.br  Thu Dec 19 18:23:21 2002
+        #From karoliina at karoliinasalminen.com  Wed Jun 29 19:34:55 2005
+        #From evolution-hackers-admin@trna.helixcode.com  Wed May 31 10:41:29 2000
         text = text.replace("From ","")
-
-        if '@' in text:
-            text = text.split(' ')
-            self.actual_message.author_from = utils.purify_text(text.pop(0))
-        else:
-            text = text.split(' ')
-            self.actual_message.author_from = utils.purify_text(text.pop(0))
-            #Eliminando el "en" o el "at"
-            text.pop(0)
-            self.actual_message.author_from += "@"+utils.purify_text(text.pop(0))
-        #self.actual_message.first_date = " ".join(text)
-        #self.actual_message.first_date = utils.correct_date(self.actual_message.first_date)
-        #Sun Oct  8 17:27:48 2006
-        #Mon, 15 May 2006 17:37:00 -070
-        self.processing = ""
+        email_address = text.split('  ')[0]
+        email_address = email_address.replace(" at ", "@")
+        email_address = email_address.replace(" en ", "@")
+        email_address = email_address.replace(" em ", "@")
+        self.actual_message.author_from = email_address
 
 
 
-    def process_from_alias (self, text):
-        debug ("Processing FROM ALIAS: " + text.replace("\n",""))
-        #From: zch519 en gmail.com (Alice L.)
-        #From: Daniel Gryniewicz <dang@gentoo.org>
+
+    def process_alias (self, text):
+        debug ("Processing ALIAS: " + text.replace("\n",""))
         text = text.replace("\n","")
-        text = text.replace("'","''")
-        text = text.replace('"','')
         text = text.replace("From: ","")
-        text = text.replace("From:","")
-        text = text.replace("From","")
-        # ------------------- Trozo del From normal ----------------------------
+        text = text.replace('"','')
+        if '<' in text:
+            # El alias esta al principio.
+            alias = text.split('<')[0]
+            alias = alias.strip(' ')
+            self.actual_message.author_alias = alias
+            # La direccion esta entre los < y >
+            email_address = text.split('<')[1]
+            email_address = email_address.replace('>','')
+            email_address = email_address.strip(' ')
+            email_address = email_address.replace(" at ", "@")
+            email_address = email_address.replace(" en ", "@")
+            email_address = email_address.replace(" em ", "@")
+            self.actual_message.author_from = email_address
 
-        if '@' in text:
-            text = text.split(' ')
-            self.actual_message.author_from = utils.purify_text(text.pop(0))
-        else:
-            text = text.split(' ')
-            self.actual_message.author_from = utils.purify_text(text.pop(0))
-            #Eliminando el "en" o el "at"
-            text.pop(0)
-            self.actual_message.author_from += "@"+utils.purify_text(text.pop(0))
-        self.processing = ""
-        # ----------------- FIN Trozo del From normal --------------------------
-        try:
-            if '(' in text:
-                text = text.split('(')[1]
-                text = text.rstrip(')')
-                self.actual_message.author_alias = utils.purify_text(text)
-            if '<' in text:
-                text = text.replace('From: ','')
-                text = text.replace('From ','')
-                text = text.split('<')[0]
-                text = text.strip(' ')
-                self.actual_message.author_alias = utils.purify_text(text)
-        except:
-            print "ERROR producido al procesar un supuesto alias: ",text
-            print "Se estaba procesando el fichero ",self.last_filename
-            raise
 
+        if '(' in text:
+            # El alias esta al final.
+            alias = text.split('(')[1]
+            alias = alias.replace(')','')
+            alias = alias.strip(' ')
+            self.actual_message.author_alias = alias
+            # La direccion esta al principio
+            email_address = text.split('(')[0]
+            email_address = email_address.strip(' ')
+            email_address = email_address.replace(" at ", "@")
+            email_address = email_address.replace(" en ", "@")
+            email_address = email_address.replace(" em ", "@")
+            self.actual_message.author_from = email_address
 
 
 
@@ -221,6 +184,7 @@ class message_parser(parser):
 
 
 
+
     def process_subject (self, text):
         #Subject: [Libresoft-acad] Dinero extra en ratos libres
         debug ("Processing Subject: " + text.replace("\n",""))
@@ -230,20 +194,6 @@ class message_parser(parser):
         text = text.replace("'","''")
         text = text.replace("Subject: ","")
         self.actual_message.subject = utils.purify_text(text)
-
-
-
-    def process_strange_tag (self, text):
-        debug ("Processing unknown: " + text.replace("\n",""))
-
-
-
-    def process_list_id (self, text):
-        debug ("Processing list id: " + text.replace("\n",""))
-        text = text.replace("\n","")
-        text = text.replace("'","''")
-        text = text.replace("List-Id: ","")
-        self.actual_message.mailing_list = text
 
 
 
@@ -268,7 +218,14 @@ class message_parser(parser):
         text = text.replace("\n","")
         text = text.replace("'","''")
         text = text.replace("Cc: ","")
-        text = text.split(',')
+        text = text.replace('"','')
+
+        if ',' in text:
+            text = text.split(',')
+        elif ';' in text:
+            text = text.split(';')
+        else:
+            text = [text]
         self.actual_message.carbon_copy = text
 
 
@@ -278,20 +235,14 @@ class message_parser(parser):
         text = text.replace("\n","")
         text = text.replace("'","''")
         text = text.replace("To: ","")
-        text = text.split(',')
+        text = text.replace('"','')
+        if ',' in text:
+            text = text.split(',')
+        elif ';' in text:
+            text = text.split(';')
+        else:
+            text = [text]
         self.actual_message.to = text
-
-
-
-    def process_message_id (self, text):
-        debug ("Processing Message_id: " + text.replace("\n",""))
-        #Message-ID: <E4DF9CE3.AFE91E1@gmail.com>
-        text = text.replace("\n","")
-        text = text.replace("'","''")
-        text = text.replace("Message-ID: <","")
-        text = text.replace("Message-Id: <","")
-        text = text.replace(">","")
-        self.actual_message.message_id = text
 
 
 
@@ -391,18 +342,16 @@ def test():
     print "** UNITY TEST: message_parser.py **"
     my_log_parser = message_parser()
     # Ahora se procesa un mensaje basado en el RFC822
-    my_log_parser.match_file("/usr/home/jgascon/Trabajos/Libresoft/Prototipos/mailingListStat-devel/Results/thanima/thanima-devel/temp/2005-October_txt/2005-October.txt")
-    #my_log_parser.match_file("/usr/home/jgascon/vacio.txt")
+    my_log_parser.match_file("/home/jgascon/Trabajos/Libresoft/libresoft-tools/mailingliststat/trunk/Results/agata/agata-brasil/2005-April.txt")
     # Mostrando resultados
     result = my_log_parser.get_result()
     contador = 0
     while result != None:
         print result
-        print "Movido"
+        print "----------------------------------------------------------------"
         result = my_log_parser.get_result()
         contador += 1
     print "Procesados "+str(contador)+" mensajes."
-        
         
 if __name__ == "__main__":
     test()

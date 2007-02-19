@@ -49,17 +49,17 @@ class config_manager:
         else:
             self.order_parameters.append('config_file')
             self.parameters['config_file'] = config_file
-            
+
         self.comments['config_file']   =\
         "#  MailingListStat configuration file"
 
 
         self.order_parameters.append('country')
-        self.parameters['country'] = "india"
+        self.parameters['country'] = "<put_a_country_here>"
         self.comments['country'] = \
         "# This value is used for some transformers, for giving a \n"+\
         "# country to every project."
-        
+
         '''
         self.order_parameters.append('only_calculate_stats')
         self.parameters['only_calculate_stats'] = "NO"
@@ -70,7 +70,7 @@ class config_manager:
         self.parameters['seal_xml_transformer'] = "NO"
         self.comments['seal_xml_transformer'] = \
         "# A generator that generates xml files for seal."
-        
+
         self.order_parameters.append('send_to_seal_server')
         self.parameters['send_to_seal_server'] = "127.0.0.1"
         self.comments['send_to_seal_server'] = \
@@ -99,8 +99,15 @@ class config_manager:
         "# developers per project, see 'number_most_active_developers' option."
 
 
+        self.order_parameters.append('latex_country_report_transformer')
+        self.parameters['latex_country_report_transformer'] = "YES"
+        self.comments['latex_country_report_transformer'] = \
+        "# This transformer generates a report of all projects in a country.\n"+\
+        "# This report is built in Latex, and stored in Results/Documents directory."
+
+
         self.order_parameters.append('libresoft_big_database_transformer')
-        self.parameters['libresoft_big_database_transformer'] = "YES"
+        self.parameters['libresoft_big_database_transformer'] = "NO"
         self.comments['libresoft_big_database_transformer'] = \
         "# This transformer sends relevant data about every project and \n"+\
         "# sends it to Libresoft central Database."

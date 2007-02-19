@@ -64,7 +64,7 @@ class main_subsystem:
             self.config.set_value('database_name', "mailingliststat_"+project.replace('-','_'))
             databases.append("mailingliststat_"+project.replace('-','_'))
             self.config.set_value('databases',databases)
-            
+
             # Inicializando la base de datos
             self.m_data_manager.initialize (self.config.get_value('database_user'),
                                             self.config.get_value('database_password'),
@@ -80,17 +80,19 @@ class main_subsystem:
             # se descargaron en el pasado).
             print "   Step 2) Looking for mailing list file links."
             mail_file_urls = self.get_mail_archive_urls (mail_url)
-            
+
             # Se obtienen y preparan todos los archivos de la lista de correo.
             print "   Step 3) Downloading files."
             if mail_file_urls == []:
                 self.m_data_manager.store_mailing_list (mail_url, mail_name, project, 'failed')
             else:
+                previous_path = os.getcwd()
                 self.m_data_manager.store_mailing_list (mail_url, mail_name, project, 'visited')
                 self.executing_downloads(mail_file_urls, temp_destiny_dir)
                 analysis = analysis_subsystem.analysis_subsystem(self.config)
                 print "   Step 4) Processing..."
                 analysis.run(temp_destiny_dir)
+                os.chdir(previous_path)
             # Closing database connection
             self.m_data_manager.finalize ()
 
@@ -173,10 +175,6 @@ class main_subsystem:
         except:
             os.makedirs(directory+"/"+mailing_list_name)
 
-        try:
-            os.chdir(directory+"/results")
-        except:
-            os.makedirs(directory+"/results")
         os.chdir(previous_directory)
         return directory+"/"+mailing_list_name
 

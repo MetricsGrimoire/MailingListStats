@@ -28,10 +28,8 @@ class email:
         self.message_md5  = ""
         self.author_from  = ""
         self.author_alias = ""
-        self.mailing_list = ""
         self.to           = []
         self.carbon_copy  = []
-        #self.first_date   = ""
         self.arrival_date = ""
         self.subject      = ""
         self.body         = ""
@@ -44,19 +42,17 @@ class email:
                  str(self.carbon_copy) + str(self.arrival_date) + str(self.body))
         self.message_md5 = m.hexdigest()
         return self.message_md5
-    
 
-  
+
+
     def __str__(self):
         text  = "From        : "+self.author_from+"\n"
         text += "Alias       : "+self.author_alias+"\n"
-        text += "Mailing List: "+self.mailing_list+"\n"
         text += "To          : "+str(self.to)+"\n"
         text += "Cc          : "+str(self.carbon_copy)+"\n"
-        #text += "First Date  : "+self.first_date+"\n"
         text += "Arrival Date: "+self.arrival_date+"\n"
         text += "Subject     : "+self.subject+"\n"
-        text += "BODY        : ["+self.body+"]\n"
+        #text += "BODY        : ["+self.body+"]\n"
         return text
 
 
