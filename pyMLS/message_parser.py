@@ -58,10 +58,12 @@ class message_parser(parser):
         #Cadenas de tokens que debe reconocer nuestro parser.
         #From zch519 en gmail.com  Sun Oct  8 18:20:24 2006
         #From cartaoterra em terra.com.br  Wed May  4 20:37:08 2005
-        self.load_expression(r"^From\ [\d\w\.\-\_\+\"]+\ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
-        self.load_expression(r"^From\ [\d\w\.\-\_\+\"]+\ \ [\d\w\.\-\_]+ .", self.process_begin_from)
+        #self.load_expression(r"^From\ [\d\w\.\-\_\+\"]+\ (em|en|at)\ [\d\w\.\-\_]+ .", self.process_begin_from)
+        #self.load_expression(r"^From\ [\d\w\.\-\_\+\"]+\ \ [\d\w\.\-\_]+ .", self.process_begin_from)
         #From dang@gentoo.org  Wed May  3 12:27:49 2006
-        self.load_expression(r"^From\ [\d\w\.\_\-\+\"]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
+        #self.load_expression(r"^From\ [\d\w\.\_\-\+\"]+\@+[\d\w\.\_\-]+\ .", self.process_begin_from)
+        #From Maysa" <maysa@colorview.com.br  Tue Feb 11 20:15:06 2003
+        self.load_expression(r"^From\ .*(em|en|at|\@).*", self.process_begin_from)
         
         # Esto sirve para procesar un alias
         self.load_expression(r"^From\:\ .", self.process_alias)
@@ -127,6 +129,15 @@ class message_parser(parser):
         email_address = email_address.replace(" at ", "@")
         email_address = email_address.replace(" en ", "@")
         email_address = email_address.replace(" em ", "@")
+
+        #From Maysa" <maysa@colorview.com.br  Tue Feb 11 20:15:06 2003
+        # <maysa@colorview.com.br
+        if '"' in email_address:
+            email_address = email_address.split('"')[-1]
+            email_address = email_address.replace('<','')
+            email_address = email_address.replace('>','')
+            email_address = email_address.strip(' ')
+            
         self.actual_message.author_from = email_address
 
 
@@ -141,7 +152,12 @@ class message_parser(parser):
             # El alias esta al principio.
             alias = text.split('<')[0]
             alias = alias.strip(' ')
-            self.actual_message.author_alias = alias
+            try:
+                self.actual_message.author_alias = alias
+            except:
+                print "Petada en :",alias
+                raise
+            
             # La direccion esta entre los < y >
             email_address = text.split('<')[1]
             email_address = email_address.replace('>','')
