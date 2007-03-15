@@ -237,9 +237,13 @@ class Database:
                 stored_messages -= 1
             except:
                 import sys
+                print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to herraiz@gsyc.escet.urjc.es"
+                print
+                print " -------------------- COPY BELOW -----------------------"
                 print query_message
                 print values
-                sys.exit(2)
+                print " -------------------- END OF COPY -----------------------"
+                sys.exit(1)
 
             try:
                 self.write_cursor.execute(query_people,from_values)
