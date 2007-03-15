@@ -1,0 +1,62 @@
+Requirements
+------------
+MLStats needs the following dependencies:
+
+    * python-2.x-MySQLdb
+    * mysql-server
+
+Optional dependencies for plugins:
+
+    * gnuplot
+
+Install
+-------
+You can install cvsanaly running setup.py script:
+
+    # python setup.py install
+
+If you don't have root privileges, add to your $PATH the directory which contains mlstats.
+
+    $ export PATH=$PATH:$HOME/mlstats/
+
+You are ready to use mlstats!
+
+Running mlstats
+----------------
+
+More options, and a more detailed info about the options, can be
+learnt by running "mlstats --help"
+
+Analysis
+--------
+
+[To be written]
+
+Credits
+-------
+
+MLStats has been developed by the GSyC/LibreSoft group at the
+Universidad Rey Juan Carlos in Móstoles, near Madrid (Spain). It is
+part of a wider research on libre software engineering, aimed to gain
+knowledge on how libre software is developed and maintained.
+
+More information
+----------------
+
+MLStats:
+  http://forge.morfeo-project.org/projects/libresoft-tools/
+
+The GSyC/LibreSoft group:
+  http://libresoft.urjc.es
+
+
+Main authors
+------------
+
+Israel Herraiz                 <herraiz at gsyc.escet.urjc.es>
+Jorge Gascon Perez             <jgascon at gsyc.escet.urjc.es>
+
+Contributors
+------------
+
+

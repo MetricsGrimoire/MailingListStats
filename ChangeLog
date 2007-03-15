@@ -1,0 +1,11 @@
+2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* First tested version
+	* It can retrieve the archives from a remote URL, or scan a directory recursively looking for mboxes
+
+2007-03-09  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* Initial import 
+
+
+
