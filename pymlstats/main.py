@@ -23,7 +23,7 @@ Main funcion of mlstats. Fun starts here!
 @organization: Libresoft Research Group, Universidad Rey Juan Carlos
 @copyright:    Universidad Rey Juan Carlos (Madrid, Spain)
 @license:      GNU GPL version 2 or any later version
-@contact:      herraiz@gsyc.escet.urjc.es
+@contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
 from database import *
@@ -34,6 +34,10 @@ import pwd
 import sys
 import datetime
 import urllib
+import gzip
+import bz2
+import zipfile
+import tarfile
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 
@@ -412,7 +416,19 @@ class Application:
         
         # How to make this portable?
         if extension == '.zip':
-            os.system('unzip -qq -o "'+ filepath + '" -d "'+ self.__mbox_directory + '"')
+            zipfileobj = zipfile.ZipFile(filepath)
+            # Get all the filenames in the zip file
+            for name in zipfileobj.namelist():
+                destfilename = os.path.join(self.__mbox_directory,name)
+                # Create the subdirectories if they do not exist
+                directories = os.path.dirname(destfilename)
+                if not os.path.exists(directories):
+                    os.makedirs(directories)
+
+                fileobj = open(destfilename,'w')
+                fileobj.write(zipfileobj.read(name))
+                fileobj.close()
+            
         elif extension == '.tar.gz' or extension == 'tgz':
             os.system('cd "'+ self.__mbox_directory + '" && tar zxf "' + filepath +'"')
         elif extension == '.tar.bz2' or extension == 'tbz':

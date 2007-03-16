@@ -1,5 +1,10 @@
 2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
+	* Updated contact information
+	* Add file_extractor module for cross-platform compressed files managing
+
+2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
 	* First tested version
 	* It can retrieve the archives from a remote URL, or scan a directory recursively looking for mboxes
 

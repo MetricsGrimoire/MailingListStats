@@ -26,7 +26,7 @@ import MySQLdb for any other, for instance import PyGreSQL).
 @organization: Libresoft Research Group, Universidad Rey Juan Carlos
 @copyright:    Universidad Rey Juan Carlos (Madrid, Spain)
 @license:      GNU GPL version 2 or any later version
-@contact:      herraiz@gsyc.escet.urjc.es
+@contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
 import MySQLdb
