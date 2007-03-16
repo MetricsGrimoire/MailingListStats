@@ -29,6 +29,7 @@ Main funcion of mlstats. Fun starts here!
 from database import *
 from analyzer import *
 from htmlparser import *
+from fileextractor import *
 import os.path
 import pwd
 import sys
@@ -38,6 +39,7 @@ import gzip
 import bz2
 import zipfile
 import tarfile
+import shutil
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 
@@ -289,11 +291,19 @@ class Application:
             today = datetime.datetime.today().strftime(datetimefmt)
             self.db.set_visited_url(link,url,today)
 
+            # Check if compressed
             extension = self.__check_compressed_file(destfilename)
             if extension:
-                destfilename = self.__uncompress_file(destfilename,extension)
-
-            files_to_analyze.append(destfilename)
+                # If compressed, uncompress and get the raw filepath
+                filepaths = self.__uncompress_file(destfilename,extension)
+                # __uncompress_file returns a list containing
+                # the path to all the uncompressed files
+                # (for instance, a tar file may contain more than one file)
+                files_to_analyze += filepaths
+            else:
+                # File was not uncompressed, so there is only
+                # one file to append
+                files_to_analyze.append(destfilename)
 
         return self.__analyze_list_of_files(url,files_to_analyze)
 
@@ -374,9 +384,15 @@ class Application:
             extension = self.__check_compressed_file(filepath)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepath = self.__uncompress_file(filepath,extension)
-
-            filepaths_to_analyze.append(filepath)
+                filepaths = self.__uncompress_file(filepath,extension)
+                # __uncompress_file returns a list containing
+                # the path to all the uncompressed files
+                # (for instance, a tar file may contain more than one file)
+                filepaths_to_analyze += filepaths
+            else:
+                # File was not uncompressed, so there is only
+                # one file to append
+                filepaths_to_analyze.append(filepath)
             
         return self.__analyze_list_of_files(dirname,filepaths_to_analyze)
 
@@ -404,48 +420,45 @@ class Application:
         the extension for the uncopressed file."""
 
         basename = os.path.basename(filepath)
-
         # Remove extension from filename
         basename_noext = basename.rstrip(extension)
         # Get new path to the uncompressed file
-        new_filepath = os.path.join(self.__mbox_directory,basename_noext)
+        new_filepath = os.path.join(self.__mbox_directory,basename)
+        new_filepath_noext = os.path.join(self.__mbox_directory,basename_noext)
 
         # If destination already exists, assume it has been uncompressed before
-        if os.path.exists(new_filepath):
-            return new_filepath
-        
-        # How to make this portable?
-        if extension == '.zip':
-            zipfileobj = zipfile.ZipFile(filepath)
-            # Get all the filenames in the zip file
-            for name in zipfileobj.namelist():
-                destfilename = os.path.join(self.__mbox_directory,name)
-                # Create the subdirectories if they do not exist
-                directories = os.path.dirname(destfilename)
-                if not os.path.exists(directories):
-                    os.makedirs(directories)
+        if os.path.exists(new_filepath_noext):
+            # Return a list with only 1 element
+            return [new_filepath_noext]
 
-                fileobj = open(destfilename,'w')
-                fileobj.write(zipfileobj.read(name))
-                fileobj.close()
-            
-        elif extension == '.tar.gz' or extension == 'tgz':
-            os.system('cd "'+ self.__mbox_directory + '" && tar zxf "' + filepath +'"')
-        elif extension == '.tar.bz2' or extension == 'tbz':
-            os.system('cd "'+ self.__mbox_directory + '" && tar jxf "' + filepath +'"')
-        elif extension == '.tar':
-            os.system('cd "'+ self.__mbox_directory + '" && tar xf "' + filepath +'"')
-        elif extension == '.gz':
-            os.system('cp  "'+ filepath +'" "' + self.__mbox_directory + '"')
-            os.system('cd "' + self.__mbox_directory + '" && gunzip -f "' + basename + '"')
-        elif extension == '.bz2':
-            os.system('cp "'+ filepath +'" "' + self.__mbox_directory + '"')
-            os.system('cd "' + self.__mbox_directory + '" && bunzip2 "' + basename + '"')
-        else:
-            return None
+        extractor = FileExtractor()
 
-        
-        return new_filepath
+        if '.zip' == extension:
+            shutil.copy(filepath,self.__mbox_directory)
+            # Return a list of all the uncopressed files
+            return extractor.zipExtraction(new_filepath)
+        elif '.tar' == extension or \
+                 '.tar.gz' == extension or \
+                 '.tgz' == extension or \
+                 '.tar.bz2' == extension or \
+                 '.tbz' == extension:
+            shutil.copy(filepath,self.__mbox_directory)
+            # Return a list of all the uncopressed files
+            return extractor.tarExtraction(new_filepath)
+        elif '.gz' == extension:
+            shutil.copy(filepath,self.__mbox_directory)
+            # Return a list with only 1 element
+            # (the method returns a string)
+            return [extractor.gzExtraction(new_filepath)]
+        elif '.bz2' == extension:
+            shutil.copy(filepath,self.__mbox_directory)
+            # Return a list with only 1 element
+            # (the method returns a string)
+            return [extractor.bz2Extraction(new_filepath)]
+
+        # Nothing extracted
+        self.__print_output("   ***WARNING: File not extracted %s***" % filepath)
+        return []
 
     def __check_mlstats_dirs(self):
         """Check if the mlstats directories exist

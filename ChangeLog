@@ -1,7 +1,8 @@
 2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* Updated contact information
-	* Add file_extractor module for cross-platform compressed files managing
+	* Add fileextractor module for cross-platform compressed files managing
+	* All the extraction and file handling (copying to cache and so) is now cross-platform (it uses the Python standard modules)
 
 2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 

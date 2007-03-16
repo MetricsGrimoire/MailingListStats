@@ -30,7 +30,7 @@ import MySQLdb for any other, for instance import PyGreSQL).
 """
 
 import MySQLdb
-from pymlstats import data_model
+from pymlstats import datamodel
 
 class Database:
 
@@ -62,7 +62,7 @@ class Database:
             cursor.execute(query)
             query = "USE "+self.name+";"
             cursor.execute(query)
-            for query in data_model.data_model_query_list:
+            for query in datamodel.data_model_query_list:
                 cursor.execute(query)
             self.__dbobj.commit()
 

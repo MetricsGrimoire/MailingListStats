@@ -60,11 +60,11 @@ class FileExtractor:
         @return: the path to the file that has been extracted
         """
         gzipfile = gzip.GzipFile(filename,mode='r')
-        outputfilename, ext = os.path.splitext(file)
+        outputfilename, ext = os.path.splitext(filename)
         # If the extension is different than gz,
         # add this to avoid using the same output
         # filename than the original file
-        if '.gz' != lower(ext):
+        if '.gz' != ext.lower():
             outputfilename = filename + '.extracted'
 
         outputfileobj = open(outputfilename,'w')
@@ -86,7 +86,7 @@ class FileExtractor:
         # If the extension is different than bz2,
         # add this to avoid using the same output
         # filename than the original file
-        if '.bz2' != lower(ext):
+        if '.bz2' != ext.lower():
             outputfile = filename + '.extracted'
 
         outputfileobj = open(outputfilename,'w')
