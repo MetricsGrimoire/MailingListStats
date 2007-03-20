@@ -33,8 +33,14 @@ from distutils.core import setup
 setup(name = "mlstats",
       version = "0.3",
       author =  "Libresoft Research Group",
-      author_email = "herraiz@gsyc.escet.urjc.es",
+      author_email = "libresoft-tools-devel@lists.morfeo-project.org",
       description = "Mailing lists analysis tool. Part of libresoft-tools.",
+      long_description = """Mailing List Stats is a tool to analyze mailing list archives.
+      It can retrieve the archives from a remote web page (usually, the archives web page), or read them
+      from a local directory. It generates a brief report, and write everything to a MySQL database (called mlstats
+      unless other name is indicated).""",
+      license = "GNU GPL 2 or any later version",
       url = "http://forge.morfeo-project.org/projects/libresoft-tools",
+      platforms = ["any"],
       packages = ['pymlstats'],
       scripts = ['mlstats'])
