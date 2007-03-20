@@ -1,0 +1,12 @@
+====================
+MailingListStats 0.3
+====================
+
+Changes since version 0.1:
+
+	* Application rewritten from scratch
+	* It tries to use all the modules available in the Python standard modules to parse email, etc
+	* Now it can analyze local directories with mboxes as well as remote URLs
+
+Thanks:
+	Thanks to Santiago Dueñas for the file extraction module, to make the handle of compressed files cross-platform
