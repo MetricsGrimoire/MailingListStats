@@ -31,7 +31,7 @@ Installer
 from distutils.core import setup
 
 setup(name = "mlstats",
-      version = "0.2",
+      version = "0.3",
       author =  "Libresoft Research Group",
       author_email = "herraiz@gsyc.escet.urjc.es",
       description = "Mailing lists analysis tool. Part of libresoft-tools.",
