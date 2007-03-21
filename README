@@ -2,12 +2,8 @@ Requirements
 ------------
 MLStats needs the following dependencies:
 
-    * python-2.x-MySQLdb
+    * python-mysqldb
     * mysql-server
-
-Optional dependencies for plugins:
-
-    * gnuplot
 
 Install
 -------
@@ -15,9 +11,9 @@ You can install cvsanaly running setup.py script:
 
     # python setup.py install
 
-If you don't have root privileges, add to your $PATH the directory which contains mlstats.
+If you don't have root privileges, use the --prefix option to indicate the directory where mlstats will be installed. For more details, take a look at the help of the installer:
 
-    $ export PATH=$PATH:$HOME/mlstats/
+    $ python setup.py install --help
 
 You are ready to use mlstats!
 

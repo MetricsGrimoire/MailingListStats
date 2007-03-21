@@ -1,5 +1,10 @@
 2007-03-20  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
+	* Release 0.3.1
+	* Solves bug 222 (http://forge.morfeo-project.org/tracker/?func=detail&atid=238&aid=222&group_id=33)
+
+2007-03-20  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
 	* Release 0.3
 
 2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>

@@ -1,4 +1,12 @@
 ====================
+MailingListStats 0.3.1
+====================
+
+Changes since version 0.3:
+
+	* Solves bug 222 (http://forge.morfeo-project.org/tracker/?func=detail&atid=238&aid=222&group_id=33)
+
+====================
 MailingListStats 0.3
 ====================
 

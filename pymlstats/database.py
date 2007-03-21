@@ -30,6 +30,7 @@ import MySQLdb for any other, for instance import PyGreSQL).
 """
 
 import MySQLdb
+import sys
 from pymlstats import datamodel
 
 class Database:
@@ -53,21 +54,62 @@ class Database:
 
         try:
             self.__dbobj = MySQLdb.connect(self.host,self.user,self.password,self.name)
-        except MySQLdb.OperationalError:
-            # Database does not exist
-            # So create it
-            self.__dbobj = MySQLdb.connect(self.host,self.admin_user,self.admin_password,"")
-            cursor = self.__dbobj.cursor()
-            query = "CREATE DATABASE "+self.name
-            cursor.execute(query)
-            query = "USE "+self.name+";"
-            cursor.execute(query)
-            for query in datamodel.data_model_query_list:
-                cursor.execute(query)
-            self.__dbobj.commit()
+        except MySQLdb.OperationalError, e:
 
-            # Database created, now reconnect
-            self.__dbobj = MySQLdb.connect(self.host,self.user,self.password,self.name)
+            # Check the error number
+            errno = e.args[0]
+            if 1045 == errno: # Unknown or unauthorized user
+                msg = e.args[1]
+                print msg
+                print "Please check the --user and --password command line options"
+                sys.exit(2)
+            elif 1049 == errno: # Unknown database           
+                
+                # Database does not exist
+                # So create it
+                try:
+                    self.__dbobj = MySQLdb.connect(self.host,self.admin_user,self.admin_password,"")
+                except MySQLdb.OperationalError, e:
+                    errno = e.args[0]
+
+                    if 1045 == errno: # Unauthorized user
+                        msg = e.args[1]
+                        print msg
+                        print "Please check the --admin-user and --admin-password command line options"
+                        sys.exit(1)
+                    else: # Unknown exception
+                        print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to libresoft-tools-devel@lists.morfeo-project.org"
+                        print
+                        print " -------------------- COPY BELOW -----------------------"
+                        print "Module database.py, connect method, unknown exception 1"
+                        print e.args[0]
+                        print e.args[1]
+                        print " -------------------- END OF COPY -----------------------"
+                        sys.exit(1)
+                    
+                cursor = self.__dbobj.cursor()
+                query = "CREATE DATABASE "+self.name
+                cursor.execute(query)
+                query = "USE "+self.name+";"
+                cursor.execute(query)
+                for query in datamodel.data_model_query_list:
+                    cursor.execute(query)
+                self.__dbobj.commit()
+
+                # Database created, now reconnect
+                # If this point has passed the exceptions catching, it should work
+                self.__dbobj = MySQLdb.connect(self.host,self.user,self.password,self.name)
+                
+            else: # Unknown exception
+                print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to libresoft-tools-devel@lists.morfeo-project.org"
+                print
+                print " -------------------- COPY BELOW -----------------------"
+                print "Module database.py, connect method, unknown exception 2"
+                print e.args[0]
+                print e.args[1]
+                print " -------------------- END OF COPY -----------------------"
+                sys.exit(1)
+
             
         self.read_cursor = self.__dbobj.cursor()
         self.write_cursor = self.__dbobj.cursor()
@@ -236,8 +278,7 @@ class Database:
                 #print "  ***WARNING: Duplicated message "+m['message-id']+"***"
                 stored_messages -= 1
             except:
-                import sys
-                print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to herraiz@gsyc.escet.urjc.es"
+                print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to libresoft-tools-devel@lists.morfeo-project.org"
                 print
                 print " -------------------- COPY BELOW -----------------------"
                 print query_message

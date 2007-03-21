@@ -1,5 +1,6 @@
 TODO
 ====
 
-[ ] Check with a large amount of mailing lists
+[ ] Test with a large amount of mailing lists
+[ ] Test RPM packages and Win32 installer
 [ ] Add more patterns to obtain original addresses from obscured addresses (such as test _at_ test.com)

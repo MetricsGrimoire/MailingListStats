@@ -37,7 +37,7 @@ from main import *
 
 # Some stuff about the project
 author = "(C) 2007 %s <%s>" % ("Libresoft", "libresoft@gsyc.escet.urjc.es")
-name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % ("0.3")
+name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % ("0.3.1")
 credits = "\n%s \n%s\n" % (name,author)
 
 def usage ():
@@ -106,9 +106,9 @@ def start():
             hostname = value
         elif "--database" == opt:
             database = value
-        elif "--admin_user" == opt:
+        elif "--admin-user" == opt:
             admin_user = value
-        elif "--admin_password" == opt:
+        elif "--admin-password" == opt:
             admin_password = value
         elif "--report-file" == opt:
             report_filename = value
