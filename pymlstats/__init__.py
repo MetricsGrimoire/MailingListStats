@@ -47,6 +47,7 @@ def usage ():
     where URL1, URL2, ...., URLn are the urls of the archive web pages of the mailing list.
     If they are a local dir instead of a remote url,
     the directory will be recursively scanned for mbox files.
+    If the option \"-\" is passed instead of a URL(s), the URLs will be read from the standard input.
     
 Options:
 
@@ -54,6 +55,8 @@ Options:
   --report-file     Filename for the report generated after the analysis  (default is standard output)
                     WARNING: The report file will be overwritten if already exists.
   --no-report       Do not generate report after the retrieval and parsing of the archives
+  -                 Read URLs from the standard input. This will ignore all the URLs passed via the command line.
+  
   
 MySQL database:
 
@@ -64,11 +67,21 @@ MySQL database:
   --admin-user      Username to create the mlstats database (default is root)
   --admin-password  Password to create the mlstats database (default is empty)
 
+Examples:
+
+$ mlstats --user=\"root\" --password=\"\" --no-report http://my.mailinglist.com/archives/ /home/user/some/mboxes/
+
+  This will download all the archives from http://my.mailinglist.com/archives/, and will scan /home/user/some/mboxes/ searching for mboxes.
+
+$ cat list_of_urls | mlstats --user=\"root\" --password=\"\" --no-report -
+
+  This will take all the URLs (or local directories) in the file 'list_of_urls'. URLs can be in separated lines, or separated by spaces or tabs.
+
 """
 
 def start():
     # Short (one letter) options. Those requiring argument followed by :
-    short_opts = "h"
+    short_opts = ["h"]
     #short_opts = "h:t:b:r:l:n:p:d:s:i:r"
     # Long options (all started by --). Those requiring argument followed by =
     long_opts = ["help","user=", "password=", "hostname=", "database=","admin-user=","admin-password=","report-file=","no-report"]
@@ -91,8 +104,11 @@ def start():
         usage()
         sys.exit(2)
 
-    num_of_options = 1 + len(opts)
-    urls = sys.argv[num_of_options:]
+    urls = args
+    if "-" in args:
+        # Read URLs from standard input instead of command line
+        urls = [url.rstrip('\n').rstrip('\t') for url in sys.stdin.readlines()]
+
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
@@ -114,6 +130,7 @@ def start():
             report_filename = value
         elif "--no-report" == opt:
             report = False
-
+    
+           
     myapp = Application(user,password,database,hostname,admin_user,admin_password,urls,report_filename,report)
             
