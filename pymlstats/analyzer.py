@@ -70,11 +70,13 @@ class MailArchiveAnalyzer:
         mbox = mailbox.PortableUnixMailbox(fileobj,MailArchiveAnalyzer.msgfactory)
 
         message = mbox.next()
+        non_parsed = 0
 
         while message:
 
             if '' == message:
                 message = mbox.next()
+                non_parsed += 1
                 continue
             
             filtered_message = {}
@@ -161,7 +163,7 @@ class MailArchiveAnalyzer:
 
         fileobj.close()
 
-        return messages_list
+        return messages_list, non_parsed
 
     def __check_spam_obscuring(self,field):
 

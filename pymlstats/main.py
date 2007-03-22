@@ -86,22 +86,27 @@ class Application:
 
         total_messages = 0
         stored_messages = 0
+        non_parsed = 0
         for url in url_list:
-            t,s = self.__analyze_url(url)
+            t,s,np = self.__analyze_url(url)
 
             total_messages += t
             stored_messages += s
+            non_parsed += np
 
         self.__print_output("%d messages analyzed" % total_messages)
         self.__print_output("%d messages stored in database %s" % (stored_messages,self.db.name))
+        self.__print_output("%d messages ignored by the parser" % non_parsed)
 
         difference = total_messages - stored_messages
-        if difference == 0:
+        if difference == 0 and non_parsed == 0:
             self.__print_output("INFO: Everything seems to be ok.")
-        elif difference > 0:
+
+        if difference > 0:
             self.__print_output("WARNING: Some messages were parsed but not stored")
-        else:
-            self.__print_output("WARNING: More stored messages than parsed!! Very very weird! Please check archives and database.")
+
+        if non_parsed > 0:
+            self.__print_output("WARNING: Some messages were ignored by the parser (probably because they were ill formed messages)")
 
         if make_report:
             self.__print_brief_report(report_filename)
@@ -228,18 +233,18 @@ class Application:
         name = os.path.basename(url)
         self.db.update_mailing_list(url,name,today)
 
-        total, stored = (0,0)
+        total, stored, non_parsed = (0,0,0)
         # Check if directory exists
         if os.path.exists(url):
-            total, stored = self.__analyze_non_remote(url)
+            total, stored, non_parsed = self.__analyze_non_remote(url)
         # If not, assume it is remote
         else:
             try:
-                total, stored = self.__analyze_remote(url)
+                total, stored, non_parsed = self.__analyze_remote(url)
             except IOError:
                 self.__print_output("Unknown URL or directory: "+url+". Skipping.")                
 
-        return total, stored
+        return total, stored, non_parsed
 
     def __analyze_remote(self,url):
         """Download the archives from the remote url, stores and parses them."""
@@ -330,21 +335,25 @@ class Application:
 
         total_messages_url = 0
         stored_messages_url = 0
+        non_parsed_messages_url = 0
 
         for filepath in filepath_list:
             self.__print_output("Analyzing "+filepath)                    
             self.mail_parser.filepath = filepath
-            messages = self.mail_parser.get_messages()
+            messages, non_parsed_messages = self.mail_parser.get_messages()
             total_messages = len(messages)
             stored_messages = self.db.store_messages(messages,mailing_list_url)
             difference = total_messages-stored_messages
             if difference > 0:
                 self.__print_output("   ***WARNING: %d messages (out of %d) parsed but not stored***" % (difference,total_messages))
+            if non_parsed_messages > 0:
+                self.__print_output("   ***WARNING: %d messages (out of %d) were ignored by the parser***" % (non_parsed_messages,total_messages+non_parsed_messages))
 
             total_messages_url += total_messages
             stored_messages_url += stored_messages
+            non_parsed_messages_url += non_parsed_messages
 
-        return total_messages_url, stored_messages_url
+        return total_messages_url, stored_messages_url, non_parsed_messages_url
         
     def __analyze_non_remote(self,dirname):
         """Walk recursively the directory looking for files,
