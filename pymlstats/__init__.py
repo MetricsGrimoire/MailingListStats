@@ -81,7 +81,7 @@ $ cat list_of_urls | mlstats --user=\"root\" --password=\"\" --no-report -
 
 def start():
     # Short (one letter) options. Those requiring argument followed by :
-    short_opts = ["h"]
+    short_opts = "h"
     #short_opts = "h:t:b:r:l:n:p:d:s:i:r"
     # Long options (all started by --). Those requiring argument followed by =
     long_opts = ["help","user=", "password=", "hostname=", "database=","admin-user=","admin-password=","report-file=","no-report"]
