@@ -1,0 +1,57 @@
+#!/usr/bin/make -f
+
+PACKAGE_NAME=mlstats
+MODULE_NAME=mlstats
+DEB_UPSTREAM_VERSION=0.3.2_beta1
+
+#PYVERS=$(shell pyversions -vr)
+PYVERS=2.4
+
+build: build-stamp
+build-stamp: $(PYVERS:%=build-python%)
+	touch $@
+build-python%:
+# Force setuptools, but reset sys.argv[0] to 'setup.py' because setup.py files expect that.
+	python$* -c "import setuptools,sys;f='setup.py';sys.argv[0]=f;execfile(f,{'__file__':f,'__name__':'__main__'})" build
+	touch $@
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f *-stamp
+	rm -rf dist build
+	-find -name '*.py[co]' | xargs rm -f
+#	find . -name *.pyc -exec rm {} \;
+	dh_clean
+
+install: build install-prereq $(PYVERS:%=install-python%)
+install-prereq:
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+
+install-python%:
+# Force setuptools, but reset sys.argv[0] to 'setup.py' because setup.py files expect that.
+	python$* -c "import setuptools,sys;f='setup.py';sys.argv[0]=f;execfile(f,{'__file__':f,'__name__':'__main__'})" install		 --no-compile --single-version-externally-managed		 --root $(CURDIR)/debian/${PACKAGE_NAME}
+	mv debian/${PACKAGE_NAME}/usr/lib/python$*/site-packages/${MODULE_NAME}-${DEB_UPSTREAM_VERSION}-py$*.egg-info		 debian/${PACKAGE_NAME}/usr/lib/python$*/site-packages/${MODULE_NAME}.egg-info
+
+binary-arch:
+	
+binary-indep: build install
+	dh_testdir -i
+	dh_testroot -i
+	dh_pycentral -i
+	dh_installdocs -i
+	dh_installdirs -i
+	dh_installexamples  -i
+	dh_strip -i
+	dh_compress -i -X.py
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+binary: binary-indep binary-arch
+
+
+.PHONY: build clean binary-indep binary-arch binary install configure

@@ -37,7 +37,7 @@ from main import *
 
 # Some stuff about the project
 author = "(C) 2007 %s <%s>" % ("Libresoft", "libresoft@gsyc.escet.urjc.es")
-name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % ("0.3.2-beta1")
+name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % ("0.3.2_beta1")
 credits = "\n%s \n%s\n" % (name,author)
 
 def usage ():
