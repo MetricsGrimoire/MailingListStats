@@ -1,3 +1,7 @@
+2007-03-27  Roberto Andradas Izquierdo <randradas@gsyc.esceturjc.es>
+
+	* Fixed a little error with the README file, there was a reference to cvsanaly instead of MLSstats
+
 2007-03-22  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* Added check to find out how many messages are ignored by the parser
