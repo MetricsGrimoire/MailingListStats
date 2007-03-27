@@ -7,7 +7,7 @@ MLStats needs the following dependencies:
 
 Install
 -------
-You can install cvsanaly running setup.py script:
+You can install MLStats running setup.py script:
 
     # python setup.py install
 
