@@ -78,13 +78,9 @@ class Database:
                         print "Please check the --admin-user and --admin-password command line options"
                         sys.exit(1)
                     else: # Unknown exception
-                        print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to libresoft-tools-devel@lists.morfeo-project.org"
-                        print
-                        print " -------------------- COPY BELOW -----------------------"
-                        print "Module database.py, connect method, unknown exception 1"
-                        print e.args[0]
-                        print e.args[1]
-                        print " -------------------- END OF COPY -----------------------"
+                        message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
+                        # Write message to the stderr
+                        print >> sys.stderr, message                        
                         sys.exit(1)
                     
                 cursor = self.__dbobj.cursor()
@@ -101,13 +97,9 @@ class Database:
                 self.__dbobj = MySQLdb.connect(self.host,self.user,self.password,self.name)
                 
             else: # Unknown exception
-                print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to libresoft-tools-devel@lists.morfeo-project.org"
-                print
-                print " -------------------- COPY BELOW -----------------------"
-                print "Module database.py, connect method, unknown exception 2"
-                print e.args[0]
-                print e.args[1]
-                print " -------------------- END OF COPY -----------------------"
+                message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
+                # Write message to the stderr
+                print >> sys.stderr, message                        
                 sys.exit(1)
 
             
@@ -278,14 +270,11 @@ class Database:
                 #print "  ***WARNING: Duplicated message "+m['message-id']+"***"
                 stored_messages -= 1
             except:
-                print "ERROR: Oops. Something went really bad. Please copy the information that appears below and send it to libresoft-tools-devel@lists.morfeo-project.org"
-                print
-                print " -------------------- COPY BELOW -----------------------"
-                print query_message
-                print values
-                print " -------------------- END OF COPY -----------------------"
-                sys.exit(1)
-
+                error_message = "ERROR: Runtime error while trying to write message with message-id "+message_id+". That message has not been written to the database, but the execution has not been stopped. Please report this failure including the message-id and the URL for the mbox."
+                stored_messages -= 1
+                # Write message to the stderr
+                print >> sys.stderr, error_message
+                
             try:
                 self.write_cursor.execute(query_people,from_values)
             except MySQLdb.IntegrityError:
