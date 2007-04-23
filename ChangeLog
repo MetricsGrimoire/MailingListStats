@@ -2,10 +2,11 @@
 	
 	* pymlstats/database.py:
 	
-	Changed the handling of exceptions. When a unknown error happens parsing a message,
-	the message is ignored and the message-id written to stderr along with a warning message.
-	When connecting to a database, unknown errors are written to stderr and the execution stopped.
-	This is related to bug #237, in order to get more meaningful and brief error messages.
+	Changed the handling of exceptions. When a unknown error happens parsing a
+	message, the message is ignored and the message-id written to stderr along
+	with a warning message.	When connecting to a database, unknown errors are
+	written to stderr and the execution stopped. This is related to bug #237, in
+	order to get more meaningful and brief error messages.
 
 2007-04-23  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 	
