@@ -63,6 +63,11 @@ class Database:
                 print msg
                 print "Please check the --user and --password command line options"
                 sys.exit(2)
+            elif 1044 == errno: # User can not access database
+                msg = e.args[1]
+                print msg
+                print "Please check the --user and --password command line options"
+                sys.exit(2)
             elif 1049 == errno: # Unknown database           
                 
                 # Database does not exist

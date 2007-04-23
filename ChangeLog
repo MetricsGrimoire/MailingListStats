@@ -8,6 +8,9 @@
 	written to stderr and the execution stopped. This is related to bug #237, in
 	order to get more meaningful and brief error messages.
 
+	Added one more error case when trying to connect the database (error 1044,
+	authorized user but not for that database).
+
 2007-04-23  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 	
 	* mlstats.egg-info/SOURCES.txt:
