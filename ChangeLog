@@ -1,15 +1,26 @@
+2007-05-10 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* setup.py:
+	* ChangeLog:
+
+	Added dependency for the Python modules.
+
+	Fixed the format of the ChangeLog. From now on, the format of this
+	log should follow the same style that this entry.
+
 2007-04-23  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 	
 	* pymlstats/database.py:
 	
-	Changed the handling of exceptions. When a unknown error happens parsing a
-	message, the message is ignored and the message-id written to stderr along
-	with a warning message.	When connecting to a database, unknown errors are
-	written to stderr and the execution stopped. This is related to bug #237, in
-	order to get more meaningful and brief error messages.
+	Changed the handling of exceptions. When a unknown error happens
+	parsing a message, the message is ignored and the message-id
+	written to stderr along with a warning message.	When connecting to
+	a database, unknown errors are written to stderr and the execution
+	stopped. This is related to bug #237, in order to get more
+	meaningful and brief error messages. 
 
-	Added one more error case when trying to connect the database (error 1044,
-	authorized user but not for that database).
+	Added one more error case when trying to connect the database
+	(error 1044, authorized user but not for that database).
 
 2007-04-23  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 	
@@ -18,21 +29,24 @@
 	* mlstats.egg-info/PKG-INFO:
 	* mlstats.egg-info/dependency_links.txt:
 
-	Added Python egg info. This is a requirement for the Debian package.
+	Added Python egg info. This is a requirement for the Debian
+	package. 
 
 2007-03-27  Roberto Andradas Izquierdo <randradas@gsyc.esceturjc.es>
 
-	* Fixed a little error with the README file, there was a reference to cvsanaly instead of MLSstats
-
+	* Fixed a little error with the README file, there was a reference
+	to cvsanaly instead of MLSstats
+	
 2007-03-22  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
-	* Added check to find out how many messages are ignored by the parser
-	* Solved bug 227 (http://forge.morfeo-project.org/tracker/?func=detail&atid=238&aid=227&group_id=33)
+	* Added check to find out how many messages are ignored by the
+	  parser 
+	* Solved bug 227
 	
 2007-03-21  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* Release 0.3.1
-	* Solved bug 222 (http://forge.morfeo-project.org/tracker/?func=detail&atid=238&aid=222&group_id=33)
+	* Solved bug 222
 
 2007-03-20  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
@@ -41,13 +55,16 @@
 2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* Updated contact information
-	* Add fileextractor module for cross-platform compressed files managing
-	* All the extraction and file handling (copying to cache and so) is now cross-platform (it uses the Python standard modules)
+	* Add fileextractor module for cross-platform compressed files
+	  managing 
+	* All the extraction and file handling (copying to cache and so)
+	  is now cross-platform (it uses the Python standard modules) 
 
 2007-03-15  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* First tested version
-	* It can retrieve the archives from a remote URL, or scan a directory recursively looking for mboxes
+	* It can retrieve the archives from a remote URL, or scan a
+	  directory recursively looking for mboxes 
 
 2007-03-09  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 

@@ -43,4 +43,5 @@ setup(name = "mlstats",
       url = "http://forge.morfeo-project.org/projects/libresoft-tools",
       platforms = ["any"],
       packages = ['pymlstats'],
-      scripts = ['mlstats'])
+      scripts = ['mlstats'],
+      requires = ['MySQLdb'])
