@@ -61,12 +61,12 @@ Options:
   
 MySQL database:
 
-  --user            Username to connect to the database (default is operator)
-  --password        Password to connect to the database (default is operator)
-  --database        Database which contains data previously analyzed (default is mlstats)
-  --hostname        Name of the host with a database server running (default is localhost)
-  --admin-user      Username to create the mlstats database (default is root)
-  --admin-password  Password to create the mlstats database (default is empty)
+  --db-user            Username to connect to the database (default is operator)
+  --db-password        Password to connect to the database (default is operator)
+  --db-name            Name of the database that contains data previously analyzed (default is mlstats)
+  --db-hostname        Name of the host with a database server running (default is localhost)
+  --db-admin-user      Username to create the mlstats database (default is root)
+  --db-admin-password  Password to create the mlstats database (default is empty)
 
 Examples:
 
@@ -85,7 +85,7 @@ def start():
     short_opts = "h"
     #short_opts = "h:t:b:r:l:n:p:d:s:i:r"
     # Long options (all started by --). Those requiring argument followed by =
-    long_opts = ["help","user=", "password=", "hostname=", "database=","admin-user=","admin-password=","report-file=","no-report","version"]
+    long_opts = ["help","db-user=", "db-password=", "db-hostname=", "db-name=","db-admin-user=","db-admin-password=","report-file=","no-report","version"]
 
     # Default options
     user = 'operator'
@@ -115,17 +115,17 @@ def start():
         if opt in ("-h", "--help"):
             usage()
             sys.exit(0)
-        elif "--user" == opt:
+        elif "--db-user" == opt:
             user = value
-        elif "--password" == opt:
+        elif "--db-password" == opt:
             password = value
-        elif "--hostname" == opt:
+        elif "--db-hostname" == opt:
             hostname = value
-        elif "--database" == opt:
+        elif "--db-name" == opt:
             database = value
-        elif "--admin-user" == opt:
+        elif "--db-admin-user" == opt:
             admin_user = value
-        elif "--admin-password" == opt:
+        elif "--db-admin-password" == opt:
             admin_password = value
         elif "--report-file" == opt:
             report_filename = value
