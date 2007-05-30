@@ -36,8 +36,9 @@ import getopt
 from main import *
 
 # Some stuff about the project
+version = "0.3.2_beta1"
 author = "(C) 2007 %s <%s>" % ("Libresoft", "libresoft@gsyc.escet.urjc.es")
-name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % ("0.3.2_beta1")
+name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % version
 credits = "\n%s \n%s\n" % (name,author)
 
 def usage ():
@@ -56,7 +57,7 @@ Options:
                     WARNING: The report file will be overwritten if already exists.
   --no-report       Do not generate report after the retrieval and parsing of the archives
   -                 Read URLs from the standard input. This will ignore all the URLs passed via the command line.
-  
+  --version         Show the version number and exit
   
 MySQL database:
 
@@ -84,7 +85,7 @@ def start():
     short_opts = "h"
     #short_opts = "h:t:b:r:l:n:p:d:s:i:r"
     # Long options (all started by --). Those requiring argument followed by =
-    long_opts = ["help","user=", "password=", "hostname=", "database=","admin-user=","admin-password=","report-file=","no-report"]
+    long_opts = ["help","user=", "password=", "hostname=", "database=","admin-user=","admin-password=","report-file=","no-report","version"]
 
     # Default options
     user = 'operator'
@@ -130,6 +131,9 @@ def start():
             report_filename = value
         elif "--no-report" == opt:
             report = False
+        elif "--version" == opt:
+            print version
+            sys.exit(0)
     
            
     myapp = Application(user,password,database,hostname,admin_user,admin_password,urls,report_filename,report)
