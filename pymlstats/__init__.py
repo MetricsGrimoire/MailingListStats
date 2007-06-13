@@ -34,11 +34,11 @@ import string
 import stat
 import getopt
 from main import *
+from version import mlstats_version
 
 # Some stuff about the project
-version = "0.3.2_beta1"
 author = "(C) 2007 %s <%s>" % ("Libresoft", "libresoft@gsyc.escet.urjc.es")
-name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % version
+name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % mlstats_version
 credits = "\n%s \n%s\n" % (name,author)
 
 def usage ():
@@ -50,16 +50,26 @@ def usage ():
     the directory will be recursively scanned for mbox files.
     If the option \"-\" is passed instead of a URL(s), the URLs will be read from the standard input.
     
-Options:
+General options:
 
   -h, --help        Print this usage message.
+  -q, --quiet       Do not show messages about the progress in the retrieval and analysis of the archives.
+  --version         Show the version number and exit.
+  -                 Read URLs from the standard input. This will ignore all the URLs passed via the command line.
+
+Report options:
+
   --report-file     Filename for the report generated after the analysis  (default is standard output)
                     WARNING: The report file will be overwritten if already exists.
-  --no-report       Do not generate report after the retrieval and parsing of the archives
-  -                 Read URLs from the standard input. This will ignore all the URLs passed via the command line.
-  --version         Show the version number and exit
+  --no-report       Do not generate report after the retrieval and parsing of the archives.
+
+
+Private archives options:
+
+  --web-user        If the archives of the mailing list are private, use this username to login in order to retrieve the files.
+  --web-password    If the archives of the mailing list are private, use this password to login in order to retrieve the files.
   
-MySQL database:
+MySQL database options:
 
   --db-user            Username to connect to the database (default is operator)
   --db-password        Password to connect to the database (default is operator)
@@ -70,11 +80,11 @@ MySQL database:
 
 Examples:
 
-$ mlstats --user=\"root\" --password=\"\" --no-report http://my.mailinglist.com/archives/ /home/user/some/mboxes/
+$ mlstats --db-user=\"root\" ---db-password=\"\" --no-report http://my.mailinglist.com/archives/ /home/user/some/mboxes/
 
   This will download all the archives from http://my.mailinglist.com/archives/, and will scan /home/user/some/mboxes/ searching for mboxes.
 
-$ cat list_of_urls | mlstats --user=\"root\" --password=\"\" --no-report -
+$ cat list_of_urls | mlstats ---db-user=\"root\" ---db-password=\"\" --no-report -
 
   This will take all the URLs (or local directories) in the file 'list_of_urls'. URLs can be in separated lines, or separated by spaces or tabs.
 
@@ -82,21 +92,25 @@ $ cat list_of_urls | mlstats --user=\"root\" --password=\"\" --no-report -
 
 def start():
     # Short (one letter) options. Those requiring argument followed by :
-    short_opts = "h"
+    short_opts = "hq"
     #short_opts = "h:t:b:r:l:n:p:d:s:i:r"
     # Long options (all started by --). Those requiring argument followed by =
-    long_opts = ["help","db-user=", "db-password=", "db-hostname=", "db-name=","db-admin-user=","db-admin-password=","report-file=","no-report","version"]
+    long_opts = ["help","db-user=", "db-password=", "db-hostname=", "db-name=","db-admin-user=","db-admin-password=","report-file=","no-report","version","quiet","web-user=","web-password="]
 
     # Default options
-    user = 'operator'
-    password = 'operator'
-    hostname = 'localhost'
-    database = 'mlstats'
-    admin_user = 'root'
-    admin_password = ''
+    db_user = 'operator'
+    db_password = 'operator'
+    db_hostname = 'localhost'
+    db_name = 'mlstats'
+    db_admin_user = 'root'
+    db_admin_password = ''
+    web_user = None
+    web_password = None
     report_filename = ''
     report = True
+    quiet = False
     urls = ''
+    
     
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_opts, long_opts)
@@ -116,25 +130,31 @@ def start():
             usage()
             sys.exit(0)
         elif "--db-user" == opt:
-            user = value
+            db_user = value
         elif "--db-password" == opt:
-            password = value
+            db_password = value
         elif "--db-hostname" == opt:
-            hostname = value
+            db_hostname = value
         elif "--db-name" == opt:
-            database = value
+            db_name = value
         elif "--db-admin-user" == opt:
-            admin_user = value
+            db_admin_user = value
         elif "--db-admin-password" == opt:
-            admin_password = value
+            db_admin_password = value
         elif "--report-file" == opt:
             report_filename = value
         elif "--no-report" == opt:
             report = False
+        elif opt in ("-q", "--quiet"):
+            quiet = True
+        elif "--web-user" == opt:
+            web_user = value
+        elif "--web-password" == opt:
+            web_password = value
         elif "--version" == opt:
-            print version
+            print mlstats_version
             sys.exit(0)
     
            
-    myapp = Application(user,password,database,hostname,admin_user,admin_password,urls,report_filename,report)
+    myapp = Application(db_user,db_password,db_name,db_hostname,db_admin_user,db_admin_password,urls,report_filename,report,quiet,web_user,web_password)
             

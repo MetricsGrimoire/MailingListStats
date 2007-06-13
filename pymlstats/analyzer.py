@@ -168,7 +168,7 @@ class MailArchiveAnalyzer:
     def __check_spam_obscuring(self,field):
 
         # Add more patterns here
-        obscurers = [" at ","_at_"]
+        obscurers = [" at ","_at_"," en "]
 
         if not field:
             return field

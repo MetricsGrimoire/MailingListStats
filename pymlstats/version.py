@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # Copyright (C) 2007 Libresoft Research Group
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,30 +17,14 @@
 # Authors : Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 """
-Installer
+Version number. Centralized module to access to have the version number in an unique place
 
 @author:       Israel Herraiz
 @organization: Libresoft Research Group, Universidad Rey Juan Carlos
 @copyright:    Universidad Rey Juan Carlos (Madrid, Spain)
 @license:      GNU GPL version 2 or any later version
-@contact:      herraiz@gsyc.escet.urjc.es
+@contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-from distutils.core import setup
-from pymlstats.version import mlstats_version
 
-setup(name = "mlstats",
-      version = mlstats_version,
-      author =  "Libresoft Research Group",
-      author_email = "libresoft-tools-devel@lists.morfeo-project.org",
-      description = "Mailing lists analysis tool. Part of libresoft-tools.",
-      long_description = """Mailing List Stats is a tool to analyze mailing list archives.
-      It can retrieve the archives from a remote web page (usually, the archives web page), or read them
-      from a local directory. It generates a brief report, and write everything to a MySQL database (called mlstats
-      unless other name is indicated).""",
-      license = "GNU GPL 2 or any later version",
-      url = "http://forge.morfeo-project.org/projects/libresoft-tools",
-      platforms = ["any"],
-      packages = ['pymlstats'],
-      scripts = ['mlstats'],
-      requires = ['MySQLdb'])
+mlstats_version = "0.3.2_beta2"

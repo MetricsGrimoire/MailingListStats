@@ -60,7 +60,7 @@ class Application:
     COMPRESSED_TYPES = ['.gz','.bz2','.zip','.tar','.tar.gz','.tar.bz2','.tgz','.tbz']
     ACCEPTED_TYPES = ['.mbox','.txt']
 
-    def __init__(self,user,password,dbname,host,admin_user,admin_password,url_list,report_filename,make_report):
+    def __init__(self,user,password,dbname,host,admin_user,admin_password,url_list,report_filename,make_report,be_quiet,web_user,web_password):
 
         self.mail_parser = MailArchiveAnalyzer()
 
@@ -74,6 +74,13 @@ class Application:
 
         # Connect to database if exists, otherwise create it and connect
         self.db.connect()
+
+        # User and password to make login in case the archives are set to private
+        self.web_user = web_user
+        self.web_password = web_password
+
+        # Don't show messages when retrieveing and analyzing files
+        self.be_quiet = be_quiet
 
         # URLs to be analyzed
         self.url_list = url_list
@@ -112,7 +119,8 @@ class Application:
             self.__print_brief_report(report_filename)
 
     def __print_output(self,text):
-        print text
+        if not self.be_quiet:
+            print text
 
     def __print_brief_report(self,report_filename):
 
@@ -288,7 +296,7 @@ class Application:
                 self.__print_output("Already downloaded "+link)
             else:
                 self.__print_output("Retrieving "+link+"...")
-                urllib.urlretrieve(link,destfilename)
+                self.__retrieve_remote_file(link,destfilename)
                 
             # If not, set visited
             # (before uncompressing, otherwise the db will point towards
@@ -317,7 +325,13 @@ class Application:
     def __get_remote_links(self,url):
         """Return a list of all the links contained in a remote url"""
         # Download index.html to a temp file
-        htmlpage = urllib.urlopen(url)
+        if not self.web_user:
+            htmlpage = urllib.urlopen(url)
+        else:
+            postdata = urllib.urlencode({'username':self.web_user,
+                                         'password':self.web_password})
+
+            htmlpage = urllib.urlopen(url,data=postdata)
 
         htmltxt = ''.join(htmlpage.readlines())
         htmlpage.close()
@@ -330,6 +344,19 @@ class Application:
 
         return links
 
+    def __retrieve_remote_file(self,url,destfilename):
+        """Retrieve a file from a remote location. It logins in the archives private page if necessary."""
+
+        if not self.web_user:
+            urllib.urlretrieve(url,destfilename)
+        else:
+            postdata = urllib.urlencode( \
+                {'username':self.web_user, \
+                 'password':self.web_password})
+                 
+            urllib.urlretrieve(url,destfilename,data=postdata)
+                
+        
     def __analyze_list_of_files(self,mailing_list_url,filepath_list):
         """Analyze a list of given files"""
 

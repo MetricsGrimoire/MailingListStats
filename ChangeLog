@@ -1,3 +1,19 @@
+2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* pymlstats/__init__.py:
+	* pymlstats/main.py:
+	* pymlstats/analyzer.py:
+	* pymlstats/version.py:
+	* setup.py:
+	
+	Fixed help message, that still contained the old command line
+	options.
+	
+	Added --quiet option.
+	
+	Added --web-user and --web-password options to retrieve mailing
+	list archives that are set to private.
+
 2007-05-10 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* setup.py:
