@@ -12,6 +12,7 @@ debian/compat
 debian/control
 debian/mlstats.docs
 debian/rules
+man/mlstats.1
 mlstats.egg-info/PKG-INFO
 mlstats.egg-info/SOURCES.txt
 mlstats.egg-info/dependency_links.txt
@@ -23,3 +24,4 @@ pymlstats/datamodel.py
 pymlstats/fileextractor.py
 pymlstats/htmlparser.py
 pymlstats/main.py
+pymlstats/version.py

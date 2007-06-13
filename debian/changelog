@@ -1,3 +1,9 @@
+mlstats (0.3.2) experimental; urgency=low
+
+  * Release 0.3.2
+
+ -- Israel Herraiz <herraiz@computer.org>  Wed, 13 Jun 2007 16:55:38 +0200
+
 mlstats (0.3.2-beta1-1) experimental; urgency=low
 
   * source package automatically created by stdeb

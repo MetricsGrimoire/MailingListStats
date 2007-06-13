@@ -1,10 +1,26 @@
-====================
+======================
+MailingListStats 0.3.2
+======================
+
+Changes since version 0.3.1:
+
+	* Added --web-user and --web-password options to download archives that
+          are private, making login in the archives web page. Now the archives
+          can be downloaded even if they are private (providing that an account
+          to login in the archives page is available).
+	* New command line options. All the database options are now with a --db
+          prefix. A --quiet, --version options have been added to fulfill the
+          requirements of Mission 1.
+	* Some bugs have been fixed.	  
+
+======================
 MailingListStats 0.3.1
-====================
+======================
 
 Changes since version 0.3:
 
-	* Solves bug 222 (http://forge.morfeo-project.org/tracker/?func=detail&atid=238&aid=222&group_id=33)
+	* Solves bug 222
+          (http://forge.morfeo-project.org/tracker/?func=detail&atid=238&aid=222&group_id=33) 
 
 ====================
 MailingListStats 0.3
@@ -13,8 +29,11 @@ MailingListStats 0.3
 Changes since version 0.1:
 
 	* Application rewritten from scratch
-	* It tries to use all the modules available in the Python standard modules to parse email, etc
-	* Now it can analyze local directories with mboxes as well as remote URLs
+	* It tries to use all the modules available in the Python standard
+	  modules to parse email, etc 
+	* Now it can analyze local directories with mboxes as well as remote
+	  URLs 
 
 Thanks:
-	Thanks to Santiago Dueñas for the file extraction module, to make the handle of compressed files cross-platform
+	Thanks to Santiago Dueñas for the file extraction module, to make the
+	handle of compressed files cross-platform 
