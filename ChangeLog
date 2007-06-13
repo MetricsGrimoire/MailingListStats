@@ -1,5 +1,18 @@
 2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
+        * setup.py:
+	* man/mlstats.1:
+	* pymlstats/__init__.py:
+	* README:
+
+	Added man page. The Examples section has been removed from the
+	help message, and it is now present in the man page.
+
+	Fixed minor typo in README.
+	
+
+2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
 	* pymlstats/__init__.py:
 	* pymlstats/main.py:
 	* pymlstats/analyzer.py:

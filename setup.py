@@ -45,4 +45,5 @@ setup(name = "mlstats",
       platforms = ["any"],
       packages = ['pymlstats'],
       scripts = ['mlstats'],
+      data_files = [('share/man/man1',['man/mlstats.1'])],
       requires = ['MySQLdb'])

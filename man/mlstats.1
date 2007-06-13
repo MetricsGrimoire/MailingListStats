@@ -1,0 +1,92 @@
+.\" Process this file with
+.\" groff -man -Tascii mlstats.1
+.\"
+.TH MLSTATS 1 "JUNE 2007" Libresoft-tools "User Manuals"
+.SH NAME
+mlstats \- Mailing lists analysis tool. Part of libresoft-tools.
+.SH SYNOPSIS
+.B mlstats [options] [URL1] [URL2] ... [URLn]
+
+where URL1, URL2, ...., URLn are the URLs of the archive web pages of the
+mailing list. If they are a local dir instead of a remote url, the directory
+will be recursively scanned for mbox files. If the option
+.B "-"
+is passed instead
+of a URL(s), the URLs will be read from the standard input.
+
+.SH DESCRIPTION
+.B mlstats
+Mailing List Stats is a tool to analyze mailing list archives. 
+It can retrieve the archives from a remote web page (usually, the archives web
+page), or read them from a local directory. It generates a brief report, and
+write everything to a MySQL database (called mlstats unless other name is
+indicated). 
+.SH OPTIONS
+.IP -h, --help
+Print a help message containing the options of the tool.
+.IP -q, --quiet
+Do not show messages about the progress in the retrieval and analysis of the
+archives. 
+.IP --version
+Show the version number and exit.
+.IP - 
+Read URLs from the standard input. This will ignore all the URLs passed via the
+command line. See
+.BR EXAMPLES
+below for details.
+.IP --report-file reportfilename
+Filename for the report generated after the analysis  (default is standard
+output)
+WARNING: The report file will be overwritten if already exists.
+.IP --no-report
+Do not generate report after the retrieval and parsing of the archives.
+.IP --web-user
+If the archives of the mailing list are private, use this username to login in
+order to retrieve the files.
+.IP --web-password
+If the archives of the mailing list are private, use this password to login in
+order to retrieve the files.
+.IP --db-user
+Username to connect to the database (default is operator).
+.IP --db-password
+Password to connect to the database (default is operator).
+.IP --db-name
+Name of the database that contains data previously analyzed (default is
+mlstats).
+.IP --db-hostname
+Name of the host with a database server running (default is localhost).
+.IP --db-admin-user
+Username to create the mlstats database (default is root).
+.IP --db-admin-password
+Password to create the mlstats database (default is empty).
+.SH FILES
+.I ~/.mlstats/compressed/
+.RS
+This directory contains all the compressed archives that are downloaded to be
+analyzed. All the files and subdirectories contained in this directory may be
+safely removed.
+.RE
+.I ~/.mlstats/mbox/
+.RS
+This directory contains all the archives that are going to be analyzed, or have
+been already analyzed. If an analysis of a particular mailing list is repeated,
+all the files that have been already downloaded and analyzed will not be
+downloaded neither analyzed again. If the contains of this directory are
+removed, the old archives will be downloaded in future analysis. In any case,
+those messages that have been parsed and analyzed will not be again stored in
+the database.
+.RE
+.SH EXAMPLES
+.B $ mlstats --db-user="root" ---db-password="" --no-report http://my.mailinglist.com/archives/ /home/user/some/mboxes/
+.RS
+This will download all the archives from http://my.mailinglist.com/archives/,
+and will scan /home/user/some/mboxes/ searching for mboxes. 
+.RE
+.B $ cat list_of_urls | mlstats ---db-user="root" ---db-password="" --no-report -
+.RS
+This will take all the URLs (or local directories) in the file
+.C list_of_urls.
+URLs can be in separated lines, or separated by spaces or tabs.
+.RE
+.SH AUTHOR
+Israel Herraiz <herraiz at computer dot org>

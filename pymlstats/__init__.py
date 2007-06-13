@@ -77,17 +77,6 @@ MySQL database options:
   --db-hostname        Name of the host with a database server running (default is localhost)
   --db-admin-user      Username to create the mlstats database (default is root)
   --db-admin-password  Password to create the mlstats database (default is empty)
-
-Examples:
-
-$ mlstats --db-user=\"root\" ---db-password=\"\" --no-report http://my.mailinglist.com/archives/ /home/user/some/mboxes/
-
-  This will download all the archives from http://my.mailinglist.com/archives/, and will scan /home/user/some/mboxes/ searching for mboxes.
-
-$ cat list_of_urls | mlstats ---db-user=\"root\" ---db-password=\"\" --no-report -
-
-  This will take all the URLs (or local directories) in the file 'list_of_urls'. URLs can be in separated lines, or separated by spaces or tabs.
-
 """
 
 def start():
