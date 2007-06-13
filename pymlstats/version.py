@@ -27,4 +27,4 @@ Version number. Centralized module to access to have the version number in an un
 """
 
 
-mlstats_version = "0.3.2_beta2"
+mlstats_version = "0.3.2"

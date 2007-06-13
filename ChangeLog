@@ -1,5 +1,18 @@
 2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
+	* pymlstats/version.py:
+	* mlstats.egg-info/SOURCES.txt:
+	* mlstats.egg-info/PKG-INFO:
+	* debian/control:
+	* debian/changelog:
+	* debian/rules:
+	* MANIFEST.in:
+	* NEWS:
+
+	Release 0.3.2	
+	
+2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
         * setup.py:
 	* man/mlstats.1:
 	* pymlstats/__init__.py:
