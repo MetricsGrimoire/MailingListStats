@@ -77,12 +77,12 @@ those messages that have been parsed and analyzed will not be again stored in
 the database.
 .RE
 .SH EXAMPLES
-.B $ mlstats --db-user="root" ---db-password="" --no-report http://my.mailinglist.com/archives/ /home/user/some/mboxes/
+.B $ mlstats --db-user="root" --db-password="" --no-report http://my.mailinglist.com/archives/ /home/user/some/mboxes/
 .RS
 This will download all the archives from http://my.mailinglist.com/archives/,
 and will scan /home/user/some/mboxes/ searching for mboxes. 
 .RE
-.B $ cat list_of_urls | mlstats ---db-user="root" ---db-password="" --no-report -
+.B $ cat list_of_urls | mlstats --db-user="root" --db-password="" --no-report -
 .RS
 This will take all the URLs (or local directories) in the file
 .C list_of_urls.

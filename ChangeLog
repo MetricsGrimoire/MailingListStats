@@ -1,3 +1,9 @@
+2007-07-31 Santiago Dueañas <sduenas@gsyc.escet.urjc.es> 
+
+	* man/mlstats.1:
+	
+	Typo error fixed. This closes the bug #309.
+
 2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/version.py:
@@ -13,7 +19,7 @@
 	
 2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
-        * setup.py:
+    * setup.py:
 	* man/mlstats.1:
 	* pymlstats/__init__.py:
 	* README:
