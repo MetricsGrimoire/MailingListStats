@@ -60,13 +60,13 @@ class Database:
             errno = e.args[0]
             if 1045 == errno: # Unknown or unauthorized user
                 msg = e.args[1]
-                print msg
-                print "Please check the --db-user and --db-password command line options"
+                print >>sys.stderr, msg
+                print >>sys.stderr, "Please check the --db-user and --db-password command line options"
                 sys.exit(2)
             elif 1044 == errno: # User can not access database
                 msg = e.args[1]
-                print msg
-                print "Please check the --db-user and --db-password command line options"
+                print >>sys.stderr, msg
+                print >>sys.stderr, "Please check the --db-user and --db-password command line options"
                 sys.exit(2)
             elif 1049 == errno: # Unknown database           
                 
@@ -79,8 +79,8 @@ class Database:
 
                     if 1045 == errno: # Unauthorized user
                         msg = e.args[1]
-                        print msg
-                        print "Please check the --db-admin-user and --db-admin-password command line options"
+                        print >>sys.stderr, msg
+                        print >>sys.stderr, "Please check the --db-admin-user and --db-admin-password command line options"
                         sys.exit(1)
                     else: # Unknown exception
                         message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
@@ -272,7 +272,6 @@ class Database:
                 self.write_cursor.execute(query_message,values)
             except MySQLdb.IntegrityError:
                 # Duplicated message
-                #print "  ***WARNING: Duplicated message "+m['message-id']+"***"
                 stored_messages -= 1
             except:
                 error_message = "ERROR: Runtime error while trying to write message with message-id "+message_id+". That message has not been written to the database, but the execution has not been stopped. Please report this failure including the message-id and the URL for the mbox."

@@ -262,7 +262,7 @@ if __name__ == "__main__":
         extracted_list = fe.extract(container_list)
         print str(extracted_list)
     except FileExtractorError, e:
-        print e.message
+        print >>sys.stderr, e.message
     else:
         print "Extraction completed"
 

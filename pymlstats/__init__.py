@@ -104,7 +104,7 @@ def start():
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_opts, long_opts)
     except getopt.GetoptError, (msg, opt):
-        print msg
+        print >>sys.stderr, msg
         usage()
         sys.exit(2)
 

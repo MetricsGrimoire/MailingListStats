@@ -109,8 +109,6 @@ class MailArchiveAnalyzer:
                     except:
                         year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = (1979,2,4,0,0,0,0,0,0,0)
 
-                    #print (year,month,day,hour,minute,second,tz_secs)
-
                     try:
                         msgdate = datetime.datetime(year,  
                                                 month, 

@@ -1,5 +1,17 @@
 2007-08-01 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
+	* mlstats:
+	* pymlstats/fileextractor.py:
+	* pymlstats/__init__.py:
+	* pymlstats/database.py:
+	* pymlstats/analyzer.py:
+
+	Fixing bug #308.
+
+	Now all the error messages are written to stderr and not stdout. 
+		
+2007-08-01 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
 	* pymlstats/database.py:
 
 	Fixing bug #310

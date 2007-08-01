@@ -30,10 +30,11 @@ Point of entry to the main module of the program.
 """
 
 import pymlstats.main
+import sys
 
 if __name__ == "__main__":
     try:
         pymlstats.start()
     except KeyboardInterrupt:
-        print "\n\nReceived Ctrl-C or other break signal. Exiting."
+        print >>sys.stderr, "\n\nReceived Ctrl-C or other break signal. Exiting."
 
