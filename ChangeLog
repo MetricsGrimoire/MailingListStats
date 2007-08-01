@@ -1,3 +1,9 @@
+2007-08-01 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* pymlstats/database.py:
+
+	Fixing bug #310
+
 2007-07-31 Santiago Dueñas <sduenas@gsyc.escet.urjc.es> 
 
 	* man/mlstats.1:

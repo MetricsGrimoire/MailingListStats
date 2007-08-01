@@ -61,12 +61,12 @@ class Database:
             if 1045 == errno: # Unknown or unauthorized user
                 msg = e.args[1]
                 print msg
-                print "Please check the --user and --password command line options"
+                print "Please check the --db-user and --db-password command line options"
                 sys.exit(2)
             elif 1044 == errno: # User can not access database
                 msg = e.args[1]
                 print msg
-                print "Please check the --user and --password command line options"
+                print "Please check the --db-user and --db-password command line options"
                 sys.exit(2)
             elif 1049 == errno: # Unknown database           
                 
@@ -80,7 +80,7 @@ class Database:
                     if 1045 == errno: # Unauthorized user
                         msg = e.args[1]
                         print msg
-                        print "Please check the --admin-user and --admin-password command line options"
+                        print "Please check the --db-admin-user and --db-admin-password command line options"
                         sys.exit(1)
                     else: # Unknown exception
                         message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
