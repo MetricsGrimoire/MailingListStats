@@ -1,3 +1,25 @@
+2007-08-21 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* pymlstats/datamodel.py:
+	* pymlstats/database.py:
+	* db/data_model.sql:
+
+	Fixing bug #314.
+
+	Some changes in the database. Now the people table contains all
+	the people participating in the mailing list, regardless is a
+	writer or not.
+
+	The field type_of_recipient in the messages_people table may now
+	take the values From, To or Cc. That table contains all the people
+	participating in the mailing list, regardless is a recipient or a
+	writer.
+
+	The same happens with the mailing_lists_people table.
+
+	I have realized that the database schema needs a serious
+	modification.	
+		
 2007-08-01 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* mlstats:

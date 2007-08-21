@@ -238,9 +238,15 @@ class Database:
                 query += ' VALUES (%s,%s,%s);'
                 messages_people_values[query] = [addr[1],"Cc",message_id]
 
-            from_values = []
-            mailing_lists_people_values = []
             for addr in from_addresses:
+                query = 'INSERT INTO messages_people(email_address,type_of_recipient,message_id)'
+                query += ' VALUES (%s,%s,%s);'
+                messages_people_values[query] = [addr[1],"From",message_id]
+
+            query_people_values = []
+            mailing_lists_people_values = []
+            addresses = from_addresses+to_addresses+cc_addresses
+            for addr in addresses:
                 name = addr[0]
                 email = addr[1]
                 try:
@@ -264,10 +270,22 @@ class Database:
                 query_people += ' VALUES (%s,%s,%s,%s,%s);'
                 #query_people += ' VALUES ("'+email+'","'+name+'","'+username+'","'+domain_name+'","'+top_level_domain+'");'
 
+                try:
+                    self.write_cursor.execute(query_people,from_values)
+                except MySQLdb.IntegrityError:
+                    pass
+
                 query_mailing_lists_people = 'INSERT INTO mailing_lists_people (email_address,mailing_list_url)'
                 query_mailing_lists_people += ' VALUES (%s,%s);'
                 mailing_lists_people_values = [email,mailing_list_url]
 
+                try:
+                    self.write_cursor.execute(query_mailing_lists_people,mailing_lists_people_values)
+                except MySQLdb.IntegrityError:
+                    # Duplicate entry email address-mailing list url
+                    pass
+
+            # Write the rest of the message
             try:
                 self.write_cursor.execute(query_message,values)
             except MySQLdb.IntegrityError:
@@ -279,10 +297,6 @@ class Database:
                 # Write message to the stderr
                 print >> sys.stderr, error_message
                 
-            try:
-                self.write_cursor.execute(query_people,from_values)
-            except MySQLdb.IntegrityError:
-                pass
 
             for query in messages_people_values.keys():
                 try:
@@ -291,16 +305,11 @@ class Database:
                     # Duplicate entry email_address-to|cc-mailing list url
                     pass
             
-            try:
-                self.write_cursor.execute(query_mailing_lists_people,mailing_lists_people_values)
-            except MySQLdb.IntegrityError:
-                # Duplicate entry email address-mailing list url
-                pass
                 
             self.__dbobj.commit()
             stored_messages += 1
 
-
+        # Check that everything is consistent
         query = 'SET FOREIGN_KEY_CHECKS = 1;'
         self.write_cursor.execute(query)
         self.__dbobj.commit()

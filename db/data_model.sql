@@ -46,7 +46,7 @@ foreign key (author_email_address) references people(email_address) on delete ca
 
 CREATE TABLE messages_people(
 email_address varchar(255),
-type_of_recipient enum('To','Cc','Bcc'),
+type_of_recipient enum('From','To','Cc'),
 message_id varchar(255),
 primary key(email_address,type_of_recipient,message_id),
 index email_a (email_address),
