@@ -2,7 +2,7 @@
 
 PACKAGE_NAME=mlstats
 MODULE_NAME=mlstats
-DEB_UPSTREAM_VERSION=0.3.2
+DEB_UPSTREAM_VERSION=0.3.3_beta1
 
 #PYVERS=$(shell pyversions -vr)
 PYVERS=2.4

@@ -10,6 +10,7 @@ db/data_model.sql
 debian/changelog
 debian/compat
 debian/control
+debian/copyright
 debian/mlstats.docs
 debian/rules
 man/mlstats.1

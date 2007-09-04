@@ -1,3 +1,17 @@
+2007-09-05 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* pymlstats/version.py:
+	* debian/control:
+	* debian/changelog:
+	* debian/copyright:
+	* debian/rules:
+	* mlstats.egg-info/SOURCES.txt:
+	* mlstats.egg-info/PKG-INFO:	
+
+	Added copyright file for the Debian package.
+
+	Updated version number for trunk sources.
+	
 2007-08-21 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/datamodel.py:

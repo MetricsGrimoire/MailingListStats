@@ -1,0 +1,11 @@
+This package was debianized by Israel Herraiz <herraiz@computer.org> on
+Wed, 05 Sep 2007 01:03:32 +0200
+
+The sources were obtained from the Subversion repository:
+
+svn checkout https://svn.forge.morfeo-project.org/svn/libresoft-tools/mailingliststat/trunk/
+
+The entire code base may be distributed under the terms of the GNU General
+Public License (GPL), which appears immediately below.
+
+See /usr/share/common-licenses/GPL
