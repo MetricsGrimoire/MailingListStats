@@ -1,3 +1,11 @@
+2007-12-03 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* pymlstats/version.py:
+	* pymlstats/main.py:
+
+	Remote files are now analyzed in ascending chronological
+	order. Version number updated. 
+
 2007-09-05 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/version.py:
