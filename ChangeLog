@@ -4,6 +4,7 @@
 	* debian/rules:
 	* debian/changelog:
 	* debian/control:
+	* mlstats.egg-info/PKG-INFO:
 
 	Release 0.3.3
 	
