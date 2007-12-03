@@ -1,5 +1,14 @@
 2007-12-03 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
+	* NEWS:
+	* debian/rules:
+	* debian/changelog:
+	* debian/control:
+
+	Release 0.3.3
+	
+2007-12-03 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
 	* pymlstats/version.py:
 	* pymlstats/main.py:
 
