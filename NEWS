@@ -1,4 +1,16 @@
 ======================
+MailingListStats 0.3.3
+======================
+
+Changes since version 0.3.2:
+
+	* Remote files are now analyzed in ascending chronological
+	  order, so we assure that all the messages are stored in the
+	  database in the right order as to keep the referential
+	  integrity. 
+	* Some bugs have been fixed.	  
+
+======================
 MailingListStats 0.3.2
 ======================
 
