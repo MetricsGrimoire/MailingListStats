@@ -318,6 +318,14 @@ class Application:
                 # one file to append
                 files_to_analyze.append(destfilename)
 
+        # The archives are usually retrieved in descending
+        # chronological order (because the newest archives are always
+        # shown on the top of the archives)
+
+        # So we will analyze the list of files in the order inversed
+        # to the order in they were retrieved
+        files_to_analyze.reverse()
+
         return self.__analyze_list_of_files(url,files_to_analyze)
 
             
