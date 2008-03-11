@@ -1,3 +1,18 @@
+2008-03-11 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+
+	* debian/changelog:
+	* debian/control:
+	* debian/copyright:
+	* debian/mlstats.docs:
+	* debian/rules:
+	* man/mlstats.1:
+	* setup.py:
+
+	The Debian package is now Lintian compliant. The Python egg files
+	are now automatically generated, so the mlstats.egg-info directory
+	has been removed.
+	
+	
 2007-12-03 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* NEWS:

@@ -40,6 +40,7 @@ binary-indep: build install
 	dh_testdir -i
 	dh_testroot -i
 	dh_pycentral -i
+	dh_installchangelogs ChangeLog
 	dh_installdocs -i
 	dh_installdirs -i
 	dh_installexamples  -i

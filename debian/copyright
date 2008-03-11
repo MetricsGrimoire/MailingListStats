@@ -1,6 +1,8 @@
 This package was debianized by Israel Herraiz <herraiz@computer.org> on
 Wed, 05 Sep 2007 01:03:32 +0200
 
+Copyright 2007, 2008 Libresoft research group
+
 The sources were obtained from the Subversion repository:
 
 svn checkout https://svn.forge.morfeo-project.org/svn/libresoft-tools/mailingliststat/trunk/

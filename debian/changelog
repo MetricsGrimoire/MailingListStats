@@ -1,3 +1,9 @@
+mlstats (0.3.3-1) experimental; urgency=low
+
+  * Debian configuration files are now Lintian compliant
+
+ -- Israel Herraiz Tabernero <iht@elly.libresoft.es>  Mon, 10 Mar 2008 23:57:16 +0100
+
 mlstats (0.3.3) experimental; urgency=low
 
   * Release 0.3.3

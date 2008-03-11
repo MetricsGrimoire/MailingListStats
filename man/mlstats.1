@@ -22,9 +22,9 @@ page), or read them from a local directory. It generates a brief report, and
 write everything to a MySQL database (called mlstats unless other name is
 indicated). 
 .SH OPTIONS
-.IP -h, --help
+.IP "-h, --help"
 Print a help message containing the options of the tool.
-.IP -q, --quiet
+.IP "-q, --quiet"
 Do not show messages about the progress in the retrieval and analysis of the
 archives. 
 .IP --version
@@ -34,7 +34,7 @@ Read URLs from the standard input. This will ignore all the URLs passed via the
 command line. See
 .BR EXAMPLES
 below for details.
-.IP --report-file reportfilename
+.IP "--report-file reportfilename"
 Filename for the report generated after the analysis  (default is standard
 output)
 WARNING: The report file will be overwritten if already exists.
@@ -85,7 +85,7 @@ and will scan /home/user/some/mboxes/ searching for mboxes.
 .B $ cat list_of_urls | mlstats --db-user="root" --db-password="" --no-report -
 .RS
 This will take all the URLs (or local directories) in the file
-.C list_of_urls.
+.I list_of_urls.
 URLs can be in separated lines, or separated by spaces or tabs.
 .RE
 .SH AUTHOR
