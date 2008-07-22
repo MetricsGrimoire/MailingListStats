@@ -148,8 +148,66 @@ class Database:
 
         self.__dbobj.commit()
 
-    def store_messages(self,message_list,mailing_list_url):
+    def next_db_peopleID(self):
+        query_max='select max(people_ID) from people;'    
+        self.read_cursor.execute(query_max)
+        peopleID = self.read_cursor.fetchone()[0]
+        if peopleID is not None:
+            peopleID += 1
+        else:
+            peopleID = 1
+        return peopleID
 
+    def verify_peoplemail(self,peoplemail):
+        #Checking if exists the email address of the people
+        query_check='select people_ID from people where email_address=' + '"' + peoplemail  + '";'
+        flag=self.read_cursor.execute(query_check)    
+        # if 0 then not exist in the datta base this email 
+        if flag > 0:
+            peopleID = self.read_cursor.fetchone()[0]
+        else:
+            peopleID = 0
+        return peopleID
+    
+
+    def insert_people(self,addr,mailing_list_url, peopleID):
+        query_people_values = []
+        mailing_lists_people_values = []
+        name = addr[0]
+        email = addr[1]
+        try:
+            top_level_domain = email.split(".")[-1]
+        except IndexError:
+            top_level_domain = ''
+        try:
+            domain_name = email.split("@")[1]
+        except IndexError:
+            domain_name = ''
+        try:
+            username = email.split("@")[0]
+        except IndexError:
+            username = ''
+
+        from_values = [peopleID,email,name,username,domain_name,top_level_domain]
+        query_people = 'INSERT INTO people (people_ID, email_address,name,username,domain_name,top_level_domain)'
+        query_people += ' VALUES (%s,%s,%s,%s,%s,%s);'
+        try:
+            self.write_cursor.execute(query_people,from_values)
+        except MySQLdb.IntegrityError:
+            pass
+
+        query_mailing_lists_people = 'INSERT INTO mailing_lists_people (people_ID,mailing_list_url)'
+        query_mailing_lists_people += ' VALUES (%s,%s);'
+        mailing_lists_people_values = [peopleID,mailing_list_url]
+        try:
+            self.write_cursor.execute(query_mailing_lists_people,mailing_lists_people_values)
+        except MySQLdb.IntegrityError:
+            # Duplicate entry email address-mailing list url
+            pass
+
+
+
+    def store_messages(self,message_list,mailing_list_url):
         query = 'SET FOREIGN_KEY_CHECKS = 0;'
         self.write_cursor.execute(query)
 
@@ -170,16 +228,19 @@ class Database:
 
             headers = m.keys()
             for h in headers:
-                value = m[h]
-
+                value = m[h]  
                 if 'message-id' == h:
-                    query_left += 'message_id,'
-                    query_right += '%s,'
-                    values.append(value)
-                    message_id = value
+                        query_left += 'message_id,'
+                        query_right += '%s,'
+                        values.append(value)
+                        message_id = value
                 elif 'to' == h:
+                    if value is None:
+                        continue    
                     to_addresses += value
                 elif 'cc' == h:
+                    if value is None:
+                        continue
                     cc_addresses += value
                 elif 'date' == h:
                     query_left += 'first_date,'
@@ -205,13 +266,9 @@ class Database:
                     query_left += 'message_body,'
                     query_right += '%s,'
                     values.append(value)
-                elif 'from' == h:
-                    query_left += 'author_email_address,'
-                    query_right += '%s,'
-                    try:
-                        values.append(value[0][1])
-                    except:
-                        values.append('')                        
+                elif 'from' == h:                  
+                    if value is None:
+                        continue
                     from_addresses += value
                 elif 'subject' == h:
                     query_left += 'subject,'
@@ -227,63 +284,38 @@ class Database:
             query_message = query_left + query_right
 
             # FIXME: If primary key check fails, ignore and continue
-            messages_people_values = {}
+            messages_people_values = {}  
+            #NEW PEOPLE_ID VALID    
+            peopleID=self.next_db_peopleID()  
             for addr in to_addresses:
-                query = 'INSERT INTO messages_people(email_address,type_of_recipient,message_id)'
+                peopleexist= self.verify_peoplemail(addr[1])
+                if 0 == peopleexist:
+                    peopleexist=peopleID
+                    peopleID += 1
+                    self.insert_people(addr,mailing_list_url, peopleexist)
+                query = 'INSERT INTO messages_people(people_ID, type_of_recipient, message_id)'
                 query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [addr[1],"To",message_id]
+                messages_people_values[query] = [peopleexist,"To",message_id]
             
             for addr in cc_addresses:
-                query = 'INSERT INTO messages_people(email_address,type_of_recipient,message_id)'
+                peopleexist= self.verify_peoplemail(addr[1])
+                if 0 == peopleexist:
+                    peopleexist=peopleID
+                    peopleID +=1
+                    self.insert_people(addr,mailing_list_url, peopleexist)
+                query = 'INSERT INTO messages_people(people_ID,type_of_recipient,message_id)'
                 query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [addr[1],"Cc",message_id]
+                messages_people_values[query] = [peopleexist,"Cc",message_id]
 
             for addr in from_addresses:
-                query = 'INSERT INTO messages_people(email_address,type_of_recipient,message_id)'
+                peopleexist= self.verify_peoplemail(addr[1])
+                if 0 == peopleexist:
+                    peopleexist=peopleID
+                    peopleID +=1
+                    self.insert_people(addr,mailing_list_url, peopleexist)
+                query = 'INSERT INTO messages_people(people_ID,type_of_recipient,message_id)'
                 query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [addr[1],"From",message_id]
-
-            query_people_values = []
-            mailing_lists_people_values = []
-            addresses = from_addresses+to_addresses+cc_addresses
-            for addr in addresses:
-                name = addr[0]
-                email = addr[1]
-                try:
-                    top_level_domain = email.split(".")[-1]
-                except IndexError:
-                    top_level_domain = ''
-
-                try:
-                    domain_name = email.split("@")[1]
-                except IndexError:
-                    domain_name = ''
-
-                try:
-                    username = email.split("@")[0]
-                except IndexError:
-                    username = ''
-
-                from_values = [email,name,username,domain_name,top_level_domain]
-
-                query_people = 'INSERT INTO people (email_address,name,username,domain_name,top_level_domain)'
-                query_people += ' VALUES (%s,%s,%s,%s,%s);'
-                #query_people += ' VALUES ("'+email+'","'+name+'","'+username+'","'+domain_name+'","'+top_level_domain+'");'
-
-                try:
-                    self.write_cursor.execute(query_people,from_values)
-                except MySQLdb.IntegrityError:
-                    pass
-
-                query_mailing_lists_people = 'INSERT INTO mailing_lists_people (email_address,mailing_list_url)'
-                query_mailing_lists_people += ' VALUES (%s,%s);'
-                mailing_lists_people_values = [email,mailing_list_url]
-
-                try:
-                    self.write_cursor.execute(query_mailing_lists_people,mailing_lists_people_values)
-                except MySQLdb.IntegrityError:
-                    # Duplicate entry email address-mailing list url
-                    pass
+                messages_people_values[query] = [peopleexist,"From",message_id]
 
             # Write the rest of the message
             try:
@@ -297,15 +329,12 @@ class Database:
                 # Write message to the stderr
                 print >> sys.stderr, error_message
                 
-
             for query in messages_people_values.keys():
                 try:
                     self.write_cursor.execute(query,messages_people_values[query])
                 except MySQLdb.IntegrityError:
                     # Duplicate entry email_address-to|cc-mailing list url
                     pass
-            
-                
             self.__dbobj.commit()
             stored_messages += 1
 
@@ -321,18 +350,22 @@ class Database:
     # --------------------
 
     def get_num_of_mailing_lists(self):
-
+        
         query = 'select count(distinct mailing_list_url) from mailing_lists;'
         self.read_cursor.execute(query)
-
         return self.read_cursor.fetchone()[0]
 
     def get_messages_by_domain(self):
-
+        
         mailing_lists = int(self.get_num_of_mailing_lists())
         limit = 10*mailing_lists
+        query = "select m.mailing_list_url,p.domain_name, count(m.message_id) as num_messages "\
+        "  from messages m,messages_people mp, people p "\
+        " where m.message_ID=mp.message_ID "\
+        "   and mp.people_ID=p.people_ID and  mp.type_of_recipient='From'"\
+        " group by m.mailing_list_url, p.domain_name "\
+        " order by num_messages desc limit %d;" % limit
 
-        query = 'select mailing_list_url, domain_name, count(message_id) as t from messages, people where author_email_address=email_address group by mailing_list_url, domain_name order by t desc limit %d;' % limit
         self.read_cursor.execute(query)
 
         return self.read_cursor.fetchall()
@@ -341,17 +374,22 @@ class Database:
 
         mailing_lists = int(self.get_num_of_mailing_lists())
         limit = 10*mailing_lists
-
-        query = 'select mailing_list_url, domain_name, count(p.email_address) as t from mailing_lists_people as ml, people as p where ml.email_address=p.email_address group by mailing_list_url, domain_name order by t desc limit %d;' % limit
+        query = "select mailing_list_url, domain_name, count(p.email_address) as t "\
+                "  from mailing_lists_people as ml, people as p "\
+        " where ml.people_ID=p.people_ID group by mailing_list_url, domain_name order by t desc limit %d;" % limit
         self.read_cursor.execute(query)
 
         return self.read_cursor.fetchall()
 
     def get_messages_by_tld(self):
+        
         mailing_lists = int(self.get_num_of_mailing_lists())
         limit = 10*mailing_lists
-
-        query = 'select mailing_list_url, top_level_domain, count(message_id) as t from messages, people where author_email_address=email_address group by mailing_list_url, top_level_domain order by t desc limit %d;' % limit
+        query = "select m.mailing_list_url, p.top_level_domain, count(m.message_id) as num_messages "\
+        "  from messages m,messages_people mp, people p "\
+        " where m.message_ID=mp.message_ID and mp.people_ID=p.people_ID and  mp.type_of_recipient='From'"\
+        " group by m.mailing_list_url, p.top_level_domain "\
+        " order by num_messages desc limit %d;" % limit
         self.read_cursor.execute(query)
 
         return self.read_cursor.fetchall()
@@ -361,38 +399,55 @@ class Database:
         mailing_lists = int(self.get_num_of_mailing_lists())
         limit = 10*mailing_lists
 
-        query = 'select mailing_list_url, top_level_domain, count(p.email_address) as t from mailing_lists_people as ml, people as p where ml.email_address=p.email_address group by mailing_list_url, top_level_domain order by t desc limit %d;' % limit
+        query = "select mailing_list_url, top_level_domain, count(p.email_address) as t "\
+        "  from mailing_lists_people as ml, people as p "\
+        " where ml.people_ID=p.people_ID group by mailing_list_url, top_level_domain"\
+        " order by t desc limit %d;" % limit
         self.read_cursor.execute(query)
-
+        
         return self.read_cursor.fetchall()
     
     def get_messages_by_year(self):
 
         query = 'select mailing_list_url, year(first_date), count(*) as t from messages group by mailing_list_url, year(first_date);'
         self.read_cursor.execute(query)
-
+        
         return self.read_cursor.fetchall()
 
     def get_people_by_year(self):
-
-        query = 'select mailing_list_url, year(first_date), count(distinct author_email_address) as t from messages,people where author_email_address=email_address group by mailing_list_url, year(first_date);'
+        
+        query = "select m.mailing_list_url, year(m.first_date), count(distinct(mp.people_ID)) "\
+        "  from messages m , messages_people mp"\
+        " where m.message_ID=mp.message_ID"\
+        "   and type_of_recipient='From'"\
+        " group by m.mailing_list_url, year(m.first_date);"
         self.read_cursor.execute(query)
-
+        
         return self.read_cursor.fetchall()
 
     def get_messages_by_people(self):
 
         mailing_lists = int(self.get_num_of_mailing_lists())
         limit = 10*mailing_lists
+        query = "select m.mailing_list_url, (select email_address from people where people_ID= mp.people_ID),  count(m.message_ID) as t "\
+        "  from messages m, messages_people mp "\
+        " where m.message_ID = mp.message_ID "\
+        "   and mp.type_of_recipient='From'"\
+        " group by m.mailing_list_url,mp.people_ID " \
+        " order by t desc limit %d;" % limit
 
-        query = 'select mailing_list_url, author_email_address, count(*) as t from messages group by mailing_list_url,author_email_address order by t desc limit %d;' % limit
         self.read_cursor.execute(query)
 
         return self.read_cursor.fetchall()
 
     def get_total_people(self):
 
-        query = 'select mailing_list_url, count(distinct author_email_address) as t from messages group by mailing_list_url;'
+        query = "select m.mailing_list_url, count(distinct(mp.people_ID))"\
+        "  from messages m , messages_people mp"\
+        " where m.message_ID=mp.message_ID"\
+        "   and mp.type_of_recipient='From'"\
+        " group by m. mailing_list_url;" 
+
         self.read_cursor.execute(query)
 
         return self.read_cursor.fetchall()
@@ -404,4 +459,4 @@ class Database:
 
         return self.read_cursor.fetchall()
         
-        
+                

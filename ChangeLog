@@ -1,3 +1,14 @@
+2008-07-22 Liliana Tovar <lilitovar@gsyc.es>
+
+	* pymlstats/analyzer.py:
+	* pymlstats/database.py:
+	* pymlstats/datamodel.py:
+	
+	Database model modified. 
+	Added a numeric identifier for people entries, instead of using the 
+	email address. 'author_email_address' deleted from messages table. The 
+	value can be found into the 'messages_people' table.
+
 2008-03-11 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* debian/changelog:
@@ -11,7 +22,6 @@
 	The Debian package is now Lintian compliant. The Python egg files
 	are now automatically generated, so the mlstats.egg-info directory
 	has been removed.
-	
 	
 2007-12-03 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
@@ -203,6 +213,3 @@
 2007-03-09  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* Initial import 
-
-
-

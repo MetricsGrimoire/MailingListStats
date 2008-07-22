@@ -101,7 +101,7 @@ class MailArchiveAnalyzer:
                     try:
                         filtered_message[header] = getaddresses(header_content)
                     except:
-                        filtered_message[header] = [('','')]
+                        filtered_message[header] = None  #[('','')]
                 elif 'date' == header or 'received' == header:
                     t = parsedate_tz(field)
                     try:
@@ -111,22 +111,22 @@ class MailArchiveAnalyzer:
 
                     try:
                         msgdate = datetime.datetime(year,  
-                                                month, 
-                                                day,   
-                                                hour,  
-                                                minute,
-                                                second)
+                                                    month, 
+                                                    day,   
+                                                    hour,  
+                                                    minute,
+                                                    second)
 
                         msgdate = msgdate.strftime("%Y-%m-%d %H:%M:%S")
                     except ValueError:
                         year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = (1979,2,4,0,0,0,0,0,0,0)
 
                         msgdate = datetime.datetime(year,  
-                                                month, 
-                                                day,   
-                                                hour,  
-                                                minute,
-                                                second)
+                                                    month, 
+                                                    day,   
+                                                    hour,  
+                                                    minute,
+                                                    second)
 
                         msgdate = msgdate.strftime("%Y-%m-%d %H:%M:%S")
 
