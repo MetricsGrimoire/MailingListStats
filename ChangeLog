@@ -1,5 +1,14 @@
 2008-07-22 Liliana Tovar <lilitovar@gsyc.es>
 
+	* db/data_model.sql
+	* db/mlstats_model_dbdesigner.png
+	* db/mlstats_model_dbdesigner.sql
+	* db/mlstats_model_dbdesigner.xml
+	
+	Added database schema.
+
+2008-07-22 Liliana Tovar <lilitovar@gsyc.es>
+
 	* pymlstats/analyzer.py:
 	* pymlstats/database.py:
 	* pymlstats/datamodel.py:

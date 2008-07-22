@@ -99,3 +99,4 @@ CREATE TABLE messages_people (
 )
 TYPE=InnoDB;
 
+
