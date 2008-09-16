@@ -1,3 +1,11 @@
+2008-09-16  Santiago Dueñas Domínguez  <sduenas@gsyc.escet.urjc.es>
+
+	* db/mlstats_model_dbdesigner.png
+	* db/mlstats_model_dbdesigner.sql
+	* db/mlstats_model_dbdesigner.xml
+	
+	DB schema modified to include a is_response_of FK.
+
 2008-07-22 Liliana Tovar <lilitovar@gsyc.es>
 
 	* db/data_model.sql

@@ -50,7 +50,11 @@ CREATE TABLE messages (
   FOREIGN KEY(mailing_list_url)
     REFERENCES mailing_lists(mailing_list_url)
       ON DELETE CASCADE
-      ON UPDATE CASCADE
+      ON UPDATE CASCADE,
+  FOREIGN KEY(is_response_of)
+    REFERENCES messages(message_ID)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
 )
 TYPE=InnoDB;
 
