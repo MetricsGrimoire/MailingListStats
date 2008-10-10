@@ -218,7 +218,7 @@ class Database:
             query_right = ' VALUES ('
             query_people = ''
             query_messages_people = []
-
+            
             values = []
             to_addresses = []
             cc_addresses = []
@@ -228,7 +228,7 @@ class Database:
 
             headers = m.keys()
             for h in headers:
-                value = m[h]  
+                value = m[h]
                 if 'message-id' == h:
                         query_left += 'message_id,'
                         query_right += '%s,'
@@ -236,11 +236,13 @@ class Database:
                         message_id = value
                 elif 'to' == h:
                     if value is None:
-                        continue    
+                        continue
+                    value = self.filter(value)
                     to_addresses += value
                 elif 'cc' == h:
                     if value is None:
                         continue
+                    value = self.filter(value) 
                     cc_addresses += value
                 elif 'date' == h:
                     query_left += 'first_date,'
@@ -269,6 +271,7 @@ class Database:
                 elif 'from' == h:                  
                     if value is None:
                         continue
+                    value = self.filter(value)
                     from_addresses += value
                 elif 'subject' == h:
                     query_left += 'subject,'
@@ -459,4 +462,13 @@ class Database:
 
         return self.read_cursor.fetchall()
         
-                
+    def filter(self,data_address):
+        
+        #erase the " in the e-mail
+        value = []
+        if data_address == []:
+            return value	
+        aux0 = data_address[0][0]
+        aux1 = data_address[0][1].replace('"','')
+        value.append((aux0,aux1)) 
+        return value
