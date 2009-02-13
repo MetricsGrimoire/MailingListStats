@@ -29,15 +29,24 @@ return a list with all the links contained in the web page.
 """
 
 import htmllib
+import urllib
+import os
 import formatter
 
 class MyHTMLParser(htmllib.HTMLParser):
 
-    def __init__(self,verbose=0):
+    COMPRESSED_TYPES = ['.gz','.bz2','.zip','.tar','.tar.gz','.tar.bz2','.tgz','.tbz']
+    ACCEPTED_TYPES = ['.mbox','.txt']
+
+    def __init__(self, url, web_user = None, web_password = None, verbose=0):
 
         f = formatter.NullFormatter()
 
+        self.url = url
+        self.user = web_user
+        self.password = web_password
         self.links = []
+        self.mboxes_links = []
 
         htmllib.HTMLParser.__init__(self,f,verbose)
 
@@ -46,3 +55,39 @@ class MyHTMLParser(htmllib.HTMLParser):
 
         if not href in self.links:
             self.links.append(href)
+
+    def get_mboxes_links(self):
+
+        self.__get_html()
+        
+        # Ignore links with not recognized extension
+        filtered_links = []
+        for l in self.links:
+            ext1 = os.path.splitext(l)[-1]
+            ext2 = os.path.splitext(l.rstrip(ext1))[-1]
+
+            accepted_types = MyHTMLParser.COMPRESSED_TYPES + MyHTMLParser.ACCEPTED_TYPES
+
+            if ext1 in accepted_types or ext1+ext2 in accepted_types:
+                filtered_links.append(os.path.join(self.url,l))
+
+        self.mboxes_links = filtered_links
+
+        return self.mboxes_links
+
+    def __get_html(self):
+
+        # Download index.html to a temp file
+        if not self.user:
+            htmlpage = urllib.urlopen(self.url)
+        else:
+            postdata = urllib.urlencode({'username':self.user,
+                                         'password':self.password})
+
+            htmlpage = urllib.urlopen(url,data=postdata)
+
+        htmltxt = ''.join(htmlpage.readlines())
+        htmlpage.close()
+
+        self.feed(htmltxt) # Read links from HTML code
+        self.close()

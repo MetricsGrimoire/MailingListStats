@@ -1,4 +1,12 @@
-2008-10-10 Juan Francisco Gato Luis <jfcogato@gsyc.es>
+2009-02-13  Israel Herraiz <herraiz@libresoft.es>
+
+	* pymlstats/htmlparser.py:
+	* pymlstats/main.py:
+
+	MyHTMLParser now returns a list with links that are exclusively
+	mboxes. That part has been removed from main.py.
+	
+2008-10-10  Juan Francisco Gato Luis <jfcogato@gsyc.es>
 
         * pymlstats/database.py
 	added filter function that erase the quotation marks from the e-mails
@@ -12,7 +20,7 @@
 	
 	DB schema modified to include a is_response_of FK.
 
-2008-07-22 Liliana Tovar <lilitovar@gsyc.es>
+2008-07-22  Liliana Tovar <lilitovar@gsyc.es>
 
 	* db/data_model.sql
 	* db/mlstats_model_dbdesigner.png
@@ -21,7 +29,7 @@
 	
 	Added database schema.
 
-2008-07-22 Liliana Tovar <lilitovar@gsyc.es>
+2008-07-22  Liliana Tovar <lilitovar@gsyc.es>
 
 	* pymlstats/analyzer.py:
 	* pymlstats/database.py:
@@ -32,7 +40,7 @@
 	email address. 'author_email_address' deleted from messages table. The 
 	value can be found into the 'messages_people' table.
 
-2008-03-11 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2008-03-11  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* debian/changelog:
 	* debian/control:
@@ -46,7 +54,7 @@
 	are now automatically generated, so the mlstats.egg-info directory
 	has been removed.
 	
-2007-12-03 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-12-03  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* NEWS:
 	* debian/rules:
@@ -56,7 +64,7 @@
 
 	Release 0.3.3
 	
-2007-12-03 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-12-03  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/version.py:
 	* pymlstats/main.py:
@@ -64,7 +72,7 @@
 	Remote files are now analyzed in ascending chronological
 	order. Version number updated. 
 
-2007-09-05 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-09-05  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/version.py:
 	* debian/control:
@@ -78,7 +86,7 @@
 
 	Updated version number for trunk sources.
 	
-2007-08-21 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-08-21  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/datamodel.py:
 	* pymlstats/database.py:
@@ -100,7 +108,7 @@
 	I have realized that the database schema needs a serious
 	modification.	
 		
-2007-08-01 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-08-01  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* mlstats:
 	* pymlstats/fileextractor.py:
@@ -112,7 +120,7 @@
 
 	Now all the error messages are written to stderr and not stdout. 
 		
-2007-08-01 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-08-01  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/database.py:
 
@@ -124,7 +132,7 @@
 	
 	Typo error fixed. This closes the bug #309.
 
-2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-06-13  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/version.py:
 	* mlstats.egg-info/SOURCES.txt:
@@ -137,7 +145,7 @@
 
 	Release 0.3.2	
 	
-2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-06-13  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* setup.py:
 	* man/mlstats.1:
@@ -149,7 +157,7 @@
 
 	Fixed minor typo in README.
 
-2007-06-13 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-06-13  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* pymlstats/__init__.py:
 	* pymlstats/main.py:
@@ -165,7 +173,7 @@
 	Added --web-user and --web-password options to retrieve mailing
 	list archives that are set to private.
 
-2007-05-10 Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+2007-05-10  Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 	* setup.py:
 	* ChangeLog:

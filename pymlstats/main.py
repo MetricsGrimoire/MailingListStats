@@ -57,8 +57,6 @@ class Application:
     MBOX_DIR = os.path.join(DATA_DIR,'mbox')
     COMPRESSED_DIR = os.path.join(DATA_DIR,'compressed')
 
-    COMPRESSED_TYPES = ['.gz','.bz2','.zip','.tar','.tar.gz','.tar.bz2','.tgz','.tbz']
-    ACCEPTED_TYPES = ['.mbox','.txt']
 
     def __init__(self,user,password,dbname,host,admin_user,admin_password,url_list,report_filename,make_report,be_quiet,web_user,web_password):
 
@@ -266,21 +264,12 @@ class Application:
             os.makedirs(self.__mbox_directory)
 
         # Get all the links listed in the URL
-        links = self.__get_remote_links(url)
-        # Ignore links with not recognized extension
-        filtered_links = []
-        for l in links:
-            ext1 = os.path.splitext(l)[-1]
-            ext2 = os.path.splitext(l.rstrip(ext1))[-1]
-
-            accepted_types = Application.COMPRESSED_TYPES + Application.ACCEPTED_TYPES
-
-            if ext1 in accepted_types or ext1+ext2 in accepted_types:
-                filtered_links.append(os.path.join(url,l))
+        htmlparser = MyHTMLParser(url, self.web_user, self.web_password)
+        links = htmlparser.get_mboxes_links()
 
         # First retrieve, then analyze files
         files_to_analyze = []
-        for link in filtered_links:
+        for link in links:
             basename = os.path.basename(link)
             destfilename = os.path.join(self.__compressed_directory,basename)
 
@@ -327,30 +316,6 @@ class Application:
         files_to_analyze.reverse()
 
         return self.__analyze_list_of_files(url,files_to_analyze)
-
-            
-
-    def __get_remote_links(self,url):
-        """Return a list of all the links contained in a remote url"""
-        # Download index.html to a temp file
-        if not self.web_user:
-            htmlpage = urllib.urlopen(url)
-        else:
-            postdata = urllib.urlencode({'username':self.web_user,
-                                         'password':self.web_password})
-
-            htmlpage = urllib.urlopen(url,data=postdata)
-
-        htmltxt = ''.join(htmlpage.readlines())
-        htmlpage.close()
-
-        htmlparser = MyHTMLParser()
-        htmlparser.feed(htmltxt)
-        htmlparser.close()
-
-        links = htmlparser.links
-
-        return links
 
     def __retrieve_remote_file(self,url,destfilename):
         """Retrieve a file from a remote location. It logins in the archives private page if necessary."""
@@ -444,7 +409,7 @@ class Application:
         """Check if filename contains one of the extensions
         recognized as compressed file."""
 
-        recognized_exts = Application.COMPRESSED_TYPES
+        recognized_exts = MyHTMLParser.COMPRESSED_TYPES
         
         # Check the two last extensions
         # (to recognize also composed extensions such as tar.gz)
