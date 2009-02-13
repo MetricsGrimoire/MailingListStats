@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Libresoft Research Group
+# Copyright (C) 2007-2009 Libresoft Research Group
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,17 +29,11 @@ Main funcion of mlstats. Fun starts here!
 from database import *
 from analyzer import *
 from htmlparser import *
-from fileextractor import *
+import utils
 import os.path
 import pwd
 import sys
 import datetime
-import urllib
-import gzip
-import bz2
-import zipfile
-import tarfile
-import shutil
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 
@@ -215,7 +209,7 @@ class Application:
             num = r[1]
             output += str(ml)+'\t'+str(num)+'\n'
 
-        output += "\n\n\nMLStats, Copyright (C) 2007 Libresoft Research Group\n"
+        output += "\n\n\nMLStats, Copyright (C) 2007-2009 Libresoft Research Group\n"
         output += "MLStats is Open Source Software/Free Software, licensed under the GNU GPL.\n"
         output += "MLStats comes with ABSOLUTELY NO WARRANTY, and you are welcome to\n"
         output += "redistribute it under certain conditions as specified by the GNU GPL license;\n"
@@ -285,7 +279,7 @@ class Application:
                 self.__print_output("Already downloaded "+link)
             else:
                 self.__print_output("Retrieving "+link+"...")
-                self.__retrieve_remote_file(link,destfilename)
+                utils.retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
                 
             # If not, set visited
             # (before uncompressing, otherwise the db will point towards
@@ -294,10 +288,10 @@ class Application:
             self.db.set_visited_url(link,url,today)
 
             # Check if compressed
-            extension = self.__check_compressed_file(destfilename)
+            extension = utils.check_compressed_file(destfilename)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepaths = self.__uncompress_file(destfilename,extension)
+                filepaths = utils.uncompress_file(destfilename,extension, self.__mbox_directory)
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
@@ -316,19 +310,6 @@ class Application:
         files_to_analyze.reverse()
 
         return self.__analyze_list_of_files(url,files_to_analyze)
-
-    def __retrieve_remote_file(self,url,destfilename):
-        """Retrieve a file from a remote location. It logins in the archives private page if necessary."""
-
-        if not self.web_user:
-            urllib.urlretrieve(url,destfilename)
-        else:
-            postdata = urllib.urlencode( \
-                {'username':self.web_user, \
-                 'password':self.web_password})
-                 
-            urllib.urlretrieve(url,destfilename,data=postdata)
-                
         
     def __analyze_list_of_files(self,mailing_list_url,filepath_list):
         """Analyze a list of given files"""
@@ -390,10 +371,10 @@ class Application:
             self.db.set_visited_url(filepath,dirname,today)
 
             # Check if compressed
-            extension = self.__check_compressed_file(filepath)
+            extension = utils.check_compressed_file(filepath)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepaths = self.__uncompress_file(filepath,extension)
+                filepaths = utils.uncompress_file(filepath,extension, self.__mbox_directory)
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
@@ -405,69 +386,7 @@ class Application:
             
         return self.__analyze_list_of_files(dirname,filepaths_to_analyze)
 
-    def __check_compressed_file(self,filename):
-        """Check if filename contains one of the extensions
-        recognized as compressed file."""
 
-        recognized_exts = MyHTMLParser.COMPRESSED_TYPES
-        
-        # Check the two last extensions
-        # (to recognize also composed extensions such as tar.gz)
-        filename_noext1, ext1 = os.path.splitext(filename)
-        filename_noexts, ext2 = os.path.splitext(filename_noext1)
-
-        if ext2+"."+ext1 in recognized_exts:
-            return ext2+"."+ext1
-
-        if ext1 in recognized_exts:
-            return ext1
-
-        return None
-
-    def __uncompress_file(self,filepath,extension):
-        """This function uncompress the file, and return
-        the extension for the uncopressed file."""
-
-        basename = os.path.basename(filepath)
-        # Remove extension from filename
-        basename_noext = basename.rstrip(extension)
-        # Get new path to the uncompressed file
-        new_filepath = os.path.join(self.__mbox_directory,basename)
-        new_filepath_noext = os.path.join(self.__mbox_directory,basename_noext)
-
-        # If destination already exists, assume it has been uncompressed before
-        if os.path.exists(new_filepath_noext):
-            # Return a list with only 1 element
-            return [new_filepath_noext]
-
-        extractor = FileExtractor()
-
-        if '.zip' == extension:
-            shutil.copy(filepath,self.__mbox_directory)
-            # Return a list of all the uncopressed files
-            return extractor.zipExtraction(new_filepath)
-        elif '.tar' == extension or \
-                 '.tar.gz' == extension or \
-                 '.tgz' == extension or \
-                 '.tar.bz2' == extension or \
-                 '.tbz' == extension:
-            shutil.copy(filepath,self.__mbox_directory)
-            # Return a list of all the uncopressed files
-            return extractor.tarExtraction(new_filepath)
-        elif '.gz' == extension:
-            shutil.copy(filepath,self.__mbox_directory)
-            # Return a list with only 1 element
-            # (the method returns a string)
-            return [extractor.gzExtraction(new_filepath)]
-        elif '.bz2' == extension:
-            shutil.copy(filepath,self.__mbox_directory)
-            # Return a list with only 1 element
-            # (the method returns a string)
-            return [extractor.bz2Extraction(new_filepath)]
-
-        # Nothing extracted
-        self.__print_output("   ***WARNING: File not extracted %s***" % filepath)
-        return []
 
     def __check_mlstats_dirs(self):
         """Check if the mlstats directories exist

@@ -1,4 +1,4 @@
-# Copyright (C) 2007 Libresoft Research Group
+# Copyright (C) 2007-2009 Libresoft Research Group
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,11 +32,10 @@ import htmllib
 import urllib
 import os
 import formatter
+import utils
 
 class MyHTMLParser(htmllib.HTMLParser):
 
-    COMPRESSED_TYPES = ['.gz','.bz2','.zip','.tar','.tar.gz','.tar.bz2','.tgz','.tbz']
-    ACCEPTED_TYPES = ['.mbox','.txt']
 
     def __init__(self, url, web_user = None, web_password = None, verbose=0):
 
@@ -66,7 +65,7 @@ class MyHTMLParser(htmllib.HTMLParser):
             ext1 = os.path.splitext(l)[-1]
             ext2 = os.path.splitext(l.rstrip(ext1))[-1]
 
-            accepted_types = MyHTMLParser.COMPRESSED_TYPES + MyHTMLParser.ACCEPTED_TYPES
+            accepted_types = utils.COMPRESSED_TYPES + utils.ACCEPTED_TYPES
 
             if ext1 in accepted_types or ext1+ext2 in accepted_types:
                 filtered_links.append(os.path.join(self.url,l))

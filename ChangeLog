@@ -1,5 +1,23 @@
 2009-02-13  Israel Herraiz <herraiz@libresoft.es>
 
+	* mlstats:
+	* pymlstats/__init__.py:
+	* pymlstats/analyzer.py:
+	* pymlstats/database.py:
+	* pymlstats/datamodel.py:
+	* pymlstats/fileextractor.py:
+	* pymlstats/htmlparser.py:
+	* pymlstats/main.py:
+	* pymlstats/version.py:
+	* pymlstats/utils.py:
+	* setup.py:
+
+	Moved URL retrieval and compressed files handling to a new module
+	called utils.
+	Updated copyright info.
+	
+2009-02-13  Israel Herraiz <herraiz@libresoft.es>
+
 	* pymlstats/htmlparser.py:
 	* pymlstats/main.py:
 
