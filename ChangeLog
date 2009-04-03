@@ -1,3 +1,11 @@
+2009-04-03  Carlos Garcia Campos  <carlosgc@libresoft.es>
+
+	* pymlstats/main.py:
+	* pymlstats/utils.py:
+
+	Add a function to get the home user directory in a platform
+	independent way.
+	
 2009-02-13  Israel Herraiz <herraiz@libresoft.es>
 
 	* mlstats:

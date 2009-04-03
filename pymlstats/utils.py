@@ -39,6 +39,7 @@ import bz2
 import zipfile
 import tarfile
 import shutil
+import errno
 
 
 def check_compressed_file(filename):
@@ -126,3 +127,58 @@ def uncompress_file(filepath,extension, output_dir = None):
 
     # Nothing extracted (file extension not recognized)
     return []
+
+_dirs = {}
+
+def get_home_dir ():
+    try:
+        return _dirs['home']
+    except KeyError:
+        pass
+    
+    home_dir = None
+    
+    if 'HOME' in os.environ:
+        home_dir = os.environ.get ('HOME')
+    else:
+        if os.name == 'posix':
+            import pwd
+            home_dir = pwd.getpwuid (os.getuid ()).pw_dir
+        else:
+            if 'USERPROFILE' in os.environ:
+                home_dir = os.environ.get ('USERPROFILE')
+            elif 'HOMEPATH' in os.environ:
+                try:
+                    drive = os.environ.get ('HOMEDRIVE')
+                except KeyError:
+                    drive = ''
+                home_dir = os.path.join (drive, os.environ.get ('HOMEPATH'))
+                
+    assert home_dir is not None
+
+    _dirs['home'] = home_dir
+    
+    return home_dir
+
+def mlstats_dot_dir ():
+    try:
+        return _dirs['dot']
+    except KeyError:
+        pass
+
+    dot_dir = os.path.join (get_home_dir (), '.mlstats')
+    try:
+        os.mkdir (dot_dir, 0700)
+    except OSError, e:
+        if e.errno == errno.EEXIST:
+            if not os.path.isdir (dot_dir):
+                raise
+        else:
+            raise
+    
+    _dirs['dot'] = dot_dir
+
+    return dot_dir
+
+if __name__ == '__main__':
+    print "mlstats dot dir: %s" % (mlstats_dot_dir ())

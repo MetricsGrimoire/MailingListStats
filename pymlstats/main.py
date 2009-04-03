@@ -29,7 +29,8 @@ Main funcion of mlstats. Fun starts here!
 from database import *
 from analyzer import *
 from htmlparser import *
-import utils
+from utils import (retrieve_remote_file, check_compressed_file,
+                   uncompress_file, mlstats_dot_dir)
 import os.path
 import pwd
 import sys
@@ -39,17 +40,8 @@ datetimefmt = '%Y-%m-%d %H:%M:%S'
 
 class Application:
     
-    try:
-        sys.getwindowsversion()
-        USER_DIR = "C:\\"
-        DATA_DIR = os.path.join(USER_DIR,'MLStats')
-    except AttributeError:
-        HOME_DIR = '/home'
-        USER_DIR = os.path.join(HOME_DIR,pwd.getpwuid(os.getuid())[0])
-        DATA_DIR = os.path.join(USER_DIR,'.mlstats')
-        
-    MBOX_DIR = os.path.join(DATA_DIR,'mbox')
-    COMPRESSED_DIR = os.path.join(DATA_DIR,'compressed')
+    MBOX_DIR = os.path.join(mlstats_dot_dir(),'mbox')
+    COMPRESSED_DIR = os.path.join(mlstats_dot_dir(),'compressed')
 
 
     def __init__(self,user,password,dbname,host,admin_user,admin_password,url_list,report_filename,make_report,be_quiet,web_user,web_password):
@@ -279,7 +271,7 @@ class Application:
                 self.__print_output("Already downloaded "+link)
             else:
                 self.__print_output("Retrieving "+link+"...")
-                utils.retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
+                retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
                 
             # If not, set visited
             # (before uncompressing, otherwise the db will point towards
@@ -288,10 +280,10 @@ class Application:
             self.db.set_visited_url(link,url,today)
 
             # Check if compressed
-            extension = utils.check_compressed_file(destfilename)
+            extension = check_compressed_file(destfilename)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepaths = utils.uncompress_file(destfilename,extension, self.__mbox_directory)
+                filepaths = uncompress_file(destfilename,extension, self.__mbox_directory)
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
@@ -371,10 +363,10 @@ class Application:
             self.db.set_visited_url(filepath,dirname,today)
 
             # Check if compressed
-            extension = utils.check_compressed_file(filepath)
+            extension = check_compressed_file(filepath)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepaths = utils.uncompress_file(filepath,extension, self.__mbox_directory)
+                filepaths = uncompress_file(filepath,extension, self.__mbox_directory)
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
@@ -393,13 +385,9 @@ class Application:
         in the home directory of the user who
         is running the program"""
 
-        data_dir = Application.DATA_DIR
         mbox_dir = Application.MBOX_DIR
         compressed_dir = Application.COMPRESSED_DIR
         
-        if not os.path.exists(data_dir):
-            os.makedirs(data_dir)
-
         if not os.path.exists(mbox_dir):
             os.makedirs(mbox_dir)
 
