@@ -1,3 +1,11 @@
+2009-17-12  Israel Herraiz <isra@herraiz.org>
+
+	* pymlstats/analyzer.py:
+
+	Received date is now set using the Unix From line rather than the
+	value in the the header.
+	Patch sent by Simón Pena Placer <spenap@gmail.com>
+
 2009-04-03  Carlos Garcia Campos  <carlosgc@libresoft.es>
 
 	* pymlstats/main.py:

@@ -81,6 +81,27 @@ class MailArchiveAnalyzer:
             
             filtered_message = {}
 
+            # Read unix from before headers
+	    unixfrom = message.get_unixfrom()
+
+	    try:
+		_, date_to_parse = unixfrom.split("  ", 1)
+	    	parsed_date = parsedate_tz(date_to_parse)
+		year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = parsed_date
+	        msgdate = datetime.datetime(year,
+                                            month, 
+                                            day,   
+                                            hour,  
+                                            minute,
+                                            second)
+                
+                msgdate = msgdate.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                msgdate = None
+
+            # Write it to filtered message before parsing headers
+            filtered_message['received'] = unixfrom
+                
             for header in MailArchiveAnalyzer.accepted_headers:                
                 if 'body' == header:
                     # The 'body' is not actually part of the headers,
@@ -102,7 +123,7 @@ class MailArchiveAnalyzer:
                         filtered_message[header] = getaddresses(header_content)
                     except:
                         filtered_message[header] = None  #[('','')]
-                elif 'date' == header or 'received' == header:
+                elif 'date' == header:
                     t = parsedate_tz(field)
                     try:
                         year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = t
@@ -136,7 +157,11 @@ class MailArchiveAnalyzer:
                         
                     filtered_message[header+"_tz"] = str(tz_secs)
                                             
-                else:
+                elif 'received' != header:
+                    # Some messages have a received header, but it is
+                    # now being ignored by MLStats and substituted by
+                    # the value of the Unix From field (first line of
+                    # the message)
                     filtered_message[header] = field
 
                 # message.getaddrlist returns a list of tuples
