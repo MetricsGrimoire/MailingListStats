@@ -100,7 +100,7 @@ class MailArchiveAnalyzer:
                 msgdate = None
 
             # Write it to filtered message before parsing headers
-            filtered_message['received'] = unixfrom
+            filtered_message['received'] = msgdate
                 
             for header in MailArchiveAnalyzer.accepted_headers:                
                 if 'body' == header:
