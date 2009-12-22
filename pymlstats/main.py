@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2009 Libresoft Research Group
+# Copyright (C) 2007-2010 Libresoft Research Group
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -201,7 +201,7 @@ class Application:
             num = r[1]
             output += str(ml)+'\t'+str(num)+'\n'
 
-        output += "\n\n\nMLStats, Copyright (C) 2007-2009 Libresoft Research Group\n"
+        output += "\n\n\nMLStats, Copyright (C) 2007-2010 Libresoft Research Group\n"
         output += "MLStats is Open Source Software/Free Software, licensed under the GNU GPL.\n"
         output += "MLStats comes with ABSOLUTELY NO WARRANTY, and you are welcome to\n"
         output += "redistribute it under certain conditions as specified by the GNU GPL license;\n"

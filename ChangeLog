@@ -1,3 +1,20 @@
+2009-22-12  Israel Herraiz  <isra@herraiz.org>
+
+        * pymlstats/datamodel.py:
+        * pymlstats/fileextractor.py:
+        * pymlstats/__init__.py:
+        * pymlstats/utils.py:
+        * pymlstats/htmlparser.py:
+        * pymlstats/database.py:
+        * pymlstats/main.py:
+        * pymlstats/analyzer.py:
+        * pymlstats/version.py:
+        * setup.py:
+        * mlstats:
+        * README:
+
+	Update email addresses, contact URLs, and copyright year.
+
 2009-17-12  Israel Herraiz <isra@herraiz.org>
 
 	* pymlstats/analyzer.py:

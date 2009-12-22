@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2009 Libresoft Research Group
+# Copyright (C) 2007-2010 Libresoft Research Group
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ from main import *
 from version import mlstats_version
 
 # Some stuff about the project
-author = "(C) 2007-2009 %s <%s>" % ("Libresoft", "libresoft@gsyc.escet.urjc.es")
-name = "mlstats %s - Libresoft Research Group http://libresoft.urjc.es" % mlstats_version
+author = "(C) 2007-2010 %s <%s>" % ("Libresoft", "libresoft-tools-devel@lists.morfeo-project.org")
+name = "mlstats %s - Libresoft Research Group http://libresoft.es" % mlstats_version
 credits = "\n%s \n%s\n" % (name,author)
 
 def usage ():

@@ -40,16 +40,30 @@ More information
 ----------------
 
 MLStats:
-  http://forge.morfeo-project.org/projects/libresoft-tools/
+  http://tools.libresoft.es/mailing_list_stats (info)
+  http://forge.morfeo-project.org/projects/libresoft-tools/ (dev site)
 
 The GSyC/LibreSoft group:
-  http://libresoft.urjc.es
+  http://libresoft.es
 
+Help and bug reports
+--------------------
+
+Please write to the developers mailing at
+
+  libresoft-tools-devel _at_ lists.morfeo-project.org
+
+If you want to receive updates about new versions, and keep in touch
+with the development team, consider subscribing to the list. It is a
+very low traffic list (< 1 msg a day):
+
+  https://lists.morfeo-project.org/mailman/listinfo/libresoft-tools-devel
+ 
 
 Main authors
 ------------
 
-Israel Herraiz                 <herraiz at gsyc.escet.urjc.es>
+Israel Herraiz                 <isra at herraiz.org>
 Jorge Gascon Perez             <jgascon at gsyc.escet.urjc.es>
 
 Contributors
