@@ -251,11 +251,20 @@ class Database:
                     query_left += 'first_date_tz,'
                     query_right += value+','
                 elif 'received' == h:
-                    query_left += 'arrival_date,'
-                    query_right += '"'+value+'",'
+                    try:
+                        query_left += 'arrival_date,'
+                        query_right += '"'+value+'",'
+                    except TypeError:
+                        # For some reason, some received headers are None
+                        # For the moment, we ignore that header
+                        continue
                 elif 'received_tz' == h:
-                    query_left += 'arrival_date_tz,'
-                    query_right += value+','
+                    try:
+                        query_left += 'arrival_date_tz,'
+                        query_right += value+','
+                    except TypeError:
+                        # Same for the timezone of the received header
+                        continue
                 elif 'list-id' == h:
                     query_left += 'mailing_list,'
                     query_right += '%s,'

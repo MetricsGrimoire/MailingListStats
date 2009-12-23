@@ -1,3 +1,10 @@
+2009-12-23  Israel Herraiz  <isra@herraiz.org>
+
+	* pymlstats/database.py:
+
+	Ignore received header when storing messages in the database if it
+	is none.
+
 2009-22-12  Israel Herraiz  <isra@herraiz.org>
 
         * pymlstats/datamodel.py:
