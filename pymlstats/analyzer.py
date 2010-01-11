@@ -85,7 +85,7 @@ class MailArchiveAnalyzer:
                 if 'body' == header:
                     # The 'body' is not actually part of the headers,
                     # but it will be treated as any other header
-                    field = str(message.get_payload())
+                    field = self.__get_body(message)
                 else:                    
                     field = message[header]
                     if field:
@@ -163,6 +163,28 @@ class MailArchiveAnalyzer:
            
         return messages_list, non_parsed
 
+    def __get_body(self,msg):
+
+        # Non multipart messages are easy
+        if not msg.is_multipart():
+            return msg.get_payload(decode=True)
+
+        # Include all the attached texts if it is multipart        
+        body = ""
+
+        for m in msg.walk():
+
+            if m.is_multipart():
+                continue
+
+            cp = m.get_content_type()
+
+            if ("text" in cp) or ("message" in cp):
+                body += "Begin attachment of type %s\n" % cp
+                body += m.get_payload(decode=True)
+
+        return body
+                            
     def __check_spam_obscuring(self,field):
 
         # Add more patterns here
