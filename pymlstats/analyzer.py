@@ -47,38 +47,17 @@ class MailArchiveAnalyzer:
                         'subject', \
                         'body']
 
-    # This wrapper is defensive against ill-formed MIME messages in the mailbox
-    # See http://www.python.org/doc/2.4.4/lib/module-mailbox.html for details
-    def msgfactory(fp):
-        try:            
-            return email.message_from_file(fp)
-        except email.Errors.MessageParseError:
-            # Don't return None since that will
-            # stop the mailbox iterator
-            return ''
-
-    msgfactory = staticmethod(msgfactory)
-
-
     def __init__(self):
         self.filepath = None
 
     def get_messages(self):
 
-        fileobj = open(self.filepath,'r')
         messages_list = []
-        mbox = mailbox.PortableUnixMailbox(fileobj,MailArchiveAnalyzer.msgfactory)
+        mbox = mailbox.mbox(self.filepath)
 
-        message = mbox.next()
         non_parsed = 0
+        for message in mbox:
 
-        while message:
-
-            if '' == message:
-                message = mbox.next()
-                non_parsed += 1
-                continue
-            
             filtered_message = {}
 
             # Read unix from before headers
@@ -181,11 +160,7 @@ class MailArchiveAnalyzer:
                 # in the original message).
 
             messages_list.append(filtered_message)
-
-            message = mbox.next()
-
-        fileobj.close()
-
+           
         return messages_list, non_parsed
 
     def __check_spam_obscuring(self,field):

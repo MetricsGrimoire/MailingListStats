@@ -1,3 +1,16 @@
+2010-01-11  Israel Herraiz  <isra@herraiz.org>
+
+	* pymlstats/datamodel.py:
+	* pymlstats/database.py:
+	* pymlstats/analyzer.py:
+	* pymlstats/version.py:
+
+	Preparing for release 0.4.
+	Mailbox parser update to Python 2.6 (the previous one is
+	deprecated).
+	Add UTF-8 support for the database.
+	Removed People_ID field. Substituted by email address.
+
 2009-12-23  Israel Herraiz  <isra@herraiz.org>
 
 	* pymlstats/database.py:

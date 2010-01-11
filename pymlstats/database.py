@@ -146,31 +146,9 @@ class Database:
             query += ' VALUES ("'+url+'","'+mailing_list_url+'","visited","'+last_analysis+'");'
             self.write_cursor.execute(query)
 
-        self.__dbobj.commit()
+        self.__dbobj.commit() 
 
-    def next_db_peopleID(self):
-        query_max='select max(people_ID) from people;'    
-        self.read_cursor.execute(query_max)
-        peopleID = self.read_cursor.fetchone()[0]
-        if peopleID is not None:
-            peopleID += 1
-        else:
-            peopleID = 1
-        return peopleID
-
-    def verify_peoplemail(self,peoplemail):
-        #Checking if exists the email address of the people
-        query_check='select people_ID from people where email_address=' + '"' + peoplemail  + '";'
-        flag=self.read_cursor.execute(query_check)    
-        # if 0 then not exist in the datta base this email 
-        if flag > 0:
-            peopleID = self.read_cursor.fetchone()[0]
-        else:
-            peopleID = 0
-        return peopleID
-    
-
-    def insert_people(self,addr,mailing_list_url, peopleID):
+    def insert_people(self,addr,mailing_list_url):
         query_people_values = []
         mailing_lists_people_values = []
         name = addr[0]
@@ -188,17 +166,17 @@ class Database:
         except IndexError:
             username = ''
 
-        from_values = [peopleID,email,name,username,domain_name,top_level_domain]
-        query_people = 'INSERT INTO people (people_ID, email_address,name,username,domain_name,top_level_domain)'
-        query_people += ' VALUES (%s,%s,%s,%s,%s,%s);'
+        from_values = [email,name,username,domain_name,top_level_domain]
+        query_people = 'INSERT INTO people (email_address,name,username,domain_name,top_level_domain)'
+        query_people += ' VALUES ("%s","%s","%s","%s","%s");'
         try:
             self.write_cursor.execute(query_people,from_values)
         except MySQLdb.IntegrityError:
             pass
 
-        query_mailing_lists_people = 'INSERT INTO mailing_lists_people (people_ID,mailing_list_url)'
-        query_mailing_lists_people += ' VALUES (%s,%s);'
-        mailing_lists_people_values = [peopleID,mailing_list_url]
+        query_mailing_lists_people = 'INSERT INTO mailing_lists_people (email_address, mailing_list_url)'
+        query_mailing_lists_people += ' VALUES ("%s","%s");'
+        mailing_lists_people_values = [email, mailing_list_url]
         try:
             self.write_cursor.execute(query_mailing_lists_people,mailing_lists_people_values)
         except MySQLdb.IntegrityError:
@@ -227,6 +205,7 @@ class Database:
             message_id = ""
 
             headers = m.keys()
+
             for h in headers:
                 value = m[h]
                 if 'message-id' == h:
@@ -252,18 +231,11 @@ class Database:
                     query_right += value+','
                 elif 'received' == h:
                     try:
-                        query_left += 'arrival_date,'
                         query_right += '"'+value+'",'
+                        query_left += 'arrival_date,'
                     except TypeError:
                         # For some reason, some received headers are None
                         # For the moment, we ignore that header
-                        continue
-                elif 'received_tz' == h:
-                    try:
-                        query_left += 'arrival_date_tz,'
-                        query_right += value+','
-                    except TypeError:
-                        # Same for the timezone of the received header
                         continue
                 elif 'list-id' == h:
                     query_left += 'mailing_list,'
@@ -297,37 +269,29 @@ class Database:
 
             # FIXME: If primary key check fails, ignore and continue
             messages_people_values = {}  
-            #NEW PEOPLE_ID VALID    
-            peopleID=self.next_db_peopleID()  
             for addr in to_addresses:
-                peopleexist= self.verify_peoplemail(addr[1])
-                if 0 == peopleexist:
-                    peopleexist=peopleID
-                    peopleID += 1
-                    self.insert_people(addr,mailing_list_url, peopleexist)
-                query = 'INSERT INTO messages_people(people_ID, type_of_recipient, message_id)'
-                query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [peopleexist,"To",message_id]
+                email_address = addr[1]
+                self.insert_people(addr,mailing_list_url)
+
+                query = 'INSERT INTO messages_people(email_address, type_of_recipient, message_id)'
+                query += ' VALUES ("%s","%s","%s");'
+                messages_people_values[query] = [email_address, "To",message_id]
             
             for addr in cc_addresses:
-                peopleexist= self.verify_peoplemail(addr[1])
-                if 0 == peopleexist:
-                    peopleexist=peopleID
-                    peopleID +=1
-                    self.insert_people(addr,mailing_list_url, peopleexist)
-                query = 'INSERT INTO messages_people(people_ID,type_of_recipient,message_id)'
+                email_address = addr[1]
+                self.insert_people(addr,mailing_list_url)
+
+                query = 'INSERT INTO messages_people(email_address, type_of_recipient, message_id)'
                 query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [peopleexist,"Cc",message_id]
+                messages_people_values[query] = [email_address, "Cc",message_id]
 
             for addr in from_addresses:
-                peopleexist= self.verify_peoplemail(addr[1])
-                if 0 == peopleexist:
-                    peopleexist=peopleID
-                    peopleID +=1
-                    self.insert_people(addr,mailing_list_url, peopleexist)
-                query = 'INSERT INTO messages_people(people_ID,type_of_recipient,message_id)'
+                email_address = addr[1]
+                self.insert_people(addr,mailing_list_url)
+
+                query = 'INSERT INTO messages_people(email_address, type_of_recipient, message_id)'
                 query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [peopleexist,"From",message_id]
+                messages_people_values[query] = [email_address, "From",message_id]
 
             # Write the rest of the message
             try:
@@ -374,7 +338,7 @@ class Database:
         query = "select m.mailing_list_url,p.domain_name, count(m.message_id) as num_messages "\
         "  from messages m,messages_people mp, people p "\
         " where m.message_ID=mp.message_ID "\
-        "   and mp.people_ID=p.people_ID and  mp.type_of_recipient='From'"\
+        "   and mp.email_address=p.email_address and  mp.type_of_recipient='From'"\
         " group by m.mailing_list_url, p.domain_name "\
         " order by num_messages desc limit %d;" % limit
 
@@ -388,7 +352,7 @@ class Database:
         limit = 10*mailing_lists
         query = "select mailing_list_url, domain_name, count(p.email_address) as t "\
                 "  from mailing_lists_people as ml, people as p "\
-        " where ml.people_ID=p.people_ID group by mailing_list_url, domain_name order by t desc limit %d;" % limit
+        " where ml.email_address=p.email_address group by mailing_list_url, domain_name order by t desc limit %d;" % limit
         self.read_cursor.execute(query)
 
         return self.read_cursor.fetchall()
@@ -399,7 +363,7 @@ class Database:
         limit = 10*mailing_lists
         query = "select m.mailing_list_url, p.top_level_domain, count(m.message_id) as num_messages "\
         "  from messages m,messages_people mp, people p "\
-        " where m.message_ID=mp.message_ID and mp.people_ID=p.people_ID and  mp.type_of_recipient='From'"\
+        " where m.message_ID=mp.message_ID and mp.email_address=p.email_address and  mp.type_of_recipient='From'"\
         " group by m.mailing_list_url, p.top_level_domain "\
         " order by num_messages desc limit %d;" % limit
         self.read_cursor.execute(query)
@@ -413,7 +377,7 @@ class Database:
 
         query = "select mailing_list_url, top_level_domain, count(p.email_address) as t "\
         "  from mailing_lists_people as ml, people as p "\
-        " where ml.people_ID=p.people_ID group by mailing_list_url, top_level_domain"\
+        " where ml.email_address=p.email_address group by mailing_list_url, top_level_domain"\
         " order by t desc limit %d;" % limit
         self.read_cursor.execute(query)
         
@@ -428,7 +392,7 @@ class Database:
 
     def get_people_by_year(self):
         
-        query = "select m.mailing_list_url, year(m.first_date), count(distinct(mp.people_ID)) "\
+        query = "select m.mailing_list_url, year(m.first_date), count(distinct(mp.email_address)) "\
         "  from messages m , messages_people mp"\
         " where m.message_ID=mp.message_ID"\
         "   and type_of_recipient='From'"\
@@ -441,11 +405,11 @@ class Database:
 
         mailing_lists = int(self.get_num_of_mailing_lists())
         limit = 10*mailing_lists
-        query = "select m.mailing_list_url, (select email_address from people where people_ID= mp.people_ID),  count(m.message_ID) as t "\
+        query = "select m.mailing_list_url, (select email_address from people where email_address= mp.email_address),  count(m.message_ID) as t "\
         "  from messages m, messages_people mp "\
         " where m.message_ID = mp.message_ID "\
         "   and mp.type_of_recipient='From'"\
-        " group by m.mailing_list_url,mp.people_ID " \
+        " group by m.mailing_list_url,mp.email_address " \
         " order by t desc limit %d;" % limit
 
         self.read_cursor.execute(query)
@@ -454,7 +418,7 @@ class Database:
 
     def get_total_people(self):
 
-        query = "select m.mailing_list_url, count(distinct(mp.people_ID))"\
+        query = "select m.mailing_list_url, count(distinct(mp.email_address))"\
         "  from messages m , messages_people mp"\
         " where m.message_ID=mp.message_ID"\
         "   and mp.type_of_recipient='From'"\
