@@ -47,38 +47,17 @@ class MailArchiveAnalyzer:
                         'subject', \
                         'body']
 
-    # This wrapper is defensive against ill-formed MIME messages in the mailbox
-    # See http://www.python.org/doc/2.4.4/lib/module-mailbox.html for details
-    def msgfactory(fp):
-        try:            
-            return email.message_from_file(fp)
-        except email.Errors.MessageParseError:
-            # Don't return None since that will
-            # stop the mailbox iterator
-            return ''
-
-    msgfactory = staticmethod(msgfactory)
-
-
     def __init__(self):
         self.filepath = None
 
     def get_messages(self):
 
-        fileobj = open(self.filepath,'r')
         messages_list = []
-        mbox = mailbox.PortableUnixMailbox(fileobj,MailArchiveAnalyzer.msgfactory)
+        mbox = mailbox.mbox(self.filepath)
 
-        message = mbox.next()
         non_parsed = 0
+        for message in mbox:
 
-        while message:
-
-            if '' == message:
-                message = mbox.next()
-                non_parsed += 1
-                continue
-            
             filtered_message = {}
 
             # Read unix from before headers
@@ -106,7 +85,7 @@ class MailArchiveAnalyzer:
                 if 'body' == header:
                     # The 'body' is not actually part of the headers,
                     # but it will be treated as any other header
-                    field = str(message.get_payload())
+                    field = self.__get_body(message)
                 else:                    
                     field = message[header]
                     if field:
@@ -181,13 +160,31 @@ class MailArchiveAnalyzer:
                 # in the original message).
 
             messages_list.append(filtered_message)
-
-            message = mbox.next()
-
-        fileobj.close()
-
+           
         return messages_list, non_parsed
 
+    def __get_body(self,msg):
+
+        # Non multipart messages are easy
+        if not msg.is_multipart():
+            return msg.get_payload(decode=True)
+
+        # Include all the attached texts if it is multipart        
+        body = ""
+
+        for m in msg.walk():
+
+            if m.is_multipart():
+                continue
+
+            cp = m.get_content_type()
+
+            if ("text" in cp) or ("message" in cp):
+                body += "Begin attachment of type %s\n" % cp
+                body += m.get_payload(decode=True)
+
+        return body
+                            
     def __check_spam_obscuring(self,field):
 
         # Add more patterns here
