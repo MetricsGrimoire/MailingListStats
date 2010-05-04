@@ -37,6 +37,7 @@ import sys
 import datetime
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
+mailmanfmt = '%Y-%B'
 
 class Application:
     
@@ -253,27 +254,42 @@ class Application:
         htmlparser = MyHTMLParser(url, self.web_user, self.web_password)
         links = htmlparser.get_mboxes_links()
 
+        # If the file is for the current month (MailMan filename 
+        # YYYY-MMM.txt.gz) don't mark as visited, and download again
+        this_month= datetime.datetime.today().strftime(mailmanfmt)
+         
         # First retrieve, then analyze files
         files_to_analyze = []
         for link in links:
             basename = os.path.basename(link)
             destfilename = os.path.join(self.__compressed_directory,basename)
 
-            # If already visited, ignore
-            # FIXME: Should not this check the date of the last analysis?
-            status = self.db.check_compressed_file(link)
-            if 'visited' == status:
-                self.__print_output("Already analyzed "+link)
-                continue
-
-            # Check if already downloaded
-            if os.path.exists(destfilename):
-                self.__print_output("Already downloaded "+link)
+            if -1 != link.find(this_month):
+                self.__print_output("Found substring "+this_month+" in URL "+link+"...")
+                current_month = 1
             else:
+                current_month = 0
+
+            # If the URL is for the current month, always retrieve. Otherwise, check 
+            # visited status & local files first
+            if current_month == 1:
                 self.__print_output("Retrieving "+link+"...")
                 retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
+            else:
+                # If already visited, ignore
+                status = self.db.check_compressed_file(link)
+                if 'visited' == status:
+                    self.__print_output("Already analyzed "+link)
+                    continue
+
+                # Check if already downloaded
+                if os.path.exists(destfilename):
+                    self.__print_output("Already downloaded "+link)
+                else:
+                    self.__print_output("Retrieving "+link+"...")
+                    retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
                 
-            # If not, set visited
+            # Set visited
             # (before uncompressing, otherwise the db will point towards
             # the uncompressed temporary file)
             today = datetime.datetime.today().strftime(datetimefmt)
@@ -343,6 +359,9 @@ class Application:
         for root, dirs, files in os.walk(dirname):
             filepaths += [os.path.join(root,filename) for filename in files]
 
+        # If the file is for the current month (MailMan filename 
+        # YYYY-MMM.txt.gz) don't mark as visited, and download again
+        this_month= datetime.datetime.today().strftime(mailmanfmt)
         
         filepaths_to_analyze = []
         for filepath in filepaths:
@@ -350,9 +369,13 @@ class Application:
             # Check if already analyzed
             status = self.db.check_compressed_file(filepath)
 
-            # If already visited, ignore
-            # FIXME: Should not this check the date of the last analysis?
-            if 'visited' == status:
+            # If the file is for the current month, reimport
+            if -1 != link.find(this_month):
+                self.__print_output("Found substring "+this_month+" in URL "+link+"...")
+                current_month = 1
+
+            # If already visited, ignore, unless it's for the current month
+            if 'visited' == status and not 1 == current_month:
                 self.__print_output("Already analyzed "+filepath)
                 continue
             

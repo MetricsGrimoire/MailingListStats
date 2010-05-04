@@ -70,9 +70,7 @@ def retrieve_remote_file(url,destfilename = None, web_user = None, web_password 
         destfilename = os.tmpnam()
 
     postdata = None
-    if not web_user:
-        urllib.urlretrieve(url,destfilename)
-    else:
+    if web_user:
         postdata = urllib.urlencode( \
             {'username':web_user, \
             'password':web_password})
@@ -94,11 +92,6 @@ def uncompress_file(filepath,extension, output_dir = None):
     # Get new path to the uncompressed file
     new_filepath = os.path.join(output_dir,basename)
     new_filepath_noext = os.path.join(output_dir,basename_noext)
-
-    # If destination already exists, assume it has been uncompressed before
-    if os.path.exists(new_filepath_noext):
-        # Return a list with only 1 element
-        return [new_filepath_noext]
 
     extractor = FileExtractor()
 

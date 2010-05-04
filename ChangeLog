@@ -1,3 +1,11 @@
+2010-05-04  Israel Herraiz  <isra@herraiz.org>
+
+	* pymlstats/utils.py
+	* pymlstats/main.py:
+
+	Always download archives files for the current month.
+	Fixes #1183. Thanks to Dave Neary for the patch.
+
 2010-01-24  Israel Herraiz  <isra@herraiz.org>
 
 	* NEWS:
