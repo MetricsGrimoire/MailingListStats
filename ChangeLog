@@ -1,3 +1,10 @@
+2010-08-18  Israel Herraiz  <isra@herraiz.org>
+
+	* pymlstats/htmlparser.py:
+
+	Fixed bug with private archives.
+	Thanks to Francisco Puga for the patch.
+
 2010-05-04  Israel Herraiz  <isra@herraiz.org>
 
 	* pymlstats/utils.py

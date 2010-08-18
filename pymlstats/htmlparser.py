@@ -82,8 +82,9 @@ class MyHTMLParser(htmllib.HTMLParser):
         else:
             postdata = urllib.urlencode({'username':self.user,
                                          'password':self.password})
+            print self.url
 
-            htmlpage = urllib.urlopen(url,data=postdata)
+            htmlpage = urllib.urlopen(self.url,data=postdata)
 
         htmltxt = ''.join(htmlpage.readlines())
         htmlpage.close()
