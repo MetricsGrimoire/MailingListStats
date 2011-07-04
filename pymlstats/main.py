@@ -256,7 +256,12 @@ class Application:
 
         # If the file is for the current month (MailMan filename 
         # YYYY-MMM.txt.gz) don't mark as visited, and download again
-        this_month= datetime.datetime.today().strftime(mailmanfmt)
+        # Assuming this is run daily, it's better to take yesterday's date,
+        # to ensure we get all of last month's email when the month rolls over.
+        yesterday= datetime.datetime.today() + datetime.timedelta(days=-1)
+        this_month= yesterday.strftime(mailmanfmt)
+
+
          
         # First retrieve, then analyze files
         files_to_analyze = []
@@ -361,7 +366,12 @@ class Application:
 
         # If the file is for the current month (MailMan filename 
         # YYYY-MMM.txt.gz) don't mark as visited, and download again
-        this_month= datetime.datetime.today().strftime(mailmanfmt)
+        # Assuming this is run daily, it's better to take yesterday's date,
+        # to ensure we get all of last month's email when the month rolls over.
+        yesterday= datetime.datetime.today() + datetime.timedelta(days=-1)
+        this_month= yesterday.strftime(mailmanfmt)
+
+
         
         filepaths_to_analyze = []
         for filepath in filepaths:
