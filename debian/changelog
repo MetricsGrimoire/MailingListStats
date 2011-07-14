@@ -1,8 +1,20 @@
+mlstats (0.4.0-1) experimental; urgency=low
+
+  * fixed debian package bugs
+
+ -- Juan Francisco Gato Luis <jfcogato@libresoft.es>  Thu, 14 Jul 2011 18:02:09 +0200
+
+mlstats (0.4.0) experimental; urgency=low
+
+  * New release package
+
+ -- Juan Francisco Gato Luis <jfcogato@libresoft.es>  Thu, 14 Jul 2011 17:27:09 +0200
+
 mlstats (0.3.3-2) experimental; urgency=low
 
   * New Debian package
 
- -- Juan Francisco Gato <jfcogato@libresoft.es> Wed, 16 Sep 2009 14:23:00 +0100
+ -- Juan Francisco Gato <jfcogato@libresoft.es>  Wed, 16 Sep 2009 14:23:00 +0100
 
 mlstats (0.3.3-1) experimental; urgency=low
 

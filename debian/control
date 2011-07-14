@@ -1,20 +1,18 @@
 Source: mlstats
-Maintainer: Juan Francisco Gato Luis <jfcogato@libresoft.es>
-Section: libresoft
+Section: misc
 Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3-1), debhelper (>= 5.0.37), python-central (>= 0.5.6)
-Standards-Version: 3.7.2
-XS-Python-Version: all
+Maintainer: Juan Francisco Gato Luis <jfcogato@libresoft.es>
+Build-Depends: cdbs, debhelper (>= 7.0.50~), python-support, debhelper (>= 8), python
+Standards-Version: 3.8.4
+Homepage: http://projects.libresoft.es/projects/mlstats
 
 Package: mlstats
 Architecture: all
-Depends: python, python-central, python-mysqldb
-Recommends: 
-Suggests: 
-XB-Python-Version: ${python:Versions}
-Provides: ${python:Provides}
+Depends: ${misc:Depends}, ${python:Depends}, python-central, python-mysqldb
 Description: Mailing lists analysis tool. Part of libresoft-tools.
  Mailing List Stats is a tool to analyze mailing list archives.
- It can retrieve the archives from a remote web page (usually, the archives web page), or read them
- from a local directory. It generates a brief report, and write everything to a MySQL database (called mlstats
+ It can retrieve the archives from a remote web page 
+ (usually, the archives web page), or read them
+ from a local directory. It generates a brief report, 
+ and write everything to a MySQL database (called mlstats
  unless other name is indicated).

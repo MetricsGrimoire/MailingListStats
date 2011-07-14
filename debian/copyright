@@ -1,13 +1,39 @@
-This package was debianized by Juan Francisco Gato Luis <jfcogato@libresoft.es> on
-Wed, 16 Sep 2009 13:00:00 +0200
+Format: http://dep.debian.net/deps/dep5
+Upstream-Name: mlstats
+Upstream-Contact: Juan Francisco Gato Luis <jfcogato@libresoft.es>
+Source: <http://projects.libresoft.es/projects/mlstats>
 
-Copyright 2009 Libresoft research group
+Files: *
+Copyright: 2007-2011 GSyC/LibreSoft, Universidad Rey Juan Carlos
+License: GPL-2+
 
-The sources were obtained from the Subversion repository:
+Files: debian/*
+Copyright: 2007-2011 GSyC/LibreSoft, Universidad Rey Juan Carlos
+License: GPL-2+
 
-svn checkout https://svn.forge.morfeo-project.org/svn/libresoft-tools/mailingliststat/trunk/
+License: GPL-2+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
 
-The entire code base may be distributed under the terms of the GNU General
-Public License (GPL), which appears immediately below.
+# Please choose a license for your packaging work. If the program you package
+# uses a mainstream license, using the same license is the safest choice.
+# Please avoid to pick license terms that are more restrictive than the
+# packaged work, as it may make Debian's contributions unacceptable upstream.
+# If you just want it to be GPL version 2, leave the following line in.
 
-See /usr/share/common-licenses/GPL
+and is licensed under the GPL version 2, or (at your option) any later version, see above.
+
