@@ -94,32 +94,29 @@ def uncompress_file(filepath,extension, output_dir = None):
     new_filepath_noext = os.path.join(output_dir,basename_noext)
 
     extractor = FileExtractor()
+    files = []
 
+    if extension in COMPRESSED_TYPES:
+        shutil.copy(filepath,output_dir)
+
+    # Return a list of all the uncompressed files
     if '.zip' == extension:
-        shutil.copy(filepath,output_dir)
-        # Return a list of all the uncopressed files
-        return extractor.zipExtraction(new_filepath)
-    elif '.tar' == extension or \
-            '.tar.gz' == extension or \
-            '.tgz' == extension or \
-            '.tar.bz2' == extension or \
-            '.tbz' == extension:
-        shutil.copy(filepath,output_dir)
-        # Return a list of all the uncopressed files
-        return extractor.tarExtraction(new_filepath)
+        files = extractor.zipExtraction(new_filepath)
+    elif extension in ['.tar', '.tar.gz', '.tgz', '.tar.bz2', '.tbz']:
+        files = extractor.tarExtraction(new_filepath)
     elif '.gz' == extension:
-        shutil.copy(filepath,output_dir)
-        # Return a list with only 1 element
-        # (the method returns a string)
-        return [extractor.gzExtraction(new_filepath)]
+        # Return a list with only 1 element (the method returns a string)
+        files = [extractor.gzExtraction(new_filepath)]
     elif '.bz2' == extension:
-        shutil.copy(filepath,output_dir)
-        # Return a list with only 1 element
-        # (the method returns a string)
-        return [extractor.bz2Extraction(new_filepath)]
+        # Return a list with only 1 element (the method returns a string)
+        files = [extractor.bz2Extraction(new_filepath)]
 
-    # Nothing extracted (file extension not recognized)
-    return []
+    # We copied the compressed file to outputdir to uncompress it,
+    # now we need to remove it and leave only the uncompressed file(s)
+    if os.path.exists(new_filepath):
+        os.unlink(new_filepath)
+
+    return files
 
 _dirs = {}
 
