@@ -177,7 +177,7 @@ class Application:
             num = r[2]
             output += str(ml)+'\t'+str(year)+'\t'+str(num)+'\n'
 
-        output += "\n\nTotal messages by email address (only top 10 per list):\n"
+        output += "\n\nTotal messages by email address (only top 10 in total):\n"
         output += "Mailing list    \t   Email   \t #  \n"
         output += "----------------\t-----------\t----\n"        
         for r in messages_by_people:

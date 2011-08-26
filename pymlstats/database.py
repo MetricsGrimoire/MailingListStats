@@ -404,13 +404,14 @@ class Database:
     def get_messages_by_people(self):
 
         mailing_lists = int(self.get_num_of_mailing_lists())
-        limit = 10*mailing_lists
-        query = "select m.mailing_list_url, (select email_address from people where email_address= mp.email_address),  count(m.message_ID) as t "\
-        "  from messages m, messages_people mp "\
-        " where m.message_ID = mp.message_ID "\
-        "   and mp.type_of_recipient='From'"\
-        " group by m.mailing_list_url,mp.email_address " \
-        " order by t desc limit %d;" % limit
+        limit = 10
+        query = "select m.mailing_list_url, mp.email_address, " \
+                "       count(m.message_ID) as t " \
+                "from messages m, messages_people mp " \
+                "where m.message_ID = mp.message_ID and " \
+                "mp.type_of_recipient='From' " \
+                "group by m.mailing_list_url, mp.email_address " \
+                "order by t desc limit %d;" % limit
 
         self.read_cursor.execute(query)
 
