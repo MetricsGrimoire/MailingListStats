@@ -41,7 +41,6 @@ import tarfile
 import shutil
 import errno
 
-
 def check_compressed_file(filename):
     """Check if filename contains one of the extensions
     recognized as compressed file."""
@@ -61,9 +60,15 @@ def check_compressed_file(filename):
 
     return None
 
-def retrieve_remote_file(url,destfilename = None, web_user = None, web_password = None):
+def retrieve_remote_file(url, destfilename=None, web_user=None, web_password=None):
     """Retrieve a file from a remote location. It logins in the
     archives private page if necessary."""
+
+    class FakeBrowser(urllib.FancyURLopener, object):
+        version = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
+                  '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
+                  'Chrome/15.0.871.0 Safari/535.2'
+
 
     # If not dest dir, then store file in a temp file
     if not destfilename:
@@ -74,10 +79,11 @@ def retrieve_remote_file(url,destfilename = None, web_user = None, web_password 
         postdata = urllib.urlencode( \
             {'username':web_user, \
             'password':web_password})
-        
-    urllib.urlretrieve(url,destfilename,data=postdata)
 
-    return destfilename
+    crawler = FakeBrowser()
+    (fname, header) = crawler.retrieve(url, destfilename, data=postdata)
+
+    return fname
 
 def uncompress_file(filepath,extension, output_dir = None):
     """This function uncompress the file, and return
