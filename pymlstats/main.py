@@ -380,8 +380,8 @@ class Application:
             status = self.db.check_compressed_file(filepath)
 
             # If the file is for the current month, reimport
-            if -1 != link.find(this_month):
-                self.__print_output("Found substring "+this_month+" in URL "+link+"...")
+            if -1 != filepath.find(this_month):
+                self.__print_output("Found substring "+this_month+" in URL "+filepath+"...")
                 current_month = 1
 
             # If already visited, ignore, unless it's for the current month
