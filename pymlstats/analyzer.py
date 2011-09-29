@@ -57,110 +57,65 @@ class MailArchiveAnalyzer:
 
         non_parsed = 0
         for message in mbox:
-
             filtered_message = {}
 
             # Read unix from before headers
-	    unixfrom = message.get_unixfrom()
+            unixfrom = message.get_unixfrom()
 
-	    try:
-		_, date_to_parse = unixfrom.split("  ", 1)
-	    	parsed_date = parsedate_tz(date_to_parse)
-		year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = parsed_date
-	        msgdate = datetime.datetime(year,
-                                            month, 
-                                            day,   
-                                            hour,  
-                                            minute,
-                                            second)
-                
-                msgdate = msgdate.strftime("%Y-%m-%d %H:%M:%S")
+            try:
+                date_to_parse = unixfrom.split('  ', 1)[1]
+                parsed_date = parsedate_tz(date_to_parse)
+                msgdate = datetime.datetime(*parsed_date[:6]).isoformat(' ')
             except:
                 msgdate = None
 
-            # Write it to filtered message before parsing headers
+            # Some messages have a received header, but it is
+            # now being ignored by MLStats and substituted by
+            # the value of the Unix From field (first line of
+            # the message)
             filtered_message['received'] = msgdate
-                
-            for header in MailArchiveAnalyzer.accepted_headers:                
-                if 'body' == header:
-                    # The 'body' is not actually part of the headers,
-                    # but it will be treated as any other header
-                    field = self.__get_body(message)
-                else:                    
-                    field = message[header]
-                    if field:
-                        field = str(field)
-                    else:
-                        field = ""
-                
-                if 'from' == header or 'to' == header or 'cc' == header:
-                    header_content = message.get_all(header)
 
-                    # Check spam obscuring
-                    header_content = self.__check_spam_obscuring(header_content)
-                    try:
-                        filtered_message[header] = getaddresses(header_content)
-                    except:
-                        filtered_message[header] = None  #[('','')]
-                elif 'date' == header:
-                    t = parsedate_tz(field)
-                    try:
-                        year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = t
-                    except:
-                        year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = (1979,2,4,0,0,0,0,0,0,0)
+            # The 'body' is not actually part of the headers,
+            # but it will be treated as any other header
+            filtered_message['body'] = self.__get_body(message)
 
-                    try:
-                        msgdate = datetime.datetime(year,  
-                                                    month, 
-                                                    day,   
-                                                    hour,  
-                                                    minute,
-                                                    second)
+            filtered_message['subject'] = message.get('subject') or ''
+            filtered_message['list-id'] = message.get('list-id') or ''
+            filtered_message['message-id']  = message.get('message-id') or ''
+            filtered_message['in-reply-to'] = message.get('in-reply-to') or ''
 
-                        msgdate = msgdate.strftime("%Y-%m-%d %H:%M:%S")
-                    except ValueError:
-                        year, month, day, hour, minute, second, unused1, unused2, unused3, tz_secs = (1979,2,4,0,0,0,0,0,0,0)
+            for header in ('from', 'to', 'cc'):
+                header_content = message.get_all(header)
 
-                        msgdate = datetime.datetime(year,  
-                                                    month, 
-                                                    day,   
-                                                    hour,  
-                                                    minute,
-                                                    second)
+                # Check spam obscuring
+                header_content = self.__check_spam_obscuring(header_content)
+                try:
+                    filtered_message[header] = getaddresses(header_content)
+                except:
+                    filtered_message[header] = None  #[('','')]
 
-                        msgdate = msgdate.strftime("%Y-%m-%d %H:%M:%S")
+            msgdate, tz_secs = self.__get_date(message)
+            filtered_message['date'] = msgdate.isoformat(' ')
+            filtered_message['date_tz'] = str(tz_secs)
 
-                    filtered_message[header] = msgdate
-                    if not tz_secs:
-                        tz_secs = 0
-                        
-                    filtered_message[header+"_tz"] = str(tz_secs)
-                                            
-                elif 'received' != header:
-                    # Some messages have a received header, but it is
-                    # now being ignored by MLStats and substituted by
-                    # the value of the Unix From field (first line of
-                    # the message)
-                    filtered_message[header] = field
-
-                # message.getaddrlist returns a list of tuples
-                # Each one of the tuples is like this
-                # (name,email_address)
-                #
-                # For instance, if the header is
-                # To: Alice <alice@alice.com>, Bob <bob@bob.com>
-                # it will return
-                # [('Alice','alice@alice.com'), ('Bob','bob@bob.com')]
-                #
-                # If the header is 'from', this list will contain only
-                # 1 element
-                #
-                # If the header is 'to' or 'cc', it may contain several
-                # items (or it could be also an empty list if there is not such header
-                # in the original message).
+            # message.getaddrlist returns a list of tuples
+            # Each one of the tuples is like this
+            # (name,email_address)
+            #
+            # For instance, if the header is
+            # To: Alice <alice@alice.com>, Bob <bob@bob.com>
+            # it will return
+            # [('Alice','alice@alice.com'), ('Bob','bob@bob.com')]
+            #
+            # If the header is 'from', this list will contain only
+            # 1 element
+            #
+            # If the header is 'to' or 'cc', it may contain several
+            # items (or it could be also an empty list if there is not such header
+            # in the original message).
 
             messages_list.append(filtered_message)
-           
+
         return messages_list, non_parsed
 
     def __get_body(self,msg):
@@ -184,7 +139,26 @@ class MailArchiveAnalyzer:
                 body += m.get_payload(decode=True)
 
         return body
-                            
+
+    def __get_date(self, message):
+        parsed_date = parsedate_tz(message.get('date'))
+
+        if not parsed_date:
+            msgdate = datetime.datetime(*(1979, 2, 4, 0, 0))
+            tz_secs = 0
+            return msgdate, tz_secs
+
+        try:
+            msgdate = datetime.datetime(*parsed_date[:6])
+            if msgdate.year < 100:
+                msgdate = msgdate.replace(year=msgdate.year+1900)
+        except ValueError:
+            msgdate = datetime.datetime(*(1979, 2, 4, 0, 0))
+
+        tz_secs = parsed_date[-1] or 0
+
+        return msgdate, tz_secs
+
     def __check_spam_obscuring(self,field):
 
         # Add more patterns here
