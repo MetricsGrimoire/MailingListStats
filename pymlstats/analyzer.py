@@ -47,8 +47,8 @@ class MailArchiveAnalyzer:
                         'subject', \
                         'body']
 
-    def __init__(self):
-        self.filepath = None
+    def __init__(self, filepath=None):
+        self.filepath = filepath
 
     def get_messages(self):
 
@@ -198,3 +198,16 @@ class MailArchiveAnalyzer:
         for pattern in obscurers:
             if field.find(pattern):
                 return [field.replace(pattern,"@")]
+
+
+if __name__ == '__main__':
+    import sys
+    from pprint import pprint
+
+    # Print analyzer's output to check manually the parsing. In can
+    # be used with egrep to filter out specific fields.
+    # The input is a mbox file location (local)
+    maa = MailArchiveAnalyzer()
+    maa.filepath = sys.argv[1]
+    for m in maa.get_messages()[0]:
+        pprint(m)
