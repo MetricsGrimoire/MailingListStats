@@ -380,12 +380,12 @@ class Application:
             status = self.db.check_compressed_file(filepath)
 
             # If the file is for the current month, reimport
-            if -1 != filepath.find(this_month):
+            current_month = -1 != filepath.find(this_month)
+            if current_month:
                 self.__print_output("Found substring "+this_month+" in URL "+filepath+"...")
-                current_month = 1
 
             # If already visited, ignore, unless it's for the current month
-            if 'visited' == status and not 1 == current_month:
+            if 'visited' == status and not current_month:
                 self.__print_output("Already analyzed "+filepath)
                 continue
             
