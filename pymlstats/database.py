@@ -151,13 +151,11 @@ class Database:
             values = (url, mailing_list_url, 'visited', last_analysis)
             self.write_cursor.execute(query, values)
 
-        self.__dbobj.commit() 
+        self.__dbobj.commit()
 
-    def insert_people(self, addr, mailing_list_url):
+    def insert_people(self, name, email, mailing_list_url):
         query_people_values = []
         mailing_lists_people_values = []
-        name = addr[0]
-        email = addr[1]
         try:
             top_level_domain = email.split(".")[-1]
         except IndexError:
@@ -174,7 +172,7 @@ class Database:
         query_people = '''INSERT INTO people
                                       (email_address, name, username,
                                        domain_name, top_level_domain)
-                          VALUES ("%s", "%s", "%s", "%s", "%s");'''
+                          VALUES (%s, %s, %s, %s, %s);'''
         from_values = [email, name, username, domain_name, top_level_domain]
         try:
             self.write_cursor.execute(query_people, from_values)
@@ -183,7 +181,7 @@ class Database:
 
         query_mailing_lists_people = '''INSERT INTO mailing_lists_people
                                         (email_address, mailing_list_url)
-                                        VALUES ("%s", "%s");'''
+                                        VALUES (%s, %s);'''
         mailing_lists_people_values = [email, mailing_list_url]
         try:
             self.write_cursor.execute(query_mailing_lists_people,
@@ -206,49 +204,26 @@ class Database:
                                    %(received)s, %(date)s, %(date_tz)s,
                                    %(list-id)s, %(mailing_list_url)s,
                                    %(subject)s, %(body)s);'''
+        query_m_people = '''INSERT INTO messages_people
+                               (email_address, type_of_recipient, message_id)
+                            VALUES (%s, %s, %s);'''
 
         for m in message_list:
-            to_addresses = []
-            cc_addresses = []
-            from_addresses = []
-
-            message_id = m['message-id']
-            from_addresses = self.filter(m['from'])
-            to_addresses = self.filter(m['to'])
-            cc_addresses = self.filter(m['cc'])
-
             values = m
             values['mailing_list_url'] = mailing_list_url
 
             # FIXME: If primary key check fails, ignore and continue
-            messages_people_values = {}
-            query = '''INSERT INTO messages_people
-                        (email_address, type_of_recipient, message_id)
-                       VALUES (%s, %s, %s);'''
-            for addr in to_addresses:
-                email_address = addr[1]
-                self.insert_people(addr, mailing_list_url)
-                query = '''INSERT INTO messages_people
-                            (email_address, type_of_recipient, message_id)
-                           VALUES ("%s", "%s", "%s");'''
-                messages_people_values[query] = [email_address, 'To', message_id]
+            msgs_people_value = {}
+            for header in ('from', 'to', 'cc'):
+                addresses = self.filter(m[header])
+                if not addresses:
+                    continue
 
-            if cc_addresses:
-                query = '''INSERT INTO messages_people
-                            (email_address, type_of_recipient, message_id)
-                           VALUES (%s, %s, %s);'''
-                for addr in cc_addresses:
-                    email_address = addr[1]
-                    self.insert_people(addr,mailing_list_url)
-                    messages_people_values[query] = [email_address, 'Cc', message_id]
-
-            for addr in from_addresses:
-                email_address = addr[1]
-                self.insert_people(addr, mailing_list_url)
-                query = '''INSERT INTO messages_people
-                            (email_address, type_of_recipient, message_id)
-                           VALUES (%s, %s, %s);'''
-                messages_people_values[query] = [email_address, 'From', message_id]
+                for name, email in addresses:
+                    self.insert_people(name, email, mailing_list_url)
+                    key = '%s-%s' % (header, email)
+                    value = (email, header.capitalize(), m['message-id'])
+                    msgs_people_value.setdefault(key, value)
 
             # Write the rest of the message
             try:
@@ -257,14 +232,14 @@ class Database:
                 # Duplicated message
                 stored_messages -= 1
             except:
-                error_message = "ERROR: Runtime error while trying to write message with message-id "+message_id+". That message has not been written to the database, but the execution has not been stopped. Please report this failure including the message-id and the URL for the mbox."
+                error_message = "ERROR: Runtime error while trying to write message with message-id '%s'. That message has not been written to the database, but the execution has not been stopped. Please report this failure including the message-id and the URL for the mbox." % m['message-id']
                 stored_messages -= 1
                 # Write message to the stderr
                 print >> sys.stderr, error_message
 
-            for query, values in messages_people_values.iteritems():
+            for key, values in msgs_people_value.iteritems():
                 try:
-                    self.write_cursor.execute(query, values)
+                    self.write_cursor.execute(query_m_people, values)
                 except MySQLdb.IntegrityError:
                     # Duplicate entry email_address-to|cc-mailing list url
                     pass
@@ -398,9 +373,6 @@ class Database:
             return data_address
 
         #erase the " in the e-mail
-        value = []
-        if data_address == []:
-            return value
         aux0 = data_address[0][0]
         aux1 = data_address[0][1].replace('"','')
         value.append((aux0,aux1)) 
