@@ -26,7 +26,7 @@ Main funcion of mlstats. Fun starts here!
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-from database import Database
+from database import create_database
 from analyzer import *
 from htmlparser import *
 from utils import (retrieve_remote_file, check_compressed_file,
@@ -49,7 +49,7 @@ class Application:
 
         self.mail_parser = MailArchiveAnalyzer()
 
-        self.db = Database()
+        self.db = create_database(driver='mysql')
         self.db.name = dbname
         self.db.user = user
         self.db.password = password

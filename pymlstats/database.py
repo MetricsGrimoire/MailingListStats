@@ -29,11 +29,15 @@ import MySQLdb for any other, for instance import PyGreSQL).
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-import MySQLdb
 import sys
 from pymlstats import datamodel
 
-class Database:
+class DatabaseException (Exception):
+    '''Generic Database Exception'''
+class DatabaseDriverNotSupported (DatabaseException):
+    '''Database driver is not supported'''
+
+class DatabaseMysql:
 
     def __init__(self, dbname='', username='', password='', hostname='',
                  admin_user=None, admin_password=None):
@@ -51,10 +55,11 @@ class Database:
         self.write_cursor = None
 
     def connect(self):
-
+        import MySQLdb as dbapi
         try:
-            self.__dbobj = MySQLdb.connect(self.host,self.user,self.password,self.name)
-        except MySQLdb.OperationalError, e:
+            self.__dbobj = dbapi.connect(self.host, self.user,
+                                         self.password, self.name)
+        except dbapi.OperationalError, e:
 
             # Check the error number
             errno = e.args[0]
@@ -73,8 +78,8 @@ class Database:
                 # Database does not exist
                 # So create it
                 try:
-                    self.__dbobj = MySQLdb.connect(self.host,self.admin_user,self.admin_password,"")
-                except MySQLdb.OperationalError, e:
+                    self.__dbobj = dbapi.connect(self.host,self.admin_user,self.admin_password,"")
+                except dbapi.OperationalError, e:
                     errno = e.args[0]
 
                     if 1045 == errno: # Unauthorized user
@@ -99,7 +104,7 @@ class Database:
 
                 # Database created, now reconnect
                 # If this point has passed the exceptions catching, it should work
-                self.__dbobj = MySQLdb.connect(self.host,self.user,self.password,self.name)
+                self.__dbobj = dbapi.connect(self.host,self.user,self.password,self.name)
                 
             else: # Unknown exception
                 message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
@@ -154,6 +159,7 @@ class Database:
         self.__dbobj.commit()
 
     def insert_people(self, name, email, mailing_list_url):
+        import MySQLdb as dbapi
         query_people_values = []
         mailing_lists_people_values = []
         try:
@@ -176,7 +182,7 @@ class Database:
         from_values = [email, name, username, domain_name, top_level_domain]
         try:
             self.write_cursor.execute(query_people, from_values)
-        except MySQLdb.IntegrityError:
+        except dbapi.IntegrityError:
             pass
 
         query_mailing_lists_people = '''INSERT INTO mailing_lists_people
@@ -186,11 +192,13 @@ class Database:
         try:
             self.write_cursor.execute(query_mailing_lists_people,
                                       mailing_lists_people_values)
-        except MySQLdb.IntegrityError:
+        except dbapi.IntegrityError:
             # Duplicate entry email address-mailing list url
             pass
 
     def store_messages(self, message_list, mailing_list_url):
+        import MySQLdb as dbapi
+
         query = 'SET FOREIGN_KEY_CHECKS = 0;'
         self.write_cursor.execute(query)
 
@@ -228,7 +236,7 @@ class Database:
             # Write the rest of the message
             try:
                 self.write_cursor.execute(query_message, values)
-            except MySQLdb.IntegrityError:
+            except dbapi.IntegrityError:
                 # Duplicated message
                 stored_messages -= 1
             except:
@@ -240,7 +248,7 @@ class Database:
             for key, values in msgs_people_value.iteritems():
                 try:
                     self.write_cursor.execute(query_m_people, values)
-                except MySQLdb.IntegrityError:
+                except dbapi.IntegrityError:
                     # Duplicate entry email_address-to|cc-mailing list url
                     pass
             self.__dbobj.commit()
@@ -375,5 +383,18 @@ class Database:
         #erase the " in the e-mail
         aux0 = data_address[0][0]
         aux1 = data_address[0][1].replace('"','')
-        value.append((aux0,aux1)) 
-        return value
+        return ((aux0, aux1),)
+
+
+def create_database(driver='mysql', dbname='', username='', password='',
+                     hostname='', admin_user=None, admin_password=None):
+
+    drivers = { 'mysql': DatabaseMysql }
+    try:
+        call_db = drivers[driver]
+        db = call_db(dbname, username, password, hostname,
+                     admin_user, admin_password)
+    except:
+        raise DatabaseDriverNotSupported(driver)
+
+    return db
