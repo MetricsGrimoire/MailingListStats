@@ -35,14 +35,14 @@ from pymlstats import datamodel
 
 class Database:
 
-    def __init__(self):
-
+    def __init__(self, dbname='', username='', password='', hostname='',
+                 admin_user=None, admin_password=None):
         self.name = ''
-        self.user = ''
-        self.password = ''
-        self.admin_user = ''
-        self.admin_password = ''
-        self.host = ''
+        self.user = username
+        self.password = password
+        self.admin_user = admin_user
+        self.admin_password = admin_password
+        self.host = hostname
 
         self.__dbobj = None
         # Use this cursor to access to data in the database
@@ -85,13 +85,13 @@ class Database:
                     else: # Unknown exception
                         message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
                         # Write message to the stderr
-                        print >> sys.stderr, message                        
+                        print >> sys.stderr, message
                         sys.exit(1)
-                    
+
                 cursor = self.__dbobj.cursor()
-                query = "CREATE DATABASE "+self.name
+                query = 'CREATE DATABASE %s' % self.name
                 cursor.execute(query)
-                query = "USE "+self.name+";"
+                query = 'USE %s' % self.name
                 cursor.execute(query)
                 for query in datamodel.data_model_query_list:
                     cursor.execute(query)
@@ -111,10 +111,10 @@ class Database:
         self.read_cursor = self.__dbobj.cursor()
         self.write_cursor = self.__dbobj.cursor()
 
-    def check_compressed_file(self,url):
-
-        query = 'SELECT status FROM compressed_files where url="'+url+'";'
-        num_of_results = self.read_cursor.execute(query)
+    def check_compressed_file(self, url):
+        query = 'SELECT status FROM compressed_files where url=%s;'
+        values = (url)
+        num_of_results = self.read_cursor.execute(query, values)
 
         try:
             status = self.read_cursor.fetchone()[0]
@@ -123,32 +123,37 @@ class Database:
 
         return status
 
-    def update_mailing_list(self,url,name,last_analysis):
+    def update_mailing_list(self, url, name, last_analysis):
+        query = '''UPDATE mailing_lists
+                   SET last_analysis=%s WHERE mailing_list_url=%s;'''
+        values = (last_analysis, url)
+        num_of_results = self.write_cursor.execute(query, values)
 
-        query = 'UPDATE mailing_lists SET last_analysis="'+last_analysis+'" WHERE mailing_list_url="'+url+'";'
-        num_of_results = self.write_cursor.execute(query)
-        
         if 0 == num_of_results:
-            
-            query = 'INSERT INTO mailing_lists (mailing_list_url,mailing_list_name,last_analysis)'
-            query += ' VALUES ("'+url+'","'+name+'","'+last_analysis+'");'
-            self.write_cursor.execute(query)
+            query = '''INSERT INTO mailing_lists
+                       (mailing_list_url, mailing_list_name, last_analysis)
+                       VALUES (%s, %s, %s);'''
+            values = (url, name, last_analysis)
+            self.write_cursor.execute(query, values)
 
         self.__dbobj.commit()
 
-    def set_visited_url(self,url,mailing_list_url,last_analysis):
-
-        query = 'UPDATE compressed_files SET status="visited", last_analysis="'+last_analysis+'" WHERE url="'+url+'";'
-        num_of_results = self.write_cursor.execute(query)
+    def set_visited_url(self, url, mailing_list_url, last_analysis):
+        query = '''UPDATE compressed_files
+                   SET status=%s, last_analysis=%s WHERE url=%s;'''
+        values = ('visited', last_analysis, url)
+        num_of_results = self.write_cursor.execute(query, values)
 
         if 0 == num_of_results:
-            query = 'INSERT INTO compressed_files (url,mailing_list_url,status,last_analysis)'
-            query += ' VALUES ("'+url+'","'+mailing_list_url+'","visited","'+last_analysis+'");'
-            self.write_cursor.execute(query)
+            query = '''INSERT INTO compressed_files
+                       (url, mailing_list_url, status, last_analysis)
+                       VALUES (%s, %s, %s, %s);'''
+            values = (url, mailing_list_url, 'visited', last_analysis)
+            self.write_cursor.execute(query, values)
 
         self.__dbobj.commit() 
 
-    def insert_people(self,addr,mailing_list_url):
+    def insert_people(self, addr, mailing_list_url):
         query_people_values = []
         mailing_lists_people_values = []
         name = addr[0]
@@ -166,136 +171,88 @@ class Database:
         except IndexError:
             username = ''
 
-        from_values = [email,name,username,domain_name,top_level_domain]
-        query_people = 'INSERT INTO people (email_address,name,username,domain_name,top_level_domain)'
-        query_people += ' VALUES ("%s","%s","%s","%s","%s");'
+        query_people = '''INSERT INTO people
+                                      (email_address, name, username,
+                                       domain_name, top_level_domain)
+                          VALUES ("%s", "%s", "%s", "%s", "%s");'''
+        from_values = [email, name, username, domain_name, top_level_domain]
         try:
-            self.write_cursor.execute(query_people,from_values)
+            self.write_cursor.execute(query_people, from_values)
         except MySQLdb.IntegrityError:
             pass
 
-        query_mailing_lists_people = 'INSERT INTO mailing_lists_people (email_address, mailing_list_url)'
-        query_mailing_lists_people += ' VALUES ("%s","%s");'
+        query_mailing_lists_people = '''INSERT INTO mailing_lists_people
+                                        (email_address, mailing_list_url)
+                                        VALUES ("%s", "%s");'''
         mailing_lists_people_values = [email, mailing_list_url]
         try:
-            self.write_cursor.execute(query_mailing_lists_people,mailing_lists_people_values)
+            self.write_cursor.execute(query_mailing_lists_people,
+                                      mailing_lists_people_values)
         except MySQLdb.IntegrityError:
             # Duplicate entry email address-mailing list url
             pass
 
-
-
-    def store_messages(self,message_list,mailing_list_url):
+    def store_messages(self, message_list, mailing_list_url):
         query = 'SET FOREIGN_KEY_CHECKS = 0;'
         self.write_cursor.execute(query)
 
         stored_messages = 0
-        
+        query_message = '''INSERT INTO messages (
+                                   message_id, is_response_of,
+                                   arrival_date, first_date, first_date_tz,
+                                   mailing_list, mailing_list_url,
+                                   subject, message_body)
+                           VALUES (%(message-id)s, %(in-reply-to)s,
+                                   %(received)s, %(date)s, %(date_tz)s,
+                                   %(list-id)s, %(mailing_list_url)s,
+                                   %(subject)s, %(body)s);'''
+
         for m in message_list:
-            query_left = 'INSERT INTO messages('
-            query_right = ' VALUES ('
-            query_people = ''
-            query_messages_people = []
-            
-            values = []
             to_addresses = []
             cc_addresses = []
             from_addresses = []
 
-            message_id = ""
+            message_id = m['message-id']
+            from_addresses = self.filter(m['from'])
+            to_addresses = self.filter(m['to'])
+            cc_addresses = self.filter(m['cc'])
 
-            headers = m.keys()
-
-            for h in headers:
-                value = m[h]
-                if 'message-id' == h:
-                        query_left += 'message_id,'
-                        query_right += '%s,'
-                        values.append(value)
-                        message_id = value
-                elif 'to' == h:
-                    if value is None:
-                        continue
-                    value = self.filter(value)
-                    to_addresses += value
-                elif 'cc' == h:
-                    if value is None:
-                        continue
-                    value = self.filter(value) 
-                    cc_addresses += value
-                elif 'date' == h:
-                    query_left += 'first_date,'
-                    query_right += '"'+value+'",'
-                elif 'date_tz' == h:
-                    query_left += 'first_date_tz,'
-                    query_right += value+','
-                elif 'received' == h:
-                    try:
-                        query_right += '"'+value+'",'
-                        query_left += 'arrival_date,'
-                    except TypeError:
-                        # For some reason, some received headers are None
-                        # For the moment, we ignore that header
-                        continue
-                elif 'list-id' == h:
-                    query_left += 'mailing_list,'
-                    query_right += '%s,'
-                    values.append(value)
-                elif 'in-reply-to' == h:
-                    query_left += 'is_response_of,'
-                    query_right += '%s,'
-                    values.append(value)
-                elif 'body' == h:
-                    query_left += 'message_body,'
-                    query_right += '%s,'
-                    values.append(value)
-                elif 'from' == h:                  
-                    if value is None:
-                        continue
-                    value = self.filter(value)
-                    from_addresses += value
-                elif 'subject' == h:
-                    query_left += 'subject,'
-                    query_right += '%s,'
-                    values.append(value)
-
-            query_left += 'mailing_list_url,'
-            query_right += '%s,'
-            values.append(mailing_list_url)
-            
-            query_left = query_left.rstrip(',') + ')'
-            query_right = query_right.rstrip(',') + ');'
-            query_message = query_left + query_right
+            values = m
+            values['mailing_list_url'] = mailing_list_url
 
             # FIXME: If primary key check fails, ignore and continue
-            messages_people_values = {}  
+            messages_people_values = {}
+            query = '''INSERT INTO messages_people
+                        (email_address, type_of_recipient, message_id)
+                       VALUES (%s, %s, %s);'''
             for addr in to_addresses:
                 email_address = addr[1]
-                self.insert_people(addr,mailing_list_url)
+                self.insert_people(addr, mailing_list_url)
+                query = '''INSERT INTO messages_people
+                            (email_address, type_of_recipient, message_id)
+                           VALUES ("%s", "%s", "%s");'''
+                messages_people_values[query] = [email_address, 'To', message_id]
 
-                query = 'INSERT INTO messages_people(email_address, type_of_recipient, message_id)'
-                query += ' VALUES ("%s","%s","%s");'
-                messages_people_values[query] = [email_address, "To",message_id]
-            
-            for addr in cc_addresses:
-                email_address = addr[1]
-                self.insert_people(addr,mailing_list_url)
-
-                query = 'INSERT INTO messages_people(email_address, type_of_recipient, message_id)'
-                query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [email_address, "Cc",message_id]
+            if cc_addresses:
+                query = '''INSERT INTO messages_people
+                            (email_address, type_of_recipient, message_id)
+                           VALUES (%s, %s, %s);'''
+                for addr in cc_addresses:
+                    email_address = addr[1]
+                    self.insert_people(addr,mailing_list_url)
+                    messages_people_values[query] = [email_address, 'Cc', message_id]
 
             for addr in from_addresses:
                 email_address = addr[1]
-                self.insert_people(addr,mailing_list_url)
-
-                query = 'INSERT INTO messages_people(email_address, type_of_recipient, message_id)'
-                query += ' VALUES (%s,%s,%s);'
-                messages_people_values[query] = [email_address, "From",message_id]
+                self.insert_people(addr, mailing_list_url)
+                query = '''INSERT INTO messages_people
+                            (email_address, type_of_recipient, message_id)
+                           VALUES (%s, %s, %s);'''
+                messages_people_values[query] = [email_address, 'From', message_id]
 
             # Write the rest of the message
             try:
-                self.write_cursor.execute(query_message,values)
+                self.write_cursor.execute(query_message, values)
             except MySQLdb.IntegrityError:
                 # Duplicated message
                 stored_messages -= 1
@@ -304,10 +261,10 @@ class Database:
                 stored_messages -= 1
                 # Write message to the stderr
                 print >> sys.stderr, error_message
-                
-            for query in messages_people_values.keys():
+
+            for query, values in messages_people_values.iteritems():
                 try:
-                    self.write_cursor.execute(query,messages_people_values[query])
+                    self.write_cursor.execute(query, values)
                 except MySQLdb.IntegrityError:
                     # Duplicate entry email_address-to|cc-mailing list url
                     pass
@@ -340,9 +297,9 @@ class Database:
         " where m.message_ID=mp.message_ID "\
         "   and mp.email_address=p.email_address and  mp.type_of_recipient='From'"\
         " group by m.mailing_list_url, p.domain_name "\
-        " order by num_messages desc limit %d;" % limit
+        " order by num_messages desc limit %s;"
 
-        self.read_cursor.execute(query)
+        self.read_cursor.execute(query, (limit,))
 
         return self.read_cursor.fetchall()
 
@@ -352,8 +309,8 @@ class Database:
         limit = 10*mailing_lists
         query = "select mailing_list_url, domain_name, count(p.email_address) as t "\
                 "  from mailing_lists_people as ml, people as p "\
-        " where ml.email_address=p.email_address group by mailing_list_url, domain_name order by t desc limit %d;" % limit
-        self.read_cursor.execute(query)
+        " where ml.email_address=p.email_address group by mailing_list_url, domain_name order by t desc limit %s;"
+        self.read_cursor.execute(query, (limit,))
 
         return self.read_cursor.fetchall()
 
@@ -365,8 +322,8 @@ class Database:
         "  from messages m,messages_people mp, people p "\
         " where m.message_ID=mp.message_ID and mp.email_address=p.email_address and  mp.type_of_recipient='From'"\
         " group by m.mailing_list_url, p.top_level_domain "\
-        " order by num_messages desc limit %d;" % limit
-        self.read_cursor.execute(query)
+        " order by num_messages desc limit %s;"
+        self.read_cursor.execute(query, (limit,))
 
         return self.read_cursor.fetchall()
 
@@ -378,8 +335,8 @@ class Database:
         query = "select mailing_list_url, top_level_domain, count(p.email_address) as t "\
         "  from mailing_lists_people as ml, people as p "\
         " where ml.email_address=p.email_address group by mailing_list_url, top_level_domain"\
-        " order by t desc limit %d;" % limit
-        self.read_cursor.execute(query)
+        " order by t desc limit %s;"
+        self.read_cursor.execute(query, (limit,))
         
         return self.read_cursor.fetchall()
     
@@ -435,13 +392,15 @@ class Database:
         self.read_cursor.execute(query)
 
         return self.read_cursor.fetchall()
-        
-    def filter(self,data_address):
-        
+
+    def filter(self, data_address):
+        if not data_address:
+            return data_address
+
         #erase the " in the e-mail
         value = []
         if data_address == []:
-            return value	
+            return value
         aux0 = data_address[0][0]
         aux1 = data_address[0][1].replace('"','')
         value.append((aux0,aux1)) 

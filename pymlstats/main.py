@@ -26,7 +26,7 @@ Main funcion of mlstats. Fun starts here!
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-from database import *
+from database import Database
 from analyzer import *
 from htmlparser import *
 from utils import (retrieve_remote_file, check_compressed_file,
@@ -426,4 +426,4 @@ class Application:
 
         if not os.path.exists(compressed_dir):
             os.makedirs(compressed_dir)
-                        
+
