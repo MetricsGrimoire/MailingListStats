@@ -32,8 +32,16 @@ from the standard Python modules (for instance, Maildir).
 
 import mailbox
 import email
-from email.Utils import getaddresses, parsedate_tz
+import email.header
+from email.utils import getaddresses, parsedate_tz
 import datetime
+import hashlib
+
+def to_unicode(s):
+    if isinstance(s, basestring):
+        if not isinstance(s, unicode):
+            s = unicode(s, 'utf-8', 'replace')
+    return s
 
 class MailArchiveAnalyzer:
 
@@ -77,15 +85,23 @@ class MailArchiveAnalyzer:
 
             # The 'body' is not actually part of the headers,
             # but it will be treated as any other header
-            filtered_message['body'] = self.__get_body(message)
+            body = self.__get_body(message)
+            filtered_message['body'] = self.decode_header(body)
 
-            filtered_message['subject'] = message.get('subject') or ''
-            filtered_message['list-id'] = message.get('list-id') or ''
-            filtered_message['message-id']  = message.get('message-id') or ''
-            filtered_message['in-reply-to'] = message.get('in-reply-to') or ''
+            filtered_message['subject'] = message.get('subject')
+            filtered_message['list-id'] = message.get('list-id')
+            filtered_message['message-id']  = message.get('message-id')
+            in_reply_to = message.get('in-reply-to')
+            filtered_message['in-reply-to'] = self.decode_header(in_reply_to)
 
             for header in ('from', 'to', 'cc'):
                 header_content = message.get_all(header)
+
+                decoded_header = []
+                if header_content:
+                    for h in header_content:
+                        decoded_header.append(self.decode_header(h))
+                header_content = decoded_header or None
 
                 # Check spam obscuring
                 header_content = self.__check_spam_obscuring(header_content)
@@ -93,6 +109,15 @@ class MailArchiveAnalyzer:
                     filtered_message[header] = getaddresses(header_content)
                 except:
                     filtered_message[header] = None  #[('','')]
+
+            # if there is no message-id, we try to create one unique (but
+            # repeatable) using the from address and the message body.
+            # Otherwise, several messages without message-id could be
+            # considered duplicated erroneously.
+            if not filtered_message['message-id']:
+                msgid = self.make_msgid(filtered_message['from'],
+                                        filtered_message['body'])
+                filtered_message['message-id'] = msgid
 
             msgdate, tz_secs = self.__get_date(message)
             filtered_message['date'] = msgdate.isoformat(' ')
@@ -173,10 +198,34 @@ class MailArchiveAnalyzer:
             if field.find(pattern):
                 return [field.replace(pattern,"@")]
 
+    def decode_header(self, s):
+        if not s:
+            return s
+
+        header = []
+        for text, charset in email.header.decode_header(s):
+            if not charset:
+                header.append(to_unicode(text))
+                continue
+            try:
+                header.append(unicode(text, charset, 'replace'))
+            except:
+                header.append(to_unicode(text))
+
+        return u' '.join(header)
+
+    def make_msgid(self, from_addr, message):
+        try:
+            domain = from_addr[0][1].split('@')[1]
+        except:
+            domain = u'mlstats.localdomain'
+
+        m = hashlib.md5(message.encode('utf-8')).hexdigest()
+        return u'<%s.mlstats@%s>' % (m, domain)
+
 
 if __name__ == '__main__':
     import sys
-    from pprint import pprint
 
     # Print analyzer's output to check manually the parsing. In can
     # be used with egrep to filter out specific fields.
@@ -184,4 +233,4 @@ if __name__ == '__main__':
     maa = MailArchiveAnalyzer()
     maa.filepath = sys.argv[1]
     for m in maa.get_messages()[0]:
-        pprint(m)
+        pprint.pprint(m)

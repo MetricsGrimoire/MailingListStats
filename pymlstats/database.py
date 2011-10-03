@@ -30,6 +30,7 @@ import MySQLdb for any other, for instance import PyGreSQL).
 """
 
 import sys
+import pprint
 from pymlstats import datamodel
 
 class DatabaseException (Exception):
@@ -58,7 +59,8 @@ class DatabaseMysql:
         import MySQLdb as dbapi
         try:
             self.__dbobj = dbapi.connect(self.host, self.user,
-                                         self.password, self.name)
+                                         self.password, self.name,
+                                         charset='utf8', use_unicode=True)
         except dbapi.OperationalError, e:
 
             # Check the error number
@@ -78,7 +80,9 @@ class DatabaseMysql:
                 # Database does not exist
                 # So create it
                 try:
-                    self.__dbobj = dbapi.connect(self.host,self.admin_user,self.admin_password,"")
+                    self.__dbobj = dbapi.connect(self.host, self.admin_user,
+                                          self.admin_password, '',
+                                          charset='utf8', use_unicode=True)
                 except dbapi.OperationalError, e:
                     errno = e.args[0]
 
@@ -104,8 +108,9 @@ class DatabaseMysql:
 
                 # Database created, now reconnect
                 # If this point has passed the exceptions catching, it should work
-                self.__dbobj = dbapi.connect(self.host,self.user,self.password,self.name)
-                
+                self.__dbobj = dbapi.connect(self.host, self.user,
+                                          self.password,self.name,
+                                          charset='utf8', use_unicode=True)
             else: # Unknown exception
                 message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
                 # Write message to the stderr
@@ -184,6 +189,8 @@ class DatabaseMysql:
             self.write_cursor.execute(query_people, from_values)
         except dbapi.IntegrityError:
             pass
+        except dbapi.DataError:
+            pprint.pprint(from_values)
 
         query_mailing_lists_people = '''INSERT INTO mailing_lists_people
                                         (email_address, mailing_list_url)
@@ -195,6 +202,8 @@ class DatabaseMysql:
         except dbapi.IntegrityError:
             # Duplicate entry email address-mailing list url
             pass
+        except dbapi.DataError:
+            pprint.pprint(mailing_lists_people_values)
 
     def store_messages(self, message_list, mailing_list_url):
         import MySQLdb as dbapi
@@ -280,7 +289,7 @@ class DatabaseMysql:
         " where m.message_ID=mp.message_ID "\
         "   and mp.email_address=p.email_address and  mp.type_of_recipient='From'"\
         " group by m.mailing_list_url, p.domain_name "\
-        " order by num_messages desc limit %s;"
+        " order by num_messages desc, p.domain_name limit %s;"
 
         self.read_cursor.execute(query, (limit,))
 
@@ -292,7 +301,7 @@ class DatabaseMysql:
         limit = 10*mailing_lists
         query = "select mailing_list_url, domain_name, count(p.email_address) as t "\
                 "  from mailing_lists_people as ml, people as p "\
-        " where ml.email_address=p.email_address group by mailing_list_url, domain_name order by t desc limit %s;"
+        " where ml.email_address=p.email_address group by mailing_list_url, domain_name order by t desc, domain_name limit %s;"
         self.read_cursor.execute(query, (limit,))
 
         return self.read_cursor.fetchall()
@@ -305,7 +314,7 @@ class DatabaseMysql:
         "  from messages m,messages_people mp, people p "\
         " where m.message_ID=mp.message_ID and mp.email_address=p.email_address and  mp.type_of_recipient='From'"\
         " group by m.mailing_list_url, p.top_level_domain "\
-        " order by num_messages desc limit %s;"
+        " order by num_messages desc, p.top_level_domain limit %s;"
         self.read_cursor.execute(query, (limit,))
 
         return self.read_cursor.fetchall()
@@ -318,7 +327,7 @@ class DatabaseMysql:
         query = "select mailing_list_url, top_level_domain, count(p.email_address) as t "\
         "  from mailing_lists_people as ml, people as p "\
         " where ml.email_address=p.email_address group by mailing_list_url, top_level_domain"\
-        " order by t desc limit %s;"
+        " order by t desc, top_level_domain limit %s;"
         self.read_cursor.execute(query, (limit,))
         
         return self.read_cursor.fetchall()
@@ -351,9 +360,9 @@ class DatabaseMysql:
                 "where m.message_ID = mp.message_ID and " \
                 "mp.type_of_recipient='From' " \
                 "group by m.mailing_list_url, mp.email_address " \
-                "order by t desc limit %d;" % limit
+                "order by t desc, mp.email_address limit %s;"
 
-        self.read_cursor.execute(query)
+        self.read_cursor.execute(query, (limit,))
 
         return self.read_cursor.fetchall()
 
