@@ -1,9 +1,13 @@
 Requirements
 ------------
-MLStats needs the following dependencies:
+MLStats needs the following dependencies (either MySQL or PostgresQL):
 
-    * python-mysqldb
-    * mysql-server
+    MySQL:
+      * python-mysqldb
+      * mysql-server
+    Postgresql:
+      * psycopg2
+      * postgresql-server (it has been tested with 8.4)
 
 Install
 -------
@@ -15,13 +19,17 @@ If you don't have root privileges, use the --prefix option to indicate the direc
 
     $ python setup.py install --help
 
-You are ready to use mlstats!
+You are ready to use mlstats
 
 Running mlstats
 ----------------
 
 More options, and a more detailed info about the options, can be
 learnt by running "mlstats --help"
+
+The backend postgres requires the database already exists. The creation
+of tables must be done manually. There is a SQL script with the schema
+in db/data_model_pg.sql that can be used for this purpose.
 
 Analysis
 --------

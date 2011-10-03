@@ -68,9 +68,10 @@ Private archives options:
 
   --web-user        If the archives of the mailing list are private, use this username to login in order to retrieve the files.
   --web-password    If the archives of the mailing list are private, use this password to login in order to retrieve the files.
-  
-MySQL database options:
 
+Database options:
+
+  --db-driver          Database backend: mysql or postgres (default is mysql)
   --db-user            Username to connect to the database (default is operator)
   --db-password        Password to connect to the database (default is operator)
   --db-name            Name of the database that contains data previously analyzed (default is mlstats)
@@ -84,9 +85,10 @@ def start():
     short_opts = "hq"
     #short_opts = "h:t:b:r:l:n:p:d:s:i:r"
     # Long options (all started by --). Those requiring argument followed by =
-    long_opts = ["help","db-user=", "db-password=", "db-hostname=", "db-name=","db-admin-user=","db-admin-password=","report-file=","no-report","version","quiet","web-user=","web-password="]
+    long_opts = ["help", "db-driver=", "db-user=", "db-password=", "db-hostname=", "db-name=","db-admin-user=","db-admin-password=","report-file=","no-report","version","quiet","web-user=","web-password="]
 
     # Default options
+    db_driver = 'mysql'
     db_user = 'operator'
     db_password = 'operator'
     db_hostname = 'localhost'
@@ -118,6 +120,8 @@ def start():
         if opt in ("-h", "--help"):
             usage()
             sys.exit(0)
+        elif "--db-driver" == opt:
+            db_driver = value
         elif "--db-user" == opt:
             db_user = value
         elif "--db-password" == opt:
@@ -143,7 +147,8 @@ def start():
         elif "--version" == opt:
             print mlstats_version
             sys.exit(0)
-    
-           
-    myapp = Application(db_user,db_password,db_name,db_hostname,db_admin_user,db_admin_password,urls,report_filename,report,quiet,web_user,web_password)
-            
+
+    myapp = Application(db_driver, db_user, db_password, db_name,
+                        db_hostname, db_admin_user, db_admin_password,
+                        urls, report_filename, report, quiet,
+                        web_user, web_password)

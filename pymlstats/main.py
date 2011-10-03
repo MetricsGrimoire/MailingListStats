@@ -45,11 +45,13 @@ class Application:
     COMPRESSED_DIR = os.path.join(mlstats_dot_dir(),'compressed')
 
 
-    def __init__(self,user,password,dbname,host,admin_user,admin_password,url_list,report_filename,make_report,be_quiet,web_user,web_password):
+    def __init__(self, driver, user, password, dbname, host,
+                 admin_user, admin_password, url_list, report_filename,
+                 make_report, be_quiet, web_user, web_password):
 
         self.mail_parser = MailArchiveAnalyzer()
 
-        self.db = create_database(driver='mysql')
+        self.db = create_database(driver=driver)
         self.db.name = dbname
         self.db.user = user
         self.db.password = password
@@ -164,7 +166,7 @@ class Application:
         output += "----------------\t-----------\t----\n"        
         for r in messages_by_year:
             ml = r[0].rstrip("/").split('/')[-1]
-            year = r[1]
+            year = int(r[1])
             num = r[2]
             output += str(ml)+'\t'+str(year)+'\t'+str(num)+'\n'
 
@@ -173,7 +175,7 @@ class Application:
         output += "----------------\t-----------\t----\n"        
         for r in people_by_year:
             ml = r[0].rstrip("/").split('/')[-1]
-            year = r[1]
+            year = int(r[1])
             num = r[2]
             output += str(ml)+'\t'+str(year)+'\t'+str(num)+'\n'
 
@@ -261,10 +263,9 @@ class Application:
         yesterday= datetime.datetime.today() + datetime.timedelta(days=-1)
         this_month= yesterday.strftime(mailmanfmt)
 
-
-         
         # First retrieve, then analyze files
-        files_to_analyze = []
+        files_to_analyze = {}
+        url_list = []
         for link in links:
             basename = os.path.basename(link)
             destfilename = os.path.join(self.__compressed_directory,basename)
@@ -283,7 +284,7 @@ class Application:
             else:
                 # If already visited, ignore
                 status = self.db.check_compressed_file(link)
-                if 'visited' == status:
+                if status == self.db.VISITED:
                     self.__print_output("Already analyzed "+link)
                     continue
 
@@ -292,13 +293,14 @@ class Application:
                     self.__print_output("Already downloaded "+link)
                 else:
                     self.__print_output("Retrieving "+link+"...")
-                    retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
-                
+                    retrieve_remote_file(link, destfilename, self.web_user,
+                                         self.web_password)
+
             # Set visited
             # (before uncompressing, otherwise the db will point towards
             # the uncompressed temporary file)
             today = datetime.datetime.today().strftime(datetimefmt)
-            self.db.set_visited_url(link,url,today)
+            self.db.set_visited_url(link, url, today, self.db.NEW)
 
             # Check if compressed
             extension = check_compressed_file(destfilename)
@@ -308,47 +310,54 @@ class Application:
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
-                files_to_analyze += filepaths
+                files_to_analyze.setdefault(link, []).extend(filepaths)
             else:
                 # File was not uncompressed, so there is only
                 # one file to append
-                files_to_analyze.append(destfilename)
+                files_to_analyze.setdefault(link, []).append(destfilename)
 
+            url_list.append(link)
         # The archives are usually retrieved in descending
         # chronological order (because the newest archives are always
         # shown on the top of the archives)
 
         # So we will analyze the list of files in the order inversed
         # to the order in they were retrieved
-        files_to_analyze.reverse()
+        url_list.reverse()
 
-        return self.__analyze_list_of_files(url,files_to_analyze)
-        
-    def __analyze_list_of_files(self,mailing_list_url,filepath_list):
+        return self.__analyze_list_of_files(url, url_list, files_to_analyze)
+
+    def __analyze_list_of_files(self, mailing_list_url, url_list,
+                                 files_to_analyze):
         """Analyze a list of given files"""
 
         total_messages_url = 0
         stored_messages_url = 0
         non_parsed_messages_url = 0
 
-        for filepath in filepath_list:
-            self.__print_output("Analyzing "+filepath)                    
-            self.mail_parser.filepath = filepath
-            messages, non_parsed_messages = self.mail_parser.get_messages()
-            total_messages = len(messages)
-            stored_messages = self.db.store_messages(messages,mailing_list_url)
-            difference = total_messages-stored_messages
-            if difference > 0:
-                self.__print_output("   ***WARNING: %d messages (out of %d) parsed but not stored***" % (difference,total_messages))
-            if non_parsed_messages > 0:
-                self.__print_output("   ***WARNING: %d messages (out of %d) were ignored by the parser***" % (non_parsed_messages,total_messages+non_parsed_messages))
+        for url in url_list:
+            for filepath in files_to_analyze[url]:
+                self.__print_output('Analyzing %s' % filepath)
+                self.mail_parser.filepath = filepath
+                messages, non_parsed_messages = self.mail_parser.get_messages()
+                total_messages = len(messages)
+                stored_messages = self.db.store_messages(messages,mailing_list_url)
+                difference = total_messages-stored_messages
+                if difference > 0:
+                    self.__print_output("   ***WARNING: %d messages (out of %d) parsed but not stored***" % (difference,total_messages))
+                if non_parsed_messages > 0:
+                    self.__print_output("   ***WARNING: %d messages (out of %d) were ignored by the parser***" % (non_parsed_messages,total_messages+non_parsed_messages))
 
-            total_messages_url += total_messages
-            stored_messages_url += stored_messages
-            non_parsed_messages_url += non_parsed_messages
+                total_messages_url += total_messages
+                stored_messages_url += stored_messages
+                non_parsed_messages_url += non_parsed_messages
+
+            today = datetime.datetime.today().strftime(datetimefmt)
+            self.db.set_visited_url(url, mailing_list_url, today,
+                                    self.db.VISITED)
 
         return total_messages_url, stored_messages_url, non_parsed_messages_url
-        
+
     def __analyze_non_remote(self,dirname):
         """Walk recursively the directory looking for files,
         and uncompress them. Then __analyze_local_directory is called."""
@@ -371,8 +380,6 @@ class Application:
         yesterday= datetime.datetime.today() + datetime.timedelta(days=-1)
         this_month= yesterday.strftime(mailmanfmt)
 
-
-        
         filepaths_to_analyze = []
         for filepath in filepaths:
 

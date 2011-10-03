@@ -88,11 +88,11 @@ class MailArchiveAnalyzer:
             body = self.__get_body(message)
             filtered_message['body'] = self.decode_header(body)
 
-            filtered_message['subject'] = message.get('subject')
             filtered_message['list-id'] = message.get('list-id')
-            filtered_message['message-id']  = message.get('message-id')
-            in_reply_to = message.get('in-reply-to')
-            filtered_message['in-reply-to'] = self.decode_header(in_reply_to)
+
+            for header in ('subject', 'message-id', 'in-reply-to'):
+                header_content = self.decode_header(message.get(header))
+                filtered_message[header] = header_content
 
             for header in ('from', 'to', 'cc'):
                 header_content = message.get_all(header)
