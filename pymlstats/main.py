@@ -35,6 +35,7 @@ import os.path
 import pwd
 import sys
 import datetime
+import re
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 mailmanfmt = '%Y-%B'
@@ -245,8 +246,10 @@ class Application:
         """Download the archives from the remote url, stores and parses them."""
 
         # Check directories to stored the archives
-        self.__compressed_directory = os.path.join(Application.COMPRESSED_DIR,url.lstrip("http://").lstrip("https://").lstrip("ftp://").lstrip("ftps://"))
-        self.__mbox_directory = os.path.join(Application.MBOX_DIR,url.lstrip("http://").lstrip("https://").lstrip("ftp://").lstrip("ftps://"))
+        target = re.sub('^(http|ftp)[s]{0,1}://', '', url)
+        self.__compressed_directory = os.path.join(Application.COMPRESSED_DIR,
+                                                   target)
+        self.__mbox_directory = os.path.join(Application.MBOX_DIR, target)
         if not os.path.exists(self.__compressed_directory):
             os.makedirs(self.__compressed_directory)
         if not os.path.exists(self.__mbox_directory):
