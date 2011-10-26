@@ -273,16 +273,14 @@ class Application:
             basename = os.path.basename(link)
             destfilename = os.path.join(self.__compressed_directory,basename)
 
-            if -1 != link.find(this_month):
-                self.__print_output("Found substring "+this_month+" in URL "+link+"...")
-                current_month = 1
-            else:
-                current_month = 0
+            current_month = -1 != link.find(this_month)
+            if current_month:
+                self.__print_output('Found substring %s in URL %s...' % \
+                                    (this_month, link))
 
-            # If the URL is for the current month, always retrieve. Otherwise, check 
-            # visited status & local files first
-            if current_month == 1:
-                self.__print_output("Retrieving "+link+"...")
+                # If the URL is for the current month, always retrieve.
+                # Otherwise, check visited status & local files first
+                self.__print_output('Retrieving %s...' % link)
                 retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
             else:
                 # If already visited, ignore
