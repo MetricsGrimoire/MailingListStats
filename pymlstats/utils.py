@@ -34,6 +34,7 @@ import os
 import os.path
 import tempfile
 import urllib
+import urllib2
 import gzip
 import bz2
 import zipfile
@@ -64,11 +65,10 @@ def retrieve_remote_file(url, destfilename=None, web_user=None, web_password=Non
     """Retrieve a file from a remote location. It logins in the
     archives private page if necessary."""
 
-    class FakeBrowser(urllib.FancyURLopener, object):
-        version = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
-                  '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
-                  'Chrome/15.0.871.0 Safari/535.2'
-
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
+                 '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
+                 'Chrome/15.0.871.0 Safari/535.2'
+    headers = { 'User-Agent': user_agent }
 
     # If not dest dir, then store file in a temp file
     if not destfilename:
@@ -76,14 +76,23 @@ def retrieve_remote_file(url, destfilename=None, web_user=None, web_password=Non
 
     postdata = None
     if web_user:
-        postdata = urllib.urlencode( \
-            {'username':web_user, \
-            'password':web_password})
+        postdata = urllib.urlencode({'username': web_user,
+                                     'password': web_password})
 
-    crawler = FakeBrowser()
-    (fname, header) = crawler.retrieve(url, destfilename, data=postdata)
+    request = urllib2.Request(url, postdata, headers)
+    response = urllib2.urlopen(request)
+    subtype = response.info().getsubtype()
+ 
+    if url.endswith ('.gz') and subtype and subtype.endswith('plain'):
+        fd = gzip.GzipFile(destfilename, 'wb')
+    else:
+        fd = open(destfilename, 'wb')
+        
+    fd.write(response.read())
+    fd.close()
+    response.close ()
 
-    return fname
+    return destfilename
 
 def uncompress_file(filepath,extension, output_dir = None):
     """This function uncompress the file, and return
