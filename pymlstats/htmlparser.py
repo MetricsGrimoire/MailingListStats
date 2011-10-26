@@ -30,6 +30,7 @@ return a list with all the links contained in the web page.
 
 import htmllib
 import urllib
+import urllib2
 import os
 import formatter
 import utils
@@ -75,19 +76,23 @@ class MyHTMLParser(htmllib.HTMLParser):
         return self.mboxes_links
 
     def __get_html(self):
+        ''' Download index.html to a temp file '''
 
-        # Download index.html to a temp file
-        if not self.user:
-            htmlpage = urllib.urlopen(self.url)
-        else:
-            postdata = urllib.urlencode({'username':self.user,
-                                         'password':self.password})
-            print self.url
+        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
+                     '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
+                     'Chrome/15.0.871.0 Safari/535.2'
+        headers = { 'User-Agent': user_agent }
+        postdata = None
 
-            htmlpage = urllib.urlopen(self.url,data=postdata)
+        if self.user:
+            postdata = urllib.urlencode({'username': self.user,
+                                         'password': self.password})
 
-        htmltxt = ''.join(htmlpage.readlines())
-        htmlpage.close()
+        request = urllib2.Request(self.url, postdata, headers)
+        response = urllib2.urlopen(request)
+
+        htmltxt = response.read()
+        response.close()
 
         self.feed(htmltxt) # Read links from HTML code
         self.close()
