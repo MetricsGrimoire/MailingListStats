@@ -390,11 +390,12 @@ class Application:
             # If the file is for the current month, reimport
             current_month = -1 != filepath.find(this_month)
             if current_month:
-                self.__print_output("Found substring "+this_month+" in URL "+filepath+"...")
+                self.__print_output('Found substring %s in URL %s...' % \
+                                    (this_month, filepath))
 
             # If already visited, ignore, unless it's for the current month
-            if 'visited' == status and not current_month:
-                self.__print_output("Already analyzed "+filepath)
+            if status == self.db.VISITED and not current_month:
+                self.__print_output('Already analyzed %s' % filepath)
                 continue
             
             # If not, set visited
