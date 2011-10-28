@@ -87,7 +87,7 @@ class FileExtractor:
         # add this to avoid using the same output
         # filename than the original file
         if '.bz2' != ext.lower():
-            outputfile = filename + '.extracted'
+            outputfilename = filename + '.extracted'
 
         outputfileobj = open(outputfilename,'w')
         outputfileobj.write(bz2file.read())
@@ -110,14 +110,14 @@ class FileExtractor:
         
         try:
             tar = tarfile.open(filename, "r")
-        except TarError:
+        except tarfile.TarError:
             raise FileExtractorError("FileExtractor Error: Opening tarfile %s" % filename)
         
         for tarinfo in tar:
             try:
                 tar.extract(tarinfo, path)
                 extracted_list.append(os.path.join(path, tarinfo.name))
-            except TarError:
+            except tarfile.TarError:
                 tar.close()
                 raise FileExtractorError("FileExtractor Error: Extracting tarfile %s" % filename)          
             
@@ -138,37 +138,37 @@ class FileExtractor:
         path = os.path.dirname(filename)
         
         try:
-            zip = zipfile.ZipFile(filename, "r")
-        except BadZipfile:
+            zipped = zipfile.ZipFile(filename, "r")
+        except zipfile.BadZipfile:
             raise FileExtractorError("FileExtractor Error: Opening zipfile %s" % filename)
             
-        for name in zip.namelist():
+        for name in zipped.namelist():
             try:
-               bytes = zip.read(name)
-               filepath = os.path.join(path, name)
-               # Check that subdirectories exist
-               # If subdirectories do not exist, the creation of the file will fail
-               subdirectory = os.path.dirname(filepath)
-               if not os.path.exists(subdirectory):
-                   os.makedirs(subdirectory)
-                   
-               f = open(filepath, "w")
-               
-               try:
-                   f.write(bytes)
-               finally:
-                   f.close()         
+                bytes_in = zipped.read(name)
+                filepath = os.path.join(path, name)
+                # Check that subdirectories exist
+                # If subdirectories do not exist, the creation of the file will fail
+                subdirectory = os.path.dirname(filepath)
+                if not os.path.exists(subdirectory):
+                    os.makedirs(subdirectory)
+                    
+                f = open(filepath, 'w')
+                
+                try:
+                    f.write(bytes_in)
+                finally:
+                    f.close()         
                             
-            except BadZipFile:
-                zip.close()
-                raise FileExtractorError("FileExtractor Error: Reading %s zipfile" % filename)
+            except zipfile.BadZipfile:
+                zipped.close()
+                raise FileExtractorError('FileExtractor Error: Reading %s zipfile' % filename)
             except IOError:
-                zip.close()
-                raise FileExtractorError("FileExtractor Error: Write error while extracting %s zipfile" % filename)
+                zipped.close()
+                raise FileExtractorError('FileExtractor Error: Write error while extracting %s zipfile' % filename)
         
             extracted_list.append(filepath)
         
-        zip.close()
+        zipped.close()
                 
         return extracted_list
         
@@ -176,7 +176,7 @@ class FileExtractor:
     def extract (self, path_list):
         """
         Extract all the files included into a file container. If the container
-        includes container files, these will be extrated too. If the container
+        includes container files, these will be extracted too. If the container
         is a directory, the algorithm will search in its contents for other
         container files to perform the extraction.
         
@@ -188,7 +188,7 @@ class FileExtractor:
             Steps:
             
                 - Generate a LIFO list that will contains the path to files or directories containers.
-                  Add the list of paths to de LIFO list.
+                  Add the list of paths to the LIFO list.
                 
                 - Do until the list isn't be empty:
                 
