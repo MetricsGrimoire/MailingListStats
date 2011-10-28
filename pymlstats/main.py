@@ -75,10 +75,6 @@ class Application:
 
         self.__check_mlstats_dirs()
 
-        # Temporary variable to store the directory names for each mailing list
-        self.__mbox_directory = None
-        self.__compressed_directory = None
-
         total_messages = 0
         stored_messages = 0
         non_parsed = 0
@@ -242,18 +238,18 @@ class Application:
 
         return total, stored, non_parsed
 
-    def __analyze_remote(self,url):
+    def __analyze_remote(self, url):
         """Download the archives from the remote url, stores and parses them."""
 
         # Check directories to stored the archives
         target = re.sub('^(http|ftp)[s]{0,1}://', '', url)
-        self.__compressed_directory = os.path.join(Application.COMPRESSED_DIR,
-                                                   target)
-        self.__mbox_directory = os.path.join(Application.MBOX_DIR, target)
-        if not os.path.exists(self.__compressed_directory):
-            os.makedirs(self.__compressed_directory)
-        if not os.path.exists(self.__mbox_directory):
-            os.makedirs(self.__mbox_directory)
+        compressed_dir = os.path.join(self.COMPRESSED_DIR,
+                                            target)
+        mbox_dir = os.path.join(self.MBOX_DIR, target)
+        if not os.path.exists(compressed_dir):
+            os.makedirs(compressed_dir)
+        if not os.path.exists(mbox_dir):
+            os.makedirs(mbox_dir)
 
         # Get all the links listed in the URL
         htmlparser = MyHTMLParser(url, self.web_user, self.web_password)
@@ -271,29 +267,30 @@ class Application:
         url_list = []
         for link in links:
             basename = os.path.basename(link)
-            destfilename = os.path.join(self.__compressed_directory,basename)
+            destfilename = os.path.join(compressed_dir, basename)
 
             current_month = -1 != link.find(this_month)
             if current_month:
-                self.__print_output('Found substring %s in URL %s...' % \
+                self.__print_output('Found substring %s in URL %s...' %
                                     (this_month, link))
 
                 # If the URL is for the current month, always retrieve.
                 # Otherwise, check visited status & local files first
                 self.__print_output('Retrieving %s...' % link)
-                retrieve_remote_file(link,destfilename,self.web_user, self.web_password)
+                retrieve_remote_file(link,destfilename, self.web_user,
+                                     self.web_password)
             else:
                 # If already visited, ignore
                 status = self.db.check_compressed_file(link)
                 if status == self.db.VISITED:
-                    self.__print_output("Already analyzed "+link)
+                    self.__print_output('Already analyzed %s' % link)
                     continue
 
                 # Check if already downloaded
                 if os.path.exists(destfilename):
-                    self.__print_output("Already downloaded "+link)
+                    self.__print_output('Already downloaded %s' % link)
                 else:
-                    self.__print_output("Retrieving "+link+"...")
+                    self.__print_output('Retrieving %s...' % link)
                     retrieve_remote_file(link, destfilename, self.web_user,
                                          self.web_password)
 
@@ -307,7 +304,7 @@ class Application:
             extension = check_compressed_file(destfilename)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepaths = uncompress_file(destfilename,extension, self.__mbox_directory)
+                filepaths = uncompress_file(destfilename, extension, mbox_dir)
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
@@ -359,20 +356,20 @@ class Application:
 
         return total_messages_url, stored_messages_url, non_parsed_messages_url
 
-    def __analyze_non_remote(self,dirname):
+    def __analyze_non_remote(self, dirname):
         """Walk recursively the directory looking for files,
         and uncompress them. Then __analyze_local_directory is called."""
 
         # Check if directory to stored uncompressed files already exists
-        self.__mbox_directory = os.path.join(Application.MBOX_DIR,dirname.lstrip('/'))
-        if not os.path.exists(self.__mbox_directory):
-            os.makedirs(self.__mbox_directory)
+        mbox_dir = os.path.join(self.MBOX_DIR, dirname.lstrip('/'))
+        if not os.path.exists(mbox_dir):
+            os.makedirs(mbox_dir)
         # Compressed files are left in their original location,
         # because they can be uncompressed from that location
 
         filepaths = []
         for root, dirs, files in os.walk(dirname):
-            filepaths += [os.path.join(root,filename) for filename in files]
+            filepaths += [os.path.join(root, filename) for filename in files]
 
         # If the file is for the current month (MailMan filename 
         # YYYY-MMM.txt.gz) don't mark as visited, and download again
@@ -409,7 +406,7 @@ class Application:
             extension = check_compressed_file(filepath)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepaths = uncompress_file(filepath,extension, self.__mbox_directory)
+                filepaths = uncompress_file(filepath, extension, mbox_dir)
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
@@ -424,16 +421,10 @@ class Application:
 
 
     def __check_mlstats_dirs(self):
-        """Check if the mlstats directories exist
-        in the home directory of the user who
-        is running the program"""
+        '''Check if the mlstats directories exist'''
 
-        mbox_dir = Application.MBOX_DIR
-        compressed_dir = Application.COMPRESSED_DIR
-        
-        if not os.path.exists(mbox_dir):
-            os.makedirs(mbox_dir)
+        if not os.path.exists(self.MBOX_DIR):
+            os.makedirs(self.MBOX_DIR)
 
-        if not os.path.exists(compressed_dir):
-            os.makedirs(compressed_dir)
-
+        if not os.path.exists(self.COMPRESSED_DIR):
+            os.makedirs(self.COMPRESSED_DIR)
