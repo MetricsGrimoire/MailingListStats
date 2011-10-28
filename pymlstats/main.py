@@ -381,7 +381,8 @@ class Application:
         yesterday= datetime.datetime.today() + datetime.timedelta(days=-1)
         this_month= yesterday.strftime(mailmanfmt)
 
-        filepaths_to_analyze = []
+        files_to_analyze = {}
+        url_list = [dirname]
         for filepath in filepaths:
 
             # Check if already analyzed
@@ -402,7 +403,7 @@ class Application:
             # (before uncompressing, otherwise the db will point towards
             # the uncompressed temporary file)
             today = datetime.datetime.today().strftime(datetimefmt)
-            self.db.set_visited_url(filepath,dirname,today)
+            self.db.set_visited_url(filepath, dirname, today, self.db.NEW)
 
             # Check if compressed
             extension = check_compressed_file(filepath)
@@ -412,14 +413,14 @@ class Application:
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
-                filepaths_to_analyze += filepaths
+                files_to_analyze.setdefault(dirname, []).extend(filepaths)
             else:
                 # File was not uncompressed, so there is only
                 # one file to append
-                filepaths_to_analyze.append(filepath)
+                files_to_analyze.setdefault(dirname, []).append(filepath)
             
-        return self.__analyze_list_of_files(dirname,filepaths_to_analyze)
-
+        return self.__analyze_list_of_files(dirname, url_list,
+                                            files_to_analyze)
 
 
     def __check_mlstats_dirs(self):
