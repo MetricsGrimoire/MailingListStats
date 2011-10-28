@@ -32,8 +32,6 @@ from htmlparser import *
 from utils import (retrieve_remote_file, check_compressed_file,
                    uncompress_file, mlstats_dot_dir)
 import os.path
-import pwd
-import sys
 import datetime
 import re
 

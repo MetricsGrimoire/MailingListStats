@@ -308,8 +308,6 @@ class DatabaseMysql(Database):
         Database.connect(self, db)
 
     def insert_people(self, name, email, mailing_list_url):
-        query_people_values = []
-        mailing_lists_people_values = []
         try:
             top_level_domain = email.split(".")[-1]
         except IndexError:
@@ -444,8 +442,6 @@ class DatabasePostgres(Database):
         Database.connect(self, db)
 
     def insert_people(self, name, email, mailing_list_url):
-        query_people_values = []
-        mailing_lists_people_values = []
         try:
             top_level_domain = email.split(".")[-1]
         except IndexError:

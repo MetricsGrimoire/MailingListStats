@@ -30,15 +30,10 @@ COMPRESSED_TYPES = ['.gz','.bz2','.zip','.tar','.tar.gz','.tar.bz2','.tgz','.tbz
 ACCEPTED_TYPES = ['.mbox','.txt']
 
 from fileextractor import *
-import os
 import os.path
 import tempfile
 import urllib
 import urllib2
-import gzip
-import bz2
-import zipfile
-import tarfile
 import shutil
 import errno
 

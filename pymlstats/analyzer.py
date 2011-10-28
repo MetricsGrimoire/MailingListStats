@@ -31,7 +31,6 @@ from the standard Python modules (for instance, Maildir).
 
 
 import mailbox
-import email
 import email.header
 from email.utils import getaddresses, parsedate_tz
 import datetime
@@ -226,6 +225,7 @@ class MailArchiveAnalyzer:
 
 if __name__ == '__main__':
     import sys
+    import pprint
 
     # Print analyzer's output to check manually the parsing. In can
     # be used with egrep to filter out specific fields.
