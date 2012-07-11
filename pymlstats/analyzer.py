@@ -33,9 +33,10 @@ from the standard Python modules (for instance, Maildir).
 import mailbox
 import email.header
 from email.utils import getaddresses, parsedate_tz
+from email.Iterators import typed_subpart_iterator
 import datetime
 import hashlib
-import os
+import sys
 
 def to_unicode (string, charset='latin-1'):
     """Converts a string type to an object of unicode type.
@@ -82,6 +83,8 @@ class MailArchiveAnalyzer:
                         'in-reply-to', \
                         'subject', \
                         'body']
+    common_headers = ['message-id', 'in-reply-to', 'list-id',
+                      'content-type', 'references']
 
     def __init__(self, filepath=None):
         self.filepath = filepath
@@ -97,6 +100,7 @@ class MailArchiveAnalyzer:
 
             # Read unix from before headers
             unixfrom = message.get_unixfrom()
+            charset = message.get_content_charset()
 
             try:
                 date_to_parse = unixfrom.split('  ', 1)[1]
@@ -113,30 +117,44 @@ class MailArchiveAnalyzer:
 
             # The 'body' is not actually part of the headers,
             # but it will be treated as any other header
-            body = self.__get_body(message)
-            filtered_message['body'] = self.decode_header(body)
+            body, patches = self.__get_body(message, charset)
+            filtered_message['body'] = u'\n'.join(body).strip()
 
-            filtered_message['list-id'] = message.get('list-id')
-
-            for header in ('subject', 'message-id', 'in-reply-to'):
-                header_content = self.decode_header(message.get(header))
+            for header in ('subject',):
+                header_content = self.__decode(message.get(header), charset)
                 filtered_message[header] = header_content
 
             for header in ('from', 'to', 'cc'):
                 header_content = message.get_all(header)
 
-                decoded_header = []
                 if header_content:
-                    for h in header_content:
-                        decoded_header.append(self.decode_header(h))
-                header_content = decoded_header or None
+                    header_content = [ self.__decode(h, charset) for h in header_content ]
 
-                # Check spam obscuring
-                header_content = self.__check_spam_obscuring(header_content)
-                try:
+                    # Check spam obscuring
+                    header_content = self.__check_spam_obscuring(header_content)
                     filtered_message[header] = getaddresses(header_content)
-                except:
+                else:
                     filtered_message[header] = None  #[('','')]
+
+            msgdate, tz_secs = self.__get_date(message)
+            filtered_message['date'] = msgdate.isoformat(' ')
+            filtered_message['date_tz'] = str(tz_secs)
+
+            # Retrieve other headers requested
+            for header in self.common_headers:
+                # Some messages have a received header, but it is
+                # now being ignored by MLStats and substituted by
+                # the value of the Unix From field (first line of
+                # the message)
+                msg = message.get(header)
+                if msg:
+                    try:
+                        msg = to_unicode(msg, charset)
+                    except TypeError:
+                        print >> sys.stderr, 'TypeError: msg: %s % msg'
+                        msg = [to_unicode(e, charset) for e in msg]
+                
+                filtered_message[header] = msg
 
             # if there is no message-id, we try to create one unique (but
             # repeatable) using the from address and the message body.
@@ -146,10 +164,8 @@ class MailArchiveAnalyzer:
                 msgid = self.make_msgid(filtered_message['from'],
                                         filtered_message['body'])
                 filtered_message['message-id'] = msgid
-
-            msgdate, tz_secs = self.__get_date(message)
-            filtered_message['date'] = msgdate.isoformat(' ')
-            filtered_message['date_tz'] = str(tz_secs)
+                print >>sys.stderr, '=> message-id not present for:'
+                print >>sys.stderr, message
 
             # message.getaddrlist returns a list of tuples
             # Each one of the tuples is like this
@@ -171,27 +187,27 @@ class MailArchiveAnalyzer:
 
         return messages_list, non_parsed
 
-    def __get_body(self,msg):
+    def __get_body(self, msg, charset):
+        body = []
+        patches = []
 
-        # Non multipart messages are easy
+        # Non multipart messages should be straightforward
         if not msg.is_multipart():
-            return msg.get_payload(decode=True)
+            body.append(to_unicode(msg.get_payload(decode=True), charset))
+            return body, patches
 
-        # Include all the attached texts if it is multipart        
-        body = ""
+        # Include all the attached texts if it is multipart
+        parts = [part for part in typed_subpart_iterator(msg, 'text')]
+        for part in parts:
+            part_charset = part.get_content_charset()
+            part_body = part.get_payload(decode=True)
+            part_subtype = part.get_content_subtype()
+            if part_subtype == 'plain':
+                body.append(to_unicode(part_body, part_charset))
+            elif part_subtype in ('x-patch', 'x-diff'):
+                patches.append(to_unicode(part_body, part_charset))
 
-        for m in msg.walk():
-
-            if m.is_multipart():
-                continue
-
-            cp = m.get_content_type()
-
-            if ("text" in cp) or ("message" in cp):
-                body += "Begin attachment of type %s\n" % cp
-                body += m.get_payload(decode=True)
-
-        return body
+        return body, patches
 
     def __get_date(self, message):
         parsed_date = parsedate_tz(message.get('date'))
