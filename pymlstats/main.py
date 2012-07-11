@@ -249,60 +249,67 @@ class Application:
         if not os.path.exists(mbox_dir):
             os.makedirs(mbox_dir)
 
-        # Get all the links listed in the URL
-        htmlparser = MyHTMLParser(url, self.web_user, self.web_password)
-        links = htmlparser.get_mboxes_links()
-
         # If the file is for the current month (MailMan filename 
         # YYYY-MMM.txt.gz) don't mark as visited, and download again
         # Assuming this is run daily, it's better to take yesterday's date,
         # to ensure we get all of last month's email when the month rolls over.
-        yesterday= datetime.datetime.today() + datetime.timedelta(days=-1)
-        this_month= yesterday.strftime(mailmanfmt)
+        yesterday = datetime.datetime.today() + datetime.timedelta(days=-1)
+        this_month = yesterday.strftime(mailmanfmt)
 
-        # First retrieve, then analyze files
-        files_to_analyze = {}
-        url_list = []
+        # Get all the links listed in the URL
+        htmlparser = MyHTMLParser(url, self.web_user, self.web_password)
+        links = htmlparser.get_mboxes_links()
+
+        filepaths = []
         for link in links:
             basename = os.path.basename(link)
             destfilename = os.path.join(compressed_dir, basename)
 
-            current_month = -1 != link.find(this_month)
-            if current_month:
+            # If the URL is for the current month, always retrieve.
+            # Otherwise, check visited status & local files first
+            if link.find(this_month) >= 0:
                 self.__print_output('Found substring %s in URL %s...' %
                                     (this_month, link))
-
-                # If the URL is for the current month, always retrieve.
-                # Otherwise, check visited status & local files first
                 self.__print_output('Retrieving %s...' % link)
-                retrieve_remote_file(link,destfilename, self.web_user,
+                retrieve_remote_file(link, destfilename, self.web_user,
                                      self.web_password)
+            elif os.path.exists(destfilename):   # Check if already downloaded
+                self.__print_output('Already downloaded %s' % link)
             else:
-                # If already visited, ignore
-                status = self.db.check_compressed_file(link)
-                if status == self.db.VISITED:
-                    self.__print_output('Already analyzed %s' % link)
-                    continue
+                self.__print_output('Retrieving %s...' % link)
+                retrieve_remote_file(link, destfilename, self.web_user,
+                                     self.web_password)
 
-                # Check if already downloaded
-                if os.path.exists(destfilename):
-                    self.__print_output('Already downloaded %s' % link)
-                else:
-                    self.__print_output('Retrieving %s...' % link)
-                    retrieve_remote_file(link, destfilename, self.web_user,
-                                         self.web_password)
+            filepaths.append((link, destfilename))
 
-            # Set visited
+        files_to_analyze = {}
+        url_list = []
+        for link, filepath in filepaths:
+            # Check if already analyzed
+            status = self.db.check_compressed_file(filepath)
+
+            # If the file is for the current month, reimport
+            current_month = -1 != filepath.find(this_month)
+            if current_month:
+                self.__print_output('Found substring %s in URL %s...' % \
+                                    (this_month, filepath))
+
+            # If already visited, ignore, unless it's for the current month
+            if status == self.db.VISITED and not current_month:
+                self.__print_output('Already analyzed %s' % filepath)
+                continue
+            
+            # If not, set visited
             # (before uncompressing, otherwise the db will point towards
             # the uncompressed temporary file)
             today = datetime.datetime.today().strftime(datetimefmt)
             self.db.set_visited_url(link, url, today, self.db.NEW)
 
             # Check if compressed
-            extension = check_compressed_file(destfilename)
+            extension = check_compressed_file(filepath)
             if extension:
                 # If compressed, uncompress and get the raw filepath
-                filepaths = uncompress_file(destfilename, extension, mbox_dir)
+                filepaths = uncompress_file(filepath, extension, mbox_dir)
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
@@ -310,9 +317,10 @@ class Application:
             else:
                 # File was not uncompressed, so there is only
                 # one file to append
-                files_to_analyze.setdefault(link, []).append(destfilename)
+                files_to_analyze.setdefault(link, []).append(filepath)
 
             url_list.append(link)
+
         # The archives are usually retrieved in descending
         # chronological order (because the newest archives are always
         # shown on the top of the archives)
@@ -377,7 +385,7 @@ class Application:
         this_month= yesterday.strftime(mailmanfmt)
 
         files_to_analyze = {}
-        url_list = [dirname]
+        url_list = []
         for filepath in filepaths:
 
             # Check if already analyzed
@@ -408,12 +416,22 @@ class Application:
                 # __uncompress_file returns a list containing
                 # the path to all the uncompressed files
                 # (for instance, a tar file may contain more than one file)
-                files_to_analyze.setdefault(dirname, []).extend(filepaths)
+                files_to_analyze.setdefault(filepath, []).extend(filepaths)
             else:
                 # File was not uncompressed, so there is only
                 # one file to append
-                files_to_analyze.setdefault(dirname, []).append(filepath)
-            
+                files_to_analyze.setdefault(filepath, []).append(filepath)
+
+            url_list.append(filepath)
+
+        # The archives are usually retrieved in descending
+        # chronological order (because the newest archives are always
+        # shown on the top of the archives)
+
+        # So we will analyze the list of files in the order inversed
+        # to the order in they were retrieved
+        url_list.reverse()
+
         return self.__analyze_list_of_files(dirname, url_list,
                                             files_to_analyze)
 
