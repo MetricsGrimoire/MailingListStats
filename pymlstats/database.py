@@ -521,13 +521,15 @@ class DatabasePostgres(Database):
                 # Duplicated message
                 stored_messages -= 1
             except self.dbapi.DataError:
-                pprint.pprint(values)
+                pprint.pprint(values, sys.stderr)
                 raise
             except:
                 error_message = "ERROR: Runtime error while trying to write message with message-id '%s'. That message has not been written to the database, but the execution has not been stopped. Please report this failure including the message-id and the URL for the mbox." % m['message-id']
                 stored_messages -= 1
                 # Write message to the stderr
                 print >> sys.stderr, error_message
+                print >> sys.stderr, query_message
+                pprint.pprint(values, sys.stderr)
 
             for key, values in msgs_people_value.iteritems():
                 try:
@@ -536,7 +538,7 @@ class DatabasePostgres(Database):
                     # Duplicate entry email_address-to|cc-mailing list url
                     pass
                 except self.dbapi.DataError:
-                    pprint.pprint(values)
+                    pprint.pprint(values, sys.stderr)
                     raise
             self.dbobj.commit()
             stored_messages += 1
