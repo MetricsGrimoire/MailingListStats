@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Mailingliststats by MetricsGrimoire</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Mailingliststats</h1>
+        <p>MailingListStats</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/MetricsGrimoire/MailingListStats" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/MetricsGrimoire/MailingListStats/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/MetricsGrimoire/MailingListStats/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <p>Mailing List Stats is a command line based tool used to analyze mboxes. It downloads the mboxes in a directory where database will be created. It stores all the information which is contained in a e-mail.</p>
+
+<h2>Requirements</h2>
+
+<p>MLStats needs the following dependencies (either MySQL or PostgresQL):</p>
+
+<p>MySQL:</p>
+
+<ul>
+<li>python-mysqldb</li>
+<li>mysql-server
+Postgresql:</li>
+<li>psycopg2</li>
+<li>postgresql-server (it has been tested with 8.4)</li>
+</ul><h2>Install</h2>
+
+<p>You can install MLStats running setup.py script:</p>
+
+<p><code>
+    # python setup.py install
+</code></p>
+
+<p>If you don't have root privileges, use the --prefix option to indicate the directory where mlstats will be installed. For more details, take a look at the help of the installer:</p>
+
+<p><code>
+    $ python setup.py install --help
+</code></p>
+
+<p>You are ready to use mlstats</p>
+
+<h2>Running mlstats</h2>
+
+<p>More options, and a more detailed info about the options, can be learnt by running "mlstats --help"</p>
+
+<p>The backend postgres requires the database already exists. The creation of tables must be done manually. There is a SQL script with the schema in db/data_model_pg.sql that can be used for this purpose.</p>
+
+<h2>Analysis</h2>
+
+<p>[To be written]</p>
+
+<h2>Credits</h2>
+
+<p>MLStats has been developed by the GSyC/LibreSoft group at the Universidad Rey Juan Carlos in Mostoles, near Madrid (Spain). It is part of a wider research on libre software engineering, aimed to gain
+knowledge on how libre software is developed and maintained.</p>
+
+<h2>Help and bug reports</h2>
+
+<hr><p>Please write to the developers mailing at</p>
+
+<p>libresoft-tools-devel <em>at</em> lists.morfeo-project.org</p>
+
+<p>If you want to receive updates about new versions, and keep in touch with the development team, consider subscribing to the list. It is a very low traffic list (&lt; 1 msg a day):</p>
+
+<p><a href="https://lists.morfeo-project.org/mailman/listinfo/libresoft-tools-devel">https://lists.morfeo-project.org/mailman/listinfo/libresoft-tools-devel</a></p>
+
+<h2>Main authors</h2>
+
+<ul>
+<li>Israel Herraiz</li>
+<li>Jorge Gascon Perez</li>
+</ul><h2>Contributors</h2>
+
+<ul>
+<li>Dave Neary</li>
+<li>Germán Póo-Caamaño</li>
+<li>Luis Cañas</li>
+</ul>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/MetricsGrimoire">MetricsGrimoire</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
