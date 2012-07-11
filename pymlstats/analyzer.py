@@ -30,13 +30,13 @@ from the standard Python modules (for instance, Maildir).
 """
 
 
-import mailbox
 import email.header
 from email.utils import getaddresses, parsedate_tz
 from email.Iterators import typed_subpart_iterator
 import datetime
 import hashlib
 import sys
+from pymlstats.strictmbox import strict_mbox
 
 def to_unicode (string, charset='latin-1'):
     """Converts a string type to an object of unicode type.
@@ -92,7 +92,7 @@ class MailArchiveAnalyzer:
     def get_messages(self):
 
         messages_list = []
-        mbox = mailbox.mbox(self.filepath)
+        mbox = strict_mbox(self.filepath)
 
         non_parsed = 0
         for message in mbox:
