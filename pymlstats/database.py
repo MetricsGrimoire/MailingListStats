@@ -433,7 +433,8 @@ class DatabasePostgres(Database):
                                         host=self.host)
             else:
                 db = self.dbapi.connect(database=self.name,
-                                        user=self.user)
+                                        user=self.user,
+                                        port=5433)
             db.set_client_encoding('UTF8')
             db.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         except:
