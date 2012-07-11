@@ -35,12 +35,41 @@ import email.header
 from email.utils import getaddresses, parsedate_tz
 import datetime
 import hashlib
+import os
 
-def to_unicode(s):
-    if isinstance(s, basestring):
-        if not isinstance(s, unicode):
-            s = unicode(s, 'utf-8', 'replace')
-    return s
+def to_unicode (string, charset='latin-1'):
+    """Converts a string type to an object of unicode type.
+
+    Gets an string object as argument, and tries several
+    encoding to convert it to unicode. It basically tries
+    encodings in sequence, until one of them doesn't raise
+    an exception, since conversion into unicode using a
+    given encoding raises an exception of one unknown character
+    (for that encoding) is found.
+
+    The string should usually be of str type (8-bit encoding),
+    and the returned object is of unicode type.
+    If the string is already of unicode type, just return it."""
+
+    if isinstance (string, unicode):
+        return string
+    elif isinstance (string, str):
+        encoded = False
+        for encoding in [charset, 'ascii', 'utf-8', 'iso-8859-15']:
+            try:
+                uni_string = unicode (string, encoding)
+            except:
+                continue
+            encoded = True
+            break
+        if encoded:
+            return uni_string
+        else:
+            # All conversions failed, get unicode with unknown characters
+            return (unicode (string, errors='replace'))
+    else:
+        raise TypeError ('string should be of str type')
+
 
 class MailArchiveAnalyzer:
 
@@ -197,21 +226,22 @@ class MailArchiveAnalyzer:
             if field.find(pattern):
                 return [field.replace(pattern,"@")]
 
-    def decode_header(self, s):
-        if not s:
-            return s
-
-        header = []
-        for text, charset in email.header.decode_header(s):
-            if not charset:
-                header.append(to_unicode(text))
-                continue
-            try:
-                header.append(unicode(text, charset, 'replace'))
-            except:
-                header.append(to_unicode(text))
-
-        return u' '.join(header)
+    def __decode(self, s, charset='latin-1', sep=u' '):
+        """ Decode a header.  A header can be composed by strings with
+            different encoding each.  We convert each group to unicode
+            separately and then we merge them back."""
+        if not charset or 'ascii' in charset:
+            charset = 'latin-1'
+        try:
+            decoded_s = email.header.decode_header(s)
+            r = sep.join([to_unicode(text, text_charset or charset)
+                          for text, text_charset in decoded_s])
+        except:
+            print >>sys.stderr, 'charset: %s' % charset
+            print >>sys.stderr, decoded_s
+            raise
+        
+        return r
 
     def make_msgid(self, from_addr, message):
         try:
