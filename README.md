@@ -22,7 +22,7 @@ Releases:
 * https://github.com/MetricsGrimoire/MailingListStats/downloads
 
 Latest version:
-* git clone git://github.com/MetricsGrimoire/MailingListStats.git
+    $ git clone git://github.com/MetricsGrimoire/MailingListStats.git
 
 
 Requirements
@@ -34,7 +34,7 @@ MLStats needs the following dependencies (either MySQL or PostgresQL):
     * mysql-server
 * Postgresql:
     * psycopg2
-    * postgresql-server (it has been tested with 8.4)
+    * postgresql-server (it has been tested with 8.4 and 9.1)
 
 
 Installation
@@ -43,24 +43,24 @@ You can install MLStats running setup.py script:
 
     # python setup.py install
 
-If you don't have root privileges, use the --prefix option to indicate 
-the directory where mlstats will be installed. For more details, take a 
+If you don't have root privileges, use the `--prefix` option to indicate 
+the directory where `mlstats` will be installed. For more details, take a 
 look at the help of the installer:
 
     $ python setup.py install --help
 
-You are ready to use mlstats
+You are ready to use `mlstats`.
 
 
 Running mlstats
 ---------------
 
 More options, and a more detailed info about the options, can be
-learnt by running "mlstats --help"
+learnt by running `mlstats --help`
 
 The backend postgres requires the database already exists. The creation
 of tables must be done manually. There is a SQL script with the schema
-in db/data_model_pg.sql that can be used for this purpose.
+in `db/data_model_pg.sql` that can be used for this purpose.
 
 
 Analysis
@@ -72,7 +72,7 @@ Analysis
 Improving MailingListStats
 ---------------------------
 
-Source code, wiki and ITS available on Github:
+Source code, wiki and it is available on Github:
 * https://github.com/MetricsGrimoire/MailingListStats
 
 Please write to the developers mailing at
@@ -97,13 +97,13 @@ knowledge on how libre software is developed and maintained.
 Main authors
 ------------
 
-Israel Herraiz                 <isra at herraiz.org>
-Jorge Gascon Perez             <jgascon at gsyc.escet.urjc.es>
+* Israel Herraiz                 <isra at herraiz.org>
+* Jorge Gascon Perez             <jgascon at gsyc.escet.urjc.es>
 
 
 Contributors
 ------------
 
-Dave Neary                     <dneary at_ maemo.org>
-Germán Póo-Caamaño             <gpoo _at gnome.org>
-Luis Cañas                     <lcanas _at_ bitergia.com>
+* Dave Neary                     <dneary at_ maemo.org>
+* Germán Póo-Caamaño             <gpoo@gnome.org>
+* Luis Cañas                     <lcanas _at_ bitergia.com>
