@@ -19,20 +19,22 @@ Download
 --------
 
 Releases:
-* https://github.com/MetricsGrimoire/MailingListStats/downloads
+
+  * https://github.com/MetricsGrimoire/MailingListStats/downloads
 
 Latest version:
+
     $ git clone git://github.com/MetricsGrimoire/MailingListStats.git
 
 
 Requirements
 -------------
-MLStats needs the following dependencies (either MySQL or PostgresQL):
+`mlstats` needs the following dependencies (either MySQL or PostgresQL):
 
-* MySQL:
+  * MySQL:
     * python-mysqldb
     * mysql-server
-* Postgresql:
+  * Postgresql:
     * psycopg2
     * postgresql-server (it has been tested with 8.4 and 9.1)
 
@@ -72,24 +74,25 @@ Analysis
 Improving MailingListStats
 ---------------------------
 
-Source code, wiki and it is available on Github:
-* https://github.com/MetricsGrimoire/MailingListStats
+Source code, wiki and it is available on [Github].
+
+  [GitHub]: https://github.com/MetricsGrimoire/MailingListStats
 
 Please write to the developers mailing at
-* libresoft-tools-devel _at_ lists.morfeo-project.org
+libresoft-tools-devel@lists.morfeo-project.org
 
 If you want to receive updates about new versions, and keep in touch
-with the development team, consider subscribing to the list. It is a
-very low traffic list (< 1 msg a day):
+with the development team, consider subscribing to the [mailing list][1].
+It is a very low traffic list (< 1 msg a day):
 
-* https://lists.morfeo-project.org/mailman/listinfo/libresoft-tools-devel
+  [1]: https://lists.morfeo-project.org/mailman/listinfo/libresoft-tools-devel
 
 
 Credits
 -------
 
-MLStats has been originally developed by the GSyC/LibreSoft group at the
-Universidad Rey Juan Carlos in Mostoles, near Madrid (Spain). It is
+`mlstats` has been originally developed by the GSyC/LibreSoft group at
+the Universidad Rey Juan Carlos in Mostoles, near Madrid (Spain). It is
 part of a wider research on libre software engineering, aimed to gain
 knowledge on how libre software is developed and maintained.
  
@@ -97,13 +100,18 @@ knowledge on how libre software is developed and maintained.
 Main authors
 ------------
 
-* Israel Herraiz                 <isra at herraiz.org>
-* Jorge Gascon Perez             <jgascon at gsyc.escet.urjc.es>
+  * [Israel Herraiz]               <isra at herraiz org>
+  * Jorge Gascon Perez             <jgascon at gsyc.escet.urjc.es>
 
 
 Contributors
 ------------
 
-* Dave Neary                     <dneary at_ maemo.org>
-* Germán Póo-Caamaño             <gpoo@gnome.org>
-* Luis Cañas                     <lcanas _at_ bitergia.com>
+  * [Dave Neary]                   <dneary at maemo org>
+  * [Germán Poo-Caamaño]           <gpoo at gnome org>
+  * [Luis Cañas]                   <lcanas at bitergia com>
+
+  [Israel Herraiz]: http://herraiz.org/
+  [Dave Neary]: http://blogs.gnome.org/bolsh/
+  [Germán Poo-Caamaño]: http://calcifer.org/
+  [Luis Cañas]: http://sanacl.wordpress.com/
