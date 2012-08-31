@@ -164,21 +164,8 @@ def mlstats_dot_dir ():
     try:
         return _dirs['dot']
     except KeyError:
-        pass
-
-    dot_dir = os.path.join (get_home_dir (), '.mlstats')
-    try:
-        os.mkdir (dot_dir, 0700)
-    except OSError, e:
-        if e.errno == errno.EEXIST:
-            if not os.path.isdir (dot_dir):
-                raise
-        else:
-            raise
-    
-    _dirs['dot'] = dot_dir
-
-    return dot_dir
+        _dirs['dot'] = os.path.join(get_home_dir (), '.mlstats')
+        return _dirs['dot']
 
 if __name__ == '__main__':
     print "mlstats dot dir: %s" % (mlstats_dot_dir ())
