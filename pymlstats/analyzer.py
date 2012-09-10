@@ -37,6 +37,7 @@ import datetime
 import hashlib
 import sys
 from pymlstats.strictmbox import strict_mbox
+from pymlstats.utils import EMAIL_OBFUSCATION_PATTERNS
 
 def to_unicode (string, charset='latin-1'):
     """Converts a string type to an object of unicode type.
@@ -228,19 +229,17 @@ class MailArchiveAnalyzer:
 
         return msgdate, tz_secs
 
-    def __check_spam_obscuring(self,field):
-
-        # Add more patterns here
-        obscurers = [" at ","_at_"," en "]
-
+    def __check_spam_obscuring(self, field):
         if not field:
             return field
-        
+
         field = field[0]
 
-        for pattern in obscurers:
-            if field.find(pattern):
-                return [field.replace(pattern,"@")]
+        for pattern in EMAIL_OBFUSCATION_PATTERNS:
+            if field.find(pattern) != -1:
+                return [field.replace(pattern, '@')]
+
+        return field
 
     def __decode(self, s, charset='latin-1', sep=u' '):
         """ Decode a header.  A header can be composed by strings with

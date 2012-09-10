@@ -26,8 +26,9 @@ Some utils functions for MLStats
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-COMPRESSED_TYPES = ['.gz','.bz2','.zip','.tar','.tar.gz','.tar.bz2','.tgz','.tbz']
-ACCEPTED_TYPES = ['.mbox','.txt']
+COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar', '.tar.gz', '.tar.bz2', '.tgz', '.tbz']
+ACCEPTED_TYPES = ['.mbox', '.txt']
+EMAIL_OBFUSCATION_PATTERNS = [' at ', '_at_', ' en ']
 
 from fileextractor import *
 import os.path

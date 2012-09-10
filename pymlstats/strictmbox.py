@@ -27,6 +27,7 @@ mboxo format, which fails to process some multipart archives.
 import mailbox
 import os
 import re
+from pymlstats.utils import EMAIL_OBFUSCATION_PATTERNS
 
 class strict_mbox(mailbox.mbox):
     _fromlinepattern = (r'From \s*[^\s]+\s+\w\w\w\s+\w\w\w\s+\d?\d\s+'
@@ -61,4 +62,14 @@ class strict_mbox(mailbox.mbox):
     def _strict_isrealfromline(self, line):
         if not self._regexp:
             self._regexp = re.compile(self._fromlinepattern)
-        return self._regexp.match(line)
+        return self._regexp.match(self._check_spam_obscuring(line))
+
+    def _check_spam_obscuring(self, line):
+        if not line:
+            return line
+
+        for pattern in EMAIL_OBFUSCATION_PATTERNS:
+            if line.find(pattern) != -1:
+                return line.replace(pattern, '@')
+
+        return line
