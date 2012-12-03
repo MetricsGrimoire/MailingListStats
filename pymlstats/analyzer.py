@@ -233,11 +233,9 @@ class MailArchiveAnalyzer:
         if not field:
             return field
 
-        field = field[0]
-
         for pattern in EMAIL_OBFUSCATION_PATTERNS:
-            if field.find(pattern) != -1:
-                return [field.replace(pattern, '@')]
+            if field[0].find(pattern) != -1:
+                return [field[0].replace(pattern, '@')]
 
         return field
 
