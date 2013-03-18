@@ -74,18 +74,15 @@ Analysis
 Improving MailingListStats
 ---------------------------
 
-Source code, wiki and it is available on [Github].
+Source code, wiki and submission of bug reports are accessible in [GitHub].
 
-  [GitHub]: https://github.com/MetricsGrimoire/MailingListStats
-
-Please write to the developers mailing at
-libresoft-tools-devel@lists.morfeo-project.org
+[GitHub]: https://github.com/MetricsGrimoire/MailingListStats
 
 If you want to receive updates about new versions, and keep in touch
-with the development team, consider subscribing to the [mailing list][1].
-It is a very low traffic list (< 1 msg a day):
+with the development team, consider subscribing to the [MetricsGrimoire mailing list][1].
+It is a very low traffic list, usually with less than one message per day.
 
-  [1]: https://lists.morfeo-project.org/mailman/listinfo/libresoft-tools-devel
+[1]: https://lists.libresoft.es/listinfo/metrics-grimoire
 
 
 Credits
