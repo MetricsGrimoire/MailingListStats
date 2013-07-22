@@ -25,6 +25,8 @@
 #
 # Simple script to get a mailing list from Gmane in mbox format
 #
+# Info about the Gmane download API:
+#  http://gmane.org/export.php
 
 import argparse
 import os
