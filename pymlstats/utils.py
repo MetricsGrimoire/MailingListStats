@@ -26,17 +26,34 @@ Some utils functions for MLStats
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar', '.tar.gz', '.tar.bz2', '.tgz', '.tbz']
-ACCEPTED_TYPES = ['.mbox', '.txt']
-EMAIL_OBFUSCATION_PATTERNS = [' at ', '_at_', ' en ']
-
 from fileextractor import *
 import os.path
 import tempfile
 import urllib
 import urllib2
 import shutil
-import errno
+import datetime
+
+COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar', '.tar.gz', '.tar.bz2', '.tgz', '.tbz']
+ACCEPTED_TYPES = ['.mbox', '.txt']
+EMAIL_OBFUSCATION_PATTERNS = [' at ', '_at_', ' en ']
+MAILMAN_DATE_FORMAT = '%Y-%B'
+
+
+def current_month():
+    """Get the current month"""
+    # Assuming this is run daily, it's better to take yesterday's date,
+    # to ensure we get all of last month's email when the month rolls over.
+    yesterday = datetime.datetime.today() + datetime.timedelta(days=-1)
+    this_month = yesterday.strftime(MAILMAN_DATE_FORMAT)
+    return this_month
+
+
+def create_dirs(dirpath):
+    """Wrapper to make directories"""
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+
 
 def check_compressed_file(filename):
     """Check if filename contains one of the extensions

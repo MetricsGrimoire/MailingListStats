@@ -26,23 +26,84 @@ Main funcion of mlstats. Fun starts here!
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
+import os.path
+import re
+
 from database import create_database
 from analyzer import *
 from htmlparser import *
-from utils import (retrieve_remote_file, check_compressed_file,
-                   uncompress_file, mlstats_dot_dir)
-import os.path
-import datetime
-import re
+from utils import current_month, create_dirs, mlstats_dot_dir,\
+    retrieve_remote_file, check_compressed_file, uncompress_file
+
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
-mailmanfmt = '%Y-%B'
+
+
+MBOX_DIR = os.path.join(mlstats_dot_dir(), 'mbox')
+COMPRESSED_DIR = os.path.join(mlstats_dot_dir(), 'compressed')
+
+
+class MailingList(object):
+
+    def __init__(self, url_or_dirpath):
+        self._location = url_or_dirpath
+        self._alias = os.path.basename(self._location)
+
+        # Check if directory exists, if not, assume it is remote
+        if os.path.exists(self._location):
+            self._local = True
+            target = self._location.lstrip('/')
+        else:
+            self._local = False
+            target = re.sub('^(http|ftp)[s]{0,1}://', '', self._location)
+
+        # Define local directories to store mboxes archives 
+        self._mbox_dir = os.path.join(MBOX_DIR, target)
+        self._compressed_dir = os.path.join(COMPRESSED_DIR, target)
+
+    @property
+    def location(self):
+        return self._location
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @property
+    def mbox_dir(self):
+        return self._mbox_dir
+
+    @property
+    def compressed_dir(self):
+        return self._compressed_dir
+
+    def is_local(self):
+        return self._local
+
+    def is_remote(self):
+        return not self.is_local()
+
+
+class MBoxArchive(object):
+
+    def __init__(self, filepath, url=None):
+        self._filepath = filepath
+        self.url = url
+        self._compressed = check_compressed_file(filepath)
+
+    @property
+    def filepath(self):
+        return self._filepath
+
+    @property
+    def compressed_type(self):
+        return self._compressed
+
+    def is_compressed(self):
+        return self._compressed is not None
+
 
 class Application:
-    
-    MBOX_DIR = os.path.join(mlstats_dot_dir(),'mbox')
-    COMPRESSED_DIR = os.path.join(mlstats_dot_dir(),'compressed')
-
 
     def __init__(self, driver, user, password, dbname, host,
                  admin_user, admin_password, url_list, report_filename,
@@ -68,7 +129,7 @@ class Application:
         # Don't show messages when retrieveing and analyzing files
         self.be_quiet = be_quiet
 
-        # URLs to be analyzed
+        # URLs or local files to be analyzed
         self.url_list = url_list
 
         self.__check_mlstats_dirs()
@@ -76,8 +137,8 @@ class Application:
         total_messages = 0
         stored_messages = 0
         non_parsed = 0
-        for url in url_list:
-            t,s,np = self.__analyze_url(url)
+        for mailing_list in url_list:
+            t,s,np = self.__analyze_mailing_list(mailing_list)
 
             total_messages += t
             stored_messages += s
@@ -214,56 +275,68 @@ class Application:
             fileobj.write(output)
             fileobj.close()
 
-    def __analyze_url(self,url):
-        """Check the type of url (directory, remote), and call
-        the appropiate function"""
+    def __analyze_mailing_list(self, url_or_dirpath):
+        """Look for mbox archives, retrieve, uncompress and analyze them"""
+
+        mailing_list = MailingList(url_or_dirpath)
 
         # Check if mailing list already in database
         today = datetime.datetime.today().strftime(datetimefmt)
-        name = os.path.basename(url)
-        self.db.update_mailing_list(url,name,today)
+        self.db.update_mailing_list(mailing_list.location,
+                                    mailing_list.alias,
+                                    today)
 
         total, stored, non_parsed = (0,0,0)
-        # Check if directory exists
-        if os.path.exists(url):
-            total, stored, non_parsed = self.__analyze_non_remote(url)
-        # If not, assume it is remote
-        else:
-            try:
-                total, stored, non_parsed = self.__analyze_remote(url)
-            except IOError:
-                self.__print_output("Unknown URL or directory: "+url+". Skipping.")                
+
+        try:
+            archives = self.__retrieve_mailing_list_archives(mailing_list)
+            archives_to_analyze = self.__set_archives_to_analyze(mailing_list, archives)
+            total, stored, non_parsed = self.__analyze_list_of_files(mailing_list, archives_to_analyze)
+        except IOError:
+            self.__print_output("Unknown URL or directory: " +
+                                url_or_dirpath + ". Skipping.")
 
         return total, stored, non_parsed
 
-    def __analyze_remote(self, url):
-        """Download the archives from the remote url, stores and parses them."""
+    def __retrieve_mailing_list_archives(self, mailing_list):
+        self.__create_download_dirs(mailing_list)
 
-        # Check directories to stored the archives
-        target = re.sub('^(http|ftp)[s]{0,1}://', '', url)
-        compressed_dir = os.path.join(self.COMPRESSED_DIR,
-                                            target)
-        mbox_dir = os.path.join(self.MBOX_DIR, target)
-        if not os.path.exists(compressed_dir):
-            os.makedirs(compressed_dir)
-        if not os.path.exists(mbox_dir):
-            os.makedirs(mbox_dir)
+        if mailing_list.is_local():
+            archives = self.__retrieve_local_archives(mailing_list)
+        else:
+            archives = self.__retrieve_remote_archives(mailing_list)
+        return archives
 
-        # If the file is for the current month (MailMan filename 
-        # YYYY-MMM.txt.gz) don't mark as visited, and download again
-        # Assuming this is run daily, it's better to take yesterday's date,
-        # to ensure we get all of last month's email when the month rolls over.
-        yesterday = datetime.datetime.today() + datetime.timedelta(days=-1)
-        this_month = yesterday.strftime(mailmanfmt)
+    def __retrieve_local_archives(self, mailing_list):
+        """Walk the mailing list directory looking for archives"""
+        archives = []
+        for root, dirs, files in os.walk(mailing_list.location):
+            files.sort()
+            for filename in files:
+                location = os.path.join(root, filename)
+                archives.append(MBoxArchive(location, location))
+        return archives
 
+    def __retrieve_remote_archives(self, mailing_list):
+        """Download mboxes archives from the remote mailing list"""
         # Get all the links listed in the URL
-        htmlparser = MyHTMLParser(url, self.web_user, self.web_password)
+        #
+        # The archives are usually retrieved in descending
+        # chronological order (newest archives are always
+        # shown on the top of the archives). Reverse the list
+        # to analyze in chronological order.
+        htmlparser = MyHTMLParser(mailing_list.location,
+                                  self.web_user, self.web_password)
         links = htmlparser.get_mboxes_links()
+        links.reverse()
 
-        filepaths = []
+        this_month = current_month()
+
+        archives = []
+
         for link in links:
             basename = os.path.basename(link)
-            destfilename = os.path.join(compressed_dir, basename)
+            destfilename = os.path.join(mailing_list.compressed_dir, basename)
 
             # If the URL is for the current month, always retrieve.
             # Otherwise, check visited status & local files first
@@ -271,176 +344,93 @@ class Application:
                 self.__print_output('Found substring %s in URL %s...' %
                                     (this_month, link))
                 self.__print_output('Retrieving %s...' % link)
-                retrieve_remote_file(link, destfilename, self.web_user,
-                                     self.web_password)
-            elif os.path.exists(destfilename):   # Check if already downloaded
+                retrieve_remote_file(link, destfilename,
+                                     self.web_user, self.web_password)
+            elif os.path.exists(destfilename):
                 self.__print_output('Already downloaded %s' % link)
             else:
                 self.__print_output('Retrieving %s...' % link)
-                retrieve_remote_file(link, destfilename, self.web_user,
-                                     self.web_password)
+                retrieve_remote_file(link, destfilename,
+                                     self.web_user, self.web_password)
+            archives.append(MBoxArchive(destfilename, link))
+        return archives
 
-            filepaths.append((link, destfilename))
+    def __set_archives_to_analyze(self, mailing_list, archives):
+        archives_to_analyze = []
 
-        files_to_analyze = {}
-        url_list = []
-        for link, filepath in filepaths:
+        for archive in archives:
             # Check if already analyzed
-            status = self.db.check_compressed_file(filepath)
+            status = self.db.check_compressed_file(archive.filepath)
 
-            # If the file is for the current month, reimport
-            current_month = -1 != filepath.find(this_month)
-            if current_month:
+            # If the file is for the current month, re-import to update
+            this_month = -1 != archive.filepath.find(current_month())
+            if this_month:
                 self.__print_output('Found substring %s in URL %s...' % \
-                                    (this_month, filepath))
+                                    (this_month, archive.filepath))
 
             # If already visited, ignore, unless it's for the current month
-            if status == self.db.VISITED and not current_month:
-                self.__print_output('Already analyzed %s' % filepath)
+            if status == self.db.VISITED and not this_month:
+                self.__print_output('Already analyzed %s' % archive.filepath)
                 continue
-            
+
             # If not, set visited
             # (before uncompressing, otherwise the db will point towards
             # the uncompressed temporary file)
             today = datetime.datetime.today().strftime(datetimefmt)
-            self.db.set_visited_url(link, url, today, self.db.NEW)
+            self.db.set_visited_url(archive.url, mailing_list.location, today, self.db.NEW)
 
-            # Check if compressed
-            extension = check_compressed_file(filepath)
-            if extension:
-                # If compressed, uncompress and get the raw filepath
-                filepaths = uncompress_file(filepath, extension, mbox_dir)
-                # __uncompress_file returns a list containing
-                # the path to all the uncompressed files
-                # (for instance, a tar file may contain more than one file)
-                files_to_analyze.setdefault(link, []).extend(filepaths)
+            if archive.is_compressed():
+                # Uncompress and get the raw filepaths
+                filepaths = uncompress_file(archive.filepath, archive.compressed_type,
+                                            mailing_list.mbox_dir)
+                uncompressed_mboxes = [MBoxArchive(fp, archive.url) for fp in filepaths]
+                archives_to_analyze.extend(uncompressed_mboxes)
             else:
-                # File was not uncompressed, so there is only
-                # one file to append
-                files_to_analyze.setdefault(link, []).append(filepath)
+                archives_to_analyze.append(archive)
 
-            url_list.append(link)
+        return archives_to_analyze
 
-        # The archives are usually retrieved in descending
-        # chronological order (because the newest archives are always
-        # shown on the top of the archives)
 
-        # So we will analyze the list of files in the order inversed
-        # to the order in they were retrieved
-        url_list.reverse()
-
-        return self.__analyze_list_of_files(url, url_list, files_to_analyze)
-
-    def __analyze_list_of_files(self, mailing_list_url, url_list,
-                                 files_to_analyze):
+    def __analyze_list_of_files(self, mailing_list, archives_to_analyze):
         """Analyze a list of given files"""
 
         total_messages_url = 0
         stored_messages_url = 0
         non_parsed_messages_url = 0
 
-        for url in url_list:
-            for filepath in files_to_analyze[url]:
-                self.__print_output('Analyzing %s' % filepath)
-                self.mail_parser.filepath = filepath
-                messages, non_parsed_messages = self.mail_parser.get_messages()
-                total_messages = len(messages)
-                stored_messages = self.db.store_messages(messages,mailing_list_url)
-                difference = total_messages-stored_messages
-                if difference > 0:
-                    self.__print_output("   ***WARNING: %d messages (out of %d) parsed but not stored***" % (difference,total_messages))
-                if non_parsed_messages > 0:
-                    self.__print_output("   ***WARNING: %d messages (out of %d) were ignored by the parser***" % (non_parsed_messages,total_messages+non_parsed_messages))
+        for archive in archives_to_analyze:
+            filepath = archive.filepath
+            self.__print_output('Analyzing %s' % filepath)
+            self.mail_parser.filepath = filepath
+            messages, non_parsed_messages = self.mail_parser.get_messages()
+            total_messages = len(messages)
+            stored_messages = self.db.store_messages(messages, mailing_list.location)
+            difference = total_messages-stored_messages
+            if difference > 0:
+                self.__print_output("   ***WARNING: %d messages (out of %d) parsed but not stored***" % (difference,total_messages))
+            if non_parsed_messages > 0:
+                self.__print_output("   ***WARNING: %d messages (out of %d) were ignored by the parser***" % (non_parsed_messages,total_messages+non_parsed_messages))
 
-                total_messages_url += total_messages
-                stored_messages_url += stored_messages
-                non_parsed_messages_url += non_parsed_messages
+            total_messages_url += total_messages
+            stored_messages_url += stored_messages
+            non_parsed_messages_url += non_parsed_messages
 
             today = datetime.datetime.today().strftime(datetimefmt)
-            self.db.set_visited_url(url, mailing_list_url, today,
+            self.db.set_visited_url(archive.url, mailing_list.location, today,
                                     self.db.VISITED)
 
         return total_messages_url, stored_messages_url, non_parsed_messages_url
 
-    def __analyze_non_remote(self, dirname):
-        """Walk recursively the directory looking for files,
-        and uncompress them. Then __analyze_local_directory is called."""
-
-        # Check if directory to stored uncompressed files already exists
-        mbox_dir = os.path.join(self.MBOX_DIR, dirname.lstrip('/'))
-        if not os.path.exists(mbox_dir):
-            os.makedirs(mbox_dir)
-        # Compressed files are left in their original location,
-        # because they can be uncompressed from that location
-
-        filepaths = []
-        for root, dirs, files in os.walk(dirname):
-            filepaths += [os.path.join(root, filename) for filename in files]
-
-        # If the file is for the current month (MailMan filename 
-        # YYYY-MMM.txt.gz) don't mark as visited, and download again
-        # Assuming this is run daily, it's better to take yesterday's date,
-        # to ensure we get all of last month's email when the month rolls over.
-        yesterday= datetime.datetime.today() + datetime.timedelta(days=-1)
-        this_month= yesterday.strftime(mailmanfmt)
-
-        files_to_analyze = {}
-        url_list = []
-        for filepath in filepaths:
-
-            # Check if already analyzed
-            status = self.db.check_compressed_file(filepath)
-
-            # If the file is for the current month, reimport
-            current_month = -1 != filepath.find(this_month)
-            if current_month:
-                self.__print_output('Found substring %s in URL %s...' % \
-                                    (this_month, filepath))
-
-            # If already visited, ignore, unless it's for the current month
-            if status == self.db.VISITED and not current_month:
-                self.__print_output('Already analyzed %s' % filepath)
-                continue
-            
-            # If not, set visited
-            # (before uncompressing, otherwise the db will point towards
-            # the uncompressed temporary file)
-            today = datetime.datetime.today().strftime(datetimefmt)
-            self.db.set_visited_url(filepath, dirname, today, self.db.NEW)
-
-            # Check if compressed
-            extension = check_compressed_file(filepath)
-            if extension:
-                # If compressed, uncompress and get the raw filepath
-                filepaths = uncompress_file(filepath, extension, mbox_dir)
-                # __uncompress_file returns a list containing
-                # the path to all the uncompressed files
-                # (for instance, a tar file may contain more than one file)
-                files_to_analyze.setdefault(filepath, []).extend(filepaths)
-            else:
-                # File was not uncompressed, so there is only
-                # one file to append
-                files_to_analyze.setdefault(filepath, []).append(filepath)
-
-            url_list.append(filepath)
-
-        # The archives are usually retrieved in descending
-        # chronological order (because the newest archives are always
-        # shown on the top of the archives)
-
-        # So we will analyze the list of files in the order inversed
-        # to the order in they were retrieved
-        url_list.reverse()
-
-        return self.__analyze_list_of_files(dirname, url_list,
-                                            files_to_analyze)
-
 
     def __check_mlstats_dirs(self):
         '''Check if the mlstats directories exist'''
+        create_dirs(MBOX_DIR)
+        create_dirs(COMPRESSED_DIR)
 
-        if not os.path.exists(self.MBOX_DIR):
-            os.makedirs(self.MBOX_DIR)
+    def __create_download_dirs(self, mailing_list):
+        # Remote archives are retrieved and stored in compressed_dir.
+        # Local compressed archives are left in their original location.
+        if mailing_list.is_remote():
+            create_dirs(mailing_list.compressed_dir)
 
-        if not os.path.exists(self.COMPRESSED_DIR):
-            os.makedirs(self.COMPRESSED_DIR)
+        create_dirs(mailing_list.mbox_dir)
