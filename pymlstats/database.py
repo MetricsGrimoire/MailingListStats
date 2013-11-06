@@ -66,6 +66,11 @@ class Database:
         aux1 = data_address[0][1].replace('"','')
         return ((aux0, aux1),)
 
+    def get_compressed_files(self, mailing_list_url):
+        query = 'SELECT url FROM compressed_files WHERE mailing_list_url = %s;'
+        self.read_cursor.execute(query, (mailing_list_url,))
+        return [row[0] for row in self.read_cursor.fetchall()]
+
     def check_compressed_file(self, url):
         query = 'SELECT status FROM compressed_files WHERE url=%s;'
         self.read_cursor.execute(query, (url,))

@@ -41,6 +41,10 @@ datetimefmt = '%Y-%m-%d %H:%M:%S'
 
 MBOX_DIR = os.path.join(mlstats_dot_dir(), 'mbox')
 COMPRESSED_DIR = os.path.join(mlstats_dot_dir(), 'compressed')
+GMANE_DOMAIN = 'gmane.org'
+GMANE_URL = 'http://dir.gmane.org/'
+GMANE_DOWNLOAD_URL = 'http://download.gmane.org/'
+GMANE_LIMIT = 2000
 
 
 class MailingList(object):
@@ -57,7 +61,7 @@ class MailingList(object):
             self._local = False
             target = re.sub('^(http|ftp)[s]{0,1}://', '', self._location)
 
-        # Define local directories to store mboxes archives 
+        # Define local directories to store mboxes archives
         self._mbox_dir = os.path.join(MBOX_DIR, target)
         self._compressed_dir = os.path.join(COMPRESSED_DIR, target)
 
@@ -319,6 +323,46 @@ class Application:
 
     def __retrieve_remote_archives(self, mailing_list):
         """Download mboxes archives from the remote mailing list"""
+
+        if (mailing_list.location.startswith(GMANE_URL)):
+            archives = self.__retrieve_from_gmane(mailing_list)
+        else:
+            archives = self.__retrieve_from_mailman(mailing_list)
+        return archives
+
+    def __retrieve_from_gmane(self, mailing_list):
+        """Download mboxes from gmane interface"""
+
+        gmane_url = GMANE_DOWNLOAD_URL + mailing_list.alias
+        from_msg = self.__get_gmane_total_count(mailing_list.location,
+                                                gmane_url)
+
+        archives = []
+
+        while(True):
+            to_msg = from_msg + GMANE_LIMIT
+            url = gmane_url + '/' + str(from_msg) + '/' + str(to_msg)
+            arch_url = gmane_url + '/' + str(from_msg)
+            filename = os.path.join(mailing_list.compressed_dir, str(from_msg))
+
+            self.__print_output('Retrieving %s...' % url)
+            retrieve_remote_file(url, filename,
+                                 self.web_user, self.web_password)
+
+            # Check whether we have read the last message.
+            # In Gmane, an empty page means we reached the last msg
+            with open(filename, 'r') as f:
+                content = f.read()
+            if not content:
+                break
+
+            from_msg = to_msg
+
+            archives.append(MBoxArchive(filename, arch_url))
+        return archives
+
+    def __retrieve_from_mailman(self, mailing_list):
+        """Download mboxes from mailman interface"""
         # Get all the links listed in the URL
         #
         # The archives are usually retrieved in descending
@@ -359,19 +403,21 @@ class Application:
         archives_to_analyze = []
 
         for archive in archives:
-            # Check if already analyzed
-            status = self.db.check_compressed_file(archive.filepath)
+            # Always set Gmane archives to analyze
+            if not archive.filepath.find(GMANE_DOMAIN):
+                # Check if already analyzed
+                status = self.db.check_compressed_file(archive.filepath)
 
-            # If the file is for the current month, re-import to update
-            this_month = -1 != archive.filepath.find(current_month())
-            if this_month:
-                self.__print_output('Found substring %s in URL %s...' % \
-                                    (this_month, archive.filepath))
+                # If the file is for the current month, re-import to update
+                this_month = -1 != archive.filepath.find(current_month())
+                if this_month:
+                    self.__print_output('Found substring %s in URL %s...' % \
+                                        (this_month, archive.filepath))
 
-            # If already visited, ignore, unless it's for the current month
-            if status == self.db.VISITED and not this_month:
-                self.__print_output('Already analyzed %s' % archive.filepath)
-                continue
+                # If already visited, ignore, unless it's for the current month
+                if status == self.db.VISITED and not this_month:
+                    self.__print_output('Already analyzed %s' % archive.filepath)
+                    continue
 
             # If not, set visited
             # (before uncompressing, otherwise the db will point towards
@@ -421,6 +467,19 @@ class Application:
 
         return total_messages_url, stored_messages_url, non_parsed_messages_url
 
+    def __get_gmane_total_count(self, mailing_list_url, download_url):
+        """Return the total count of messages from gmane mailing list"""
+        mboxes = self.db.get_compressed_files(mailing_list_url)
+
+        ids = []
+        for mbox in mboxes:
+            msg_id = mbox.replace(download_url, '').strip('/')
+            msg_id = int(msg_id)
+            ids.append(msg_id)
+
+        if not ids:
+            return 0
+        return max(ids)
 
     def __check_mlstats_dirs(self):
         '''Check if the mlstats directories exist'''
