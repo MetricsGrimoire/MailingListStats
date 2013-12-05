@@ -63,14 +63,14 @@ def check_compressed_file(filename):
     
     # Check the two last extensions
     # (to recognize also composed extensions such as tar.gz)
-    filename_noext1, ext1 = os.path.splitext(filename)
-    filename_noexts, ext2 = os.path.splitext(filename_noext1)
-    
-    if ext2+"."+ext1 in recognized_exts:
-        return ext2+"."+ext1
+    filename_noext, ext = os.path.splitext(filename)
+    long_ext = ''.join([os.path.splitext(filename_noext)[1], ext])
 
-    if ext1 in recognized_exts:
-        return ext1
+    if long_ext in recognized_exts:
+        return long_ext
+
+    if ext in recognized_exts:
+        return ext
 
     return None
 
