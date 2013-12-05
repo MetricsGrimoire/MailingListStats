@@ -3,11 +3,13 @@ Mailing List Stats
 
 Description
 -----------
-Mailing List Stats is a command line based tool used to analyze
-mboxes. It downloads the mboxes in a directory where database
-will be created. It stores all the information which is contained
-in a e-mail.
+Mailing List Stats (`mlstats`) is a tool to parse and analyze mail boxes.
+It is useful to retrieve and analyze mailing list archives.  The parsed
+mail boxes are stored in a database.
 
+`mlstats` is able to retrieve mailing lists from the web,
+and store the data of every email in a database, from where to obtain
+different kind of reports.
 
 License
 -------
