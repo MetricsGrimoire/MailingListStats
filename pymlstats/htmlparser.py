@@ -35,10 +35,9 @@ import os
 import formatter
 import utils
 
+
 class MyHTMLParser(htmllib.HTMLParser):
-
-
-    def __init__(self, url, web_user = None, web_password = None, verbose=0):
+    def __init__(self, url, web_user=None, web_password=None, verbose=0):
 
         f = formatter.NullFormatter()
 
@@ -48,7 +47,7 @@ class MyHTMLParser(htmllib.HTMLParser):
         self.links = []
         self.mboxes_links = []
 
-        htmllib.HTMLParser.__init__(self,f,verbose)
+        htmllib.HTMLParser.__init__(self, f, verbose)
 
     def anchor_bgn(self, href, name, type):
         self.save_bgn()
@@ -59,7 +58,7 @@ class MyHTMLParser(htmllib.HTMLParser):
     def get_mboxes_links(self):
 
         self.__get_html()
-        
+
         # Ignore links with not recognized extension
         filtered_links = []
         for l in self.links:
@@ -69,7 +68,7 @@ class MyHTMLParser(htmllib.HTMLParser):
             accepted_types = utils.COMPRESSED_TYPES + utils.ACCEPTED_TYPES
 
             if ext1 in accepted_types or ext1+ext2 in accepted_types:
-                filtered_links.append(os.path.join(self.url,l))
+                filtered_links.append(os.path.join(self.url, l))
 
         self.mboxes_links = filtered_links
 
@@ -81,7 +80,7 @@ class MyHTMLParser(htmllib.HTMLParser):
         user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
                      '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
                      'Chrome/15.0.871.0 Safari/535.2'
-        headers = { 'User-Agent': user_agent }
+        headers = {'User-Agent': user_agent}
         postdata = None
 
         if self.user:
@@ -94,5 +93,5 @@ class MyHTMLParser(htmllib.HTMLParser):
         htmltxt = response.read()
         response.close()
 
-        self.feed(htmltxt) # Read links from HTML code
+        self.feed(htmltxt)  # Read links from HTML code
         self.close()

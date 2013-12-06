@@ -17,7 +17,8 @@
 # Authors : Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 """
-Version number. Centralized module to access to have the version number in an unique place
+Version number. Centralized module to access to have the version number
+in an unique place
 
 @author:       Israel Herraiz
 @organization: Libresoft Research Group, Universidad Rey Juan Carlos

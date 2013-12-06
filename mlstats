@@ -36,5 +36,4 @@ if __name__ == "__main__":
     try:
         pymlstats.start()
     except KeyboardInterrupt:
-        print >>sys.stderr, "\n\nReceived Ctrl-C or other break signal. Exiting."
-
+        print >>sys.stderr, "\nReceived Ctrl-C or other break signal. Exiting."

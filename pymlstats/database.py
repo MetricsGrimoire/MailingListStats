@@ -35,10 +35,14 @@ import sys
 import pprint
 from pymlstats import datamodel
 
+
 class DatabaseException (Exception):
     '''Generic Database Exception'''
+
+
 class DatabaseDriverNotSupported (DatabaseException):
     '''Database driver is not supported'''
+
 
 class Database:
     (VISITED, NEW, FAILED) = ('visited', 'new', 'failed')
@@ -63,7 +67,7 @@ class Database:
 
         #erase the " in the e-mail
         aux0 = data_address[0][0]
-        aux1 = data_address[0][1].replace('"','')
+        aux1 = data_address[0][1].replace('"', '')
         return ((aux0, aux1),)
 
     def get_compressed_files(self, mailing_list_url):
@@ -205,7 +209,7 @@ class Database:
         return self.read_cursor.fetchall()
 
     def get_messages_by_people(self):
-        mailing_lists = int(self.get_num_of_mailing_lists())
+        # mailing_lists = int(self.get_num_of_mailing_lists())
         limit = self.limit
         query = '''SELECT m.mailing_list_url, lower(mp.email_address) as email,
                           count(m.message_ID) as t
@@ -251,6 +255,9 @@ class DatabaseMysql(Database):
         self.host = hostname
 
     def connect(self):
+        check_options_msg = "Please check the --db-user and " \
+                            "--db-password command line options"
+
         try:
             db = self.dbapi.connect(self.host, self.user,
                                     self.password, self.name,
@@ -259,17 +266,17 @@ class DatabaseMysql(Database):
 
             # Check the error number
             errno = e.args[0]
-            if 1045 == errno: # Unknown or unauthorized user
+            if 1045 == errno:  # Unknown or unauthorized user
                 msg = e.args[1]
                 print >>sys.stderr, msg
-                print >>sys.stderr, "Please check the --db-user and --db-password command line options"
+                print >>sys.stderr, check_options_msg
                 sys.exit(2)
-            elif 1044 == errno: # User can not access database
+            elif 1044 == errno:  # User can not access database
                 msg = e.args[1]
                 print >>sys.stderr, msg
-                print >>sys.stderr, "Please check the --db-user and --db-password command line options"
+                print >>sys.stderr, check_options_msg
                 sys.exit(2)
-            elif 1049 == errno: # Unknown database
+            elif 1049 == errno:  # Unknown database
                 # Database does not exist
                 # So create it
                 try:
@@ -279,13 +286,18 @@ class DatabaseMysql(Database):
                 except self.dbapi.OperationalError, e:
                     errno = e.args[0]
 
-                    if 1045 == errno: # Unauthorized user
+                    if 1045 == errno:  # Unauthorized user
                         msg = e.args[1]
                         print >>sys.stderr, msg
-                        print >>sys.stderr, "Please check the --db-admin-user and --db-admin-password command line options"
+                        print >>sys.stderr, check_options_msg
                         sys.exit(1)
-                    else: # Unknown exception
-                        message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
+                    else:  # Unknown exception
+                        message = """ERROR: Runtime error while trying to
+                        connect to the database. Error number is '%s'.
+                        Original message is '%s'. I don't know how to
+                        continue after this failure. Please report the
+                        failure.""" % (str(e.args[0]), str(e.args[1]))
+
                         # Write message to the stderr
                         print >> sys.stderr, message
                         sys.exit(1)
@@ -300,12 +312,18 @@ class DatabaseMysql(Database):
                 db.commit()
 
                 # Database created, now reconnect
-                # If this point has passed the exceptions catching, it should work
+                # If this point has passed the exceptions catching,
+                # it should work
                 db = self.dbapi.connect(self.host, self.user,
-                                        self.password,self.name,
+                                        self.password, self.name,
                                         charset='utf8', use_unicode=True)
-            else: # Unknown exception
-                message = "ERROR: Runtime error while trying to connect to the database. Error number is "+str(e.args[0])+". Original message is "+str(e.args[1])+". I don't know how to continue after this failure. Please report the failure."
+            else:  # Unknown exception
+                message = """ERROR: Runtime error while trying to connect to
+                the database. Error number is '%'s. Original
+                message is '%s'. I don't know how to continue
+                after this failure. Please report the
+                failure.""" % (str(e.args[0]), str(e.args[1]))
+
                 # Write message to the stderr
                 print >> sys.stderr, message
                 sys.exit(1)
@@ -389,7 +407,12 @@ class DatabaseMysql(Database):
                 # Duplicated message
                 stored_messages -= 1
             except:
-                error_message = "ERROR: Runtime error while trying to write message with message-id '%s'. That message has not been written to the database, but the execution has not been stopped. Please report this failure including the message-id and the URL for the mbox." % m['message-id']
+                error_message = """ERROR: Runtime error while trying to write
+                message with message-id '%s'. That message has not been written
+                to the database, but the execution has not been stopped. Please
+                report this failure including the message-id and the URL for
+                the mbox.""" % m['message-id']
+
                 stored_messages -= 1
                 # Write message to the stderr
                 print >> sys.stderr, error_message
@@ -529,7 +552,11 @@ class DatabasePostgres(Database):
                 pprint.pprint(values, sys.stderr)
                 raise
             except:
-                error_message = "ERROR: Runtime error while trying to write message with message-id '%s'. That message has not been written to the database, but the execution has not been stopped. Please report this failure including the message-id and the URL for the mbox." % m['message-id']
+                error_message = """ERROR: Runtime error while trying to write
+                message with message-id '%s'. That message has not been written
+                to the database, but the execution has not been stopped. Please
+                report this failure including the message-id and the URL for
+                the mbox.""" % m['message-id']
                 stored_messages -= 1
                 # Write message to the stderr
                 print >> sys.stderr, error_message
@@ -557,9 +584,9 @@ class DatabasePostgres(Database):
 
 
 def create_database(driver='mysql', dbname='', username='', password='',
-                     hostname='', admin_user=None, admin_password=None):
+                    hostname='', admin_user=None, admin_password=None):
 
-    drivers = { 'mysql': DatabaseMysql, 'postgres': DatabasePostgres }
+    drivers = {'mysql': DatabaseMysql, 'postgres': DatabasePostgres}
     try:
         call_db = drivers[driver]
         db = call_db(dbname, username, password, hostname,

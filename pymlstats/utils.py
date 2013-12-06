@@ -26,7 +26,8 @@ Some utils functions for MLStats
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-from fileextractor import *
+from fileextractor import FileExtractor
+import gzip
 import os.path
 import tempfile
 import urllib
@@ -34,7 +35,8 @@ import urllib2
 import shutil
 import datetime
 
-COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar', '.tar.gz', '.tar.bz2', '.tgz', '.tbz']
+COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar',
+                    '.tar.gz', '.tar.bz2', '.tgz', '.tbz']
 ACCEPTED_TYPES = ['.mbox', '.txt']
 EMAIL_OBFUSCATION_PATTERNS = [' at ', '_at_', ' en ']
 MAILMAN_DATE_FORMAT = '%Y-%B'
@@ -60,7 +62,7 @@ def check_compressed_file(filename):
     recognized as compressed file."""
 
     recognized_exts = COMPRESSED_TYPES
-    
+
     # Check the two last extensions
     # (to recognize also composed extensions such as tar.gz)
     filename_noext, ext = os.path.splitext(filename)
@@ -74,14 +76,16 @@ def check_compressed_file(filename):
 
     return None
 
-def retrieve_remote_file(url, destfilename=None, web_user=None, web_password=None):
+
+def retrieve_remote_file(url, destfilename=None, web_user=None,
+                         web_password=None):
     """Retrieve a file from a remote location. It logins in the
     archives private page if necessary."""
 
     user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
                  '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
                  'Chrome/15.0.871.0 Safari/535.2'
-    headers = { 'User-Agent': user_agent }
+    headers = {'User-Agent': user_agent}
 
     # If not dest dir, then store file in a temp file
     if not destfilename:
@@ -95,37 +99,35 @@ def retrieve_remote_file(url, destfilename=None, web_user=None, web_password=Non
     request = urllib2.Request(url, postdata, headers)
     response = urllib2.urlopen(request)
     subtype = response.info().getsubtype()
- 
-    if url.endswith ('.gz') and subtype and subtype.endswith('plain'):
+
+    if url.endswith('.gz') and subtype and subtype.endswith('plain'):
         fd = gzip.GzipFile(destfilename, 'wb')
     else:
         fd = open(destfilename, 'wb')
-        
+
     fd.write(response.read())
     fd.close()
-    response.close ()
+    response.close()
 
     return destfilename
 
-def uncompress_file(filepath,extension, output_dir = None):
+
+def uncompress_file(filepath, extension, output_dir=None):
     """This function uncompress the file, and return
     the extension for the uncompressed file."""
 
     if not output_dir:
         output_dir = tempfile.mkdtemp()
-    
+
     basename = os.path.basename(filepath)
-    # Remove extension from filename
-    basename_noext = basename.rstrip(extension)
     # Get new path to the uncompressed file
-    new_filepath = os.path.join(output_dir,basename)
-    new_filepath_noext = os.path.join(output_dir,basename_noext)
+    new_filepath = os.path.join(output_dir, basename)
 
     extractor = FileExtractor()
     files = []
 
     if extension in COMPRESSED_TYPES:
-        shutil.copy(filepath,output_dir)
+        shutil.copy(filepath, output_dir)
 
     # Return a list of all the uncompressed files
     if '.zip' == extension:
@@ -148,42 +150,44 @@ def uncompress_file(filepath,extension, output_dir = None):
 
 _dirs = {}
 
-def get_home_dir ():
+
+def get_home_dir():
     try:
         return _dirs['home']
     except KeyError:
         pass
-    
+
     home_dir = None
-    
+
     if 'HOME' in os.environ:
-        home_dir = os.environ.get ('HOME')
+        home_dir = os.environ.get('HOME')
     else:
         if os.name == 'posix':
             import pwd
-            home_dir = pwd.getpwuid (os.getuid ()).pw_dir
+            home_dir = pwd.getpwuid(os.getuid()).pw_dir
         else:
             if 'USERPROFILE' in os.environ:
-                home_dir = os.environ.get ('USERPROFILE')
+                home_dir = os.environ.get('USERPROFILE')
             elif 'HOMEPATH' in os.environ:
                 try:
-                    drive = os.environ.get ('HOMEDRIVE')
+                    drive = os.environ.get('HOMEDRIVE')
                 except KeyError:
                     drive = ''
-                home_dir = os.path.join (drive, os.environ.get ('HOMEPATH'))
-                
+                home_dir = os.path.join(drive, os.environ.get('HOMEPATH'))
+
     assert home_dir is not None
 
     _dirs['home'] = home_dir
-    
+
     return home_dir
 
-def mlstats_dot_dir ():
+
+def mlstats_dot_dir():
     try:
         return _dirs['dot']
     except KeyError:
-        _dirs['dot'] = os.path.join(get_home_dir (), '.mlstats')
+        _dirs['dot'] = os.path.join(get_home_dir(), '.mlstats')
         return _dirs['dot']
 
 if __name__ == '__main__':
-    print "mlstats dot dir: %s" % (mlstats_dot_dir ())
+    print "mlstats dot dir: %s" % (mlstats_dot_dir())

@@ -29,6 +29,7 @@ import os
 import re
 from pymlstats.utils import EMAIL_OBFUSCATION_PATTERNS
 
+
 class strict_mbox(mailbox.mbox):
     _fromlinepattern = (r'From \s*[^\s]+\s+\w\w\w\s+\w\w\w\s+\d?\d\s+'
                         r'\d?\d:\d\d(:\d\d)?(\s+[^\s]+)?\s+\d\d\d\d\s*'
