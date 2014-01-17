@@ -122,7 +122,7 @@ class MailArchiveAnalyzer:
             # The 'body' is not actually part of the headers,
             # but it will be treated as any other header
             body, patches = self.__get_body(message, charset)
-            filtered_message['body'] = u'\n'.join(body).strip()
+            filtered_message['body'] = u'\n'.join(body)
 
             for header in ('subject',):
                 header_content = self.__decode(message.get(header), charset)
