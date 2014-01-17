@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 # Copyright (C) 2007-2010 Libresoft Research Group
-# Copyright (C) 2011-2012 Germán Poo-Caamaño <gpoo@gnome.org>
+# Copyright (C) 2011-2014 Germán Poo-Caamaño <gpoo@gnome.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ from the standard Python modules (for instance, Maildir).
 """
 
 
-import email.header
+from email.header import decode_header
 from email.utils import getaddresses, parsedate_tz
 from email.Iterators import typed_subpart_iterator
 import datetime
@@ -124,22 +124,31 @@ class MailArchiveAnalyzer:
             body, patches = self.__get_body(message, charset)
             filtered_message['body'] = u'\n'.join(body)
 
-            for header in ('subject',):
-                header_content = self.__decode(message.get(header), charset)
-                filtered_message[header] = header_content
+            filtered_message['subject'] = self.__decode(message.get('subject'),
+                                                        charset)
 
-            for header in ('from', 'to', 'cc'):
-                header_content = message.get_all(header)
+            for header in ('from', 'to'):
+                address = message.get(header)
 
-                if header_content:
-                    header_content = [self.__decode(h, charset)
-                                      for h in header_content]
-
-                    # Check spam obscuring
-                    header_content = self.__check_spam_obscuring(header_content)
-                    filtered_message[header] = getaddresses(header_content)
-                else:
+                if not address:
                     filtered_message[header] = None  # [('','')]
+                    continue
+
+                address = self.__check_spam_obscuring([address])
+                addresses = []
+                for name, email in getaddresses(address):
+                    addresses.append((self.__decode(name, charset), email))
+
+                filtered_message[header] = addresses
+
+            # CC is a list of addresses
+            addresses = []
+            for address in (message.get_all('cc', [])):
+                address = self.__check_spam_obscuring([address])
+                for name, email in getaddresses(address):
+                    addresses.append((self.__decode(name, charset), email))
+
+            filtered_message['cc'] = addresses or None  # [('','')]
 
             msgdate, tz_secs = self.__get_date(message)
             filtered_message['date'] = msgdate.isoformat(' ')
@@ -247,16 +256,17 @@ class MailArchiveAnalyzer:
         """ Decode a header.  A header can be composed by strings with
             different encoding each.  We convert each group to unicode
             separately and then we merge them back."""
-        if not charset or 'ascii' in charset:
-            charset = 'latin-1'
+
+        charset = charset or 'latin-1'
+
         try:
-            decoded_s = email.header.decode_header(s)
+            decoded_s = decode_header(s)
             r = sep.join([to_unicode(text, text_charset or charset)
                           for text, text_charset in decoded_s])
         except:
-            print >> sys.stderr, 'charset: %s' % charset
-            print >> sys.stderr, decoded_s
-            raise
+            print >> sys.stderr, 'WARNING: charset: %s' % charset,
+            print >> sys.stderr, '"%s"' % s
+            r = s
 
         return r
 
