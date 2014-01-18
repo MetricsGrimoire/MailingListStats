@@ -1,0 +1,81 @@
+From carlos@gnome.org  Mon Mar 17 10:19:47 2008
+Return-Path: <carlos@gnome.org>
+X-Original-To: desktop-devel-list@gnome.org
+Delivered-To: desktop-devel-list@gnome.org
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by menubar.gnome.org (Postfix) with ESMTP id 0AB207500E7;
+	Mon, 17 Mar 2008 10:19:47 +0000 (GMT)
+X-Virus-Scanned: by amavisd-new at gnome.org
+X-Spam-Flag: NO
+X-Spam-Score: -2.599
+X-Spam-Level: 
+X-Spam-Status: No, score=-2.599 tagged_above=-999 required=2
+	tests=[BAYES_00=-2.599]
+X-Amavis-OS-Fingerprint: Linux 2.6 (newer, 2) (up: 635 hrs), (distance 11,
+	link: ethernet/modem), [82.103.141.69]
+Received: from menubar.gnome.org ([127.0.0.1])
+	by localhost (menubar.gnome.org [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id JRFrLXY+wJcc; Mon, 17 Mar 2008 10:19:41 +0000 (GMT)
+Received: from gandalf.pemas.net (gandalf.pemas.net [82.103.141.69])
+	by menubar.gnome.org (Postfix) with ESMTP id 06E497500BD;
+	Mon, 17 Mar 2008 10:19:40 +0000 (GMT)
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by gandalf.pemas.net (Postfix) with ESMTP id D0584DB0087;
+	Mon, 17 Mar 2008 11:17:58 +0100 (CET)
+X-Virus-Scanned: Debian amavisd-new at gandalf.pemas.net
+Received: from gandalf.pemas.net ([127.0.0.1])
+	by localhost (gandalf.pemas.net [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id b10Is5sUez8w; Mon, 17 Mar 2008 11:17:51 +0100 (CET)
+Received: from [192.168.1.11] (163.pool85-48-166.static.orange.es
+	[85.48.166.163])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by gandalf.pemas.net (Postfix) with ESMTP id 1083ADB0061;
+	Mon, 17 Mar 2008 11:17:50 +0100 (CET)
+Subject: Re: Low memory hacks
+From: Carlos =?ISO-8859-1?Q?Perell=F3_Mar=EDn?= <carlos@gnome.org>
+To: Danilo =?UTF-8?Q?=C5=A0egan?= <danilo@gnome.org>
+In-Reply-To: <87iqzlofqu.fsf@avet.kvota.net>
+References: <1204225143.12769.9.camel@localhost.localdomain>
+	<1204236062.14337.5.camel@localhost.localdomain>
+	<47C80957.6010804@sun.com> <1204295876.30088.14.camel@t25>
+	<1205676169.6819.27.camel@user-computer.NETWORK>
+Content-Type: text/plain; charset=utf-8
+Organization: GNOME Foundation
+Date: Mon, 17 Mar 2008 11:19:29 +0100
+Message-Id: <1205749169.7470.2.camel@aragorn>
+Mime-Version: 1.0
+X-Mailer: Evolution 2.22.0 
+Content-Transfer-Encoding: 8bit
+Cc: "Nikolay V. Shmyrev" <nshmyrev@yandex.ru>, Brian Nitz <Brian.Nitz@sun.com>,
+	desktop-devel-list@gnome.org, =?windows-1252?Q?Danilo_=8Aegan?= <danilo@gnome.org>,
+	"Dmitry G. Mastrukov" =?koi8-r?Q?=E4=CD=C9=D4=D2=C9=CA_?= =?koi8-r?Q?=E7=C5=CE=CE=C1=C4=D8=C5=D7=C9=DE_?= =?koi8-r?Q?=ED=C1=D3=D4=D2=C0=CB=CF=D7?= <dmitry@taurussoft.org>
+	"Ing. Rafael de" =?ISO-8859-1?Q?Jes=FAs_Fern=E1ndez?= "M." <rafael@ipicyt.edu.mx>
+X-BeenThere: desktop-devel-list@gnome.org
+X-Mailman-Version: 2.1.8
+Precedence: list
+List-Id: GNOME Desktop Development List <desktop-devel-list.gnome.org>
+List-Unsubscribe: <http://mail.gnome.org/mailman/listinfo/desktop-devel-list>, 
+	<mailto:desktop-devel-list-request@gnome.org?subject=unsubscribe>
+List-Archive: </archives/desktop-devel-list>
+List-Post: <mailto:desktop-devel-list@gnome.org>
+List-Help: <mailto:desktop-devel-list-request@gnome.org?subject=help>
+List-Subscribe: <http://mail.gnome.org/mailman/listinfo/desktop-devel-list>,
+	<mailto:desktop-devel-list-request@gnome.org?subject=subscribe>
+X-List-Received-Date: Mon, 17 Mar 2008 10:19:47 -0000
+
+El lun, 17-03-2008 a las 10:35 +0100, Danilo Šegan escribió:
+> Hi Simos,
+> 
+
+Hi,
+
+[...]
+
+Cheers.
+
+> _______________________________________________
+> desktop-devel-list mailing list
+> desktop-devel-list@gnome.org
+> http://mail.gnome.org/mailman/listinfo/desktop-devel-list
+

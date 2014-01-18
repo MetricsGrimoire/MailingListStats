@@ -86,6 +86,26 @@ It is a very low traffic list, usually with less than one message per day.
 
 [1]: https://lists.libresoft.es/listinfo/metrics-grimoire
 
+Contributing
+------------
+
+When making contributions, please follow the [PEP8 specification][8].
+To check your code follows the specification, use a tool like
+[pep8][3] or [flake8][4].
+
+When adding new features, add tests for the new feature or fix, and check
+that the existing tests pass.  Tests live in `pymlstats/tests` and you can
+run them with:
+
+```bash
+$ python -m unittest discover
+```
+
+Please, also consider to add tests for the current features available.
+
+[2]: http://www.python.org/dev/peps/pep-0008/
+[3]: http://pypi.python.org/pypi/pep8
+[4]: http://pypi.python.org/pypi/flake8/
 
 Credits
 -------
