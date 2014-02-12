@@ -36,7 +36,7 @@ import pprint
 import MySQLdb as dbapi
 
 from . import datamodel
-from . import GenericDatabase
+from ..database import GenericDatabase
 
 
 class Database(GenericDatabase):
