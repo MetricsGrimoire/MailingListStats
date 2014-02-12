@@ -1,5 +1,6 @@
 #!/usr/bin/python
-
+#-*- coding:utf-8 -*-
+# 
 # Copyright (C) 2007-2010 Libresoft Research Group
 #
 # This program is free software; you can redistribute it and/or modify
@@ -14,9 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# Foundation, Inc.m 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
 #
 # Authors : Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+# Authors : Germán Poo-Caamaño <gpoo@gnome.org>
 
 """
 Installer
@@ -28,23 +31,39 @@ Installer
 @contact:      herraiz@gsyc.escet.urjc.es
 """
 
-from distutils.core import setup
+
+import sys
+from setuptools import setup
 from pymlstats.version import mlstats_version
 
-setup(name = "mlstats",
-      version = mlstats_version,
-      author =  "Libresoft Research Group",
-      author_email = "libresoft-tools-devel@lists.morfeo-project.org",
-      description = "Mailing lists analysis tool. Part of libresoft-tools.",
-      long_description = """Mailing List Stats is a tool to analyze mailing list archives. 
-      It can retrieve the archives from a remote web page (usually,
-      the archives web page), or read them from a local directory. It
-      generates a brief report, and write everything to a MySQL
-      database (called mlstats unless other name is indicated).""",
-      license = "GNU GPL 2 or any later version",
-      url = "http://forge.morfeo-project.org/projects/libresoft-tools",
-      platforms = ["any"],
-      packages = ['pymlstats'],
-      scripts = ['mlstats'],
-      data_files = [('share/man/man1',['man/mlstats.1'])],
-      requires = ['MySQLdb'])
+# Dirty trick to allow installing the man page, making setuptools behave
+# like distutils. Uncomment the following if you would like that behavior.
+# sys.argv += ['--single-version-externally-managed', '--record=mlstats.txt']
+
+extra = {}
+# Not exactly Python3-ready...
+if sys.version_info >= (3,):
+    extra['use_2to3'] = True
+
+README = open('README.md').read()
+
+setup(
+    name='mlstats',
+    version=mlstats_version,
+    author='Libresoft Research Group',
+    author_email='metrics-grimoire@lists.libresoft.es',
+    description='Mailing lists analysis tool of the Metrics Grimoire suite.',
+    long_description=README,
+    license='GNU GPL 2 or any later version',
+    url='http://metricsgrimoire.github.io/MailingListStats/',
+    platforms = ['any'],
+    packages = ['pymlstats', 'pymlstats.backends'],
+    scripts = ['mlstats'],
+    data_files = [('share/man/man1',['man/mlstats.1'])],
+    test_suite = 'pymlstats.tests',
+    extras_require = {
+        'mysql': ['MySQL-python'],
+        'postgres': ['psycopg2']
+    },
+    **extra
+)
