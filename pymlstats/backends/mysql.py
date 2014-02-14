@@ -45,12 +45,12 @@ class Database(GenericDatabase):
                  admin_user=None, admin_password=None):
         GenericDatabase.__init__(self)
 
-        self.name = ''
+        self.name = dbname
         self.user = username
         self.password = password
         self.admin_user = admin_user
         self.admin_password = admin_password
-        self.host = hostname
+        self.host = hostname or 'localhost'
 
     def connect(self):
         check_options_msg = "Please check the --db-user and " \

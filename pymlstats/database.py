@@ -236,7 +236,7 @@ class GenericDatabase:
 
 
 def create_database(driver='mysql', dbname='', username='', password='',
-                    hostname='', admin_user=None, admin_password=None):
+                    hostname=None, admin_user=None, admin_password=None):
     drivers = {'mysql': 'mysql', 'postgres': 'postgresql'}
 
     if driver not in drivers:

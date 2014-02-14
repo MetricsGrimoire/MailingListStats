@@ -116,13 +116,10 @@ class Application:
 
         self.mail_parser = MailArchiveAnalyzer()
 
-        self.db = create_database(driver=driver)
-        self.db.name = dbname
-        self.db.user = user
-        self.db.password = password
-        self.db.host = host
-        self.db.admin_user = admin_user
-        self.db.admin_password = admin_password
+        self.db = create_database(driver=driver, dbname=dbname, username=user,
+                                  password=password, hostname=host,
+                                  admin_user=admin_user,
+                                  admin_password=admin_password)
 
         # Connect to database if exists, otherwise create it and connect
         self.db.connect()

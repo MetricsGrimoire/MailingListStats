@@ -40,11 +40,11 @@ from ..database import GenericDatabase
 
 
 class Database(GenericDatabase):
-    def __init__(self, dbname='', username='', password='', hostname='',
+    def __init__(self, dbname='', username='', password='', hostname=None,
                  admin_user=None, admin_password=None):
         GenericDatabase.__init__(self)
 
-        self.name = ''
+        self.name = dbname
         self.user = username
         self.password = password
         self.admin_user = admin_user

@@ -110,7 +110,7 @@ def start():
     db_driver = 'mysql'
     db_user = 'operator'
     db_password = 'operator'
-    db_hostname = 'localhost'
+    db_hostname = None
     db_name = 'mlstats'
     db_admin_user = 'root'
     db_admin_password = ''
