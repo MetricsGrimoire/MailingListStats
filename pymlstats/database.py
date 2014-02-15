@@ -40,7 +40,7 @@ class DatabaseDriverNotSupported (DatabaseException):
     '''Database driver is not supported'''
 
 
-class GenericDatabase:
+class GenericDatabase(object):
     (VISITED, NEW, FAILED) = ('visited', 'new', 'failed')
 
     def __init__(self):

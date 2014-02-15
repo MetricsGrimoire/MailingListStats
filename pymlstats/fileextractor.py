@@ -47,7 +47,7 @@ class FileExtractorError(Exception):
         self.message = 'FileExtractor Error: %s' % message
 
 
-class FileExtractor:
+class FileExtractor(object):
     """
     The intention of this class is to provide an easy way to extract,
     decompress and access to the files stored in any kind of containers

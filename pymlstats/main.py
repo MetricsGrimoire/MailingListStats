@@ -108,7 +108,7 @@ class MBoxArchive(object):
         return self._compressed is not None
 
 
-class Application:
+class Application(object):
 
     def __init__(self, driver, user, password, dbname, host,
                  admin_user, admin_password, url_list, report_filename,
