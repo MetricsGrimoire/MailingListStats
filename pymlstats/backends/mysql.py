@@ -117,7 +117,7 @@ class Database(GenericDatabase):
                                    charset='utf8', use_unicode=True)
             else:  # Unknown exception
                 message = """ERROR: Runtime error while trying to connect to
-                the database. Error number is '%'s. Original
+                the database. Error number is '%s'. Original
                 message is '%s'. I don't know how to continue
                 after this failure. Please report the
                 failure.""" % (str(e.args[0]), str(e.args[1]))
