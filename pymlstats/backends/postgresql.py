@@ -52,21 +52,19 @@ class Database(GenericDatabase):
         self.host = hostname
 
     def connect(self):
-        self.host = None
+        dbname = 'dbname=%s' % (self.name)
+        user = 'user=%s' % (self.user or '')
+        password = 'password=%s' % (self.password or '')
+        host = 'host=%s' % (self.host or '')
+
+        dsn = ' '.join([dbname, user, password, host])
+
         try:
-            if self.host is not None:
-                db = dbapi.connect(database=self.name,
-                                   user=self.user,
-                                   password=self.password,
-                                   host=self.host)
-            else:
-                db = dbapi.connect(database=self.name,
-                                   user=self.user,
-                                   port=5432)
+            db = dbapi.connect(dsn)
             db.set_client_encoding('UTF8')
             db.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        except:
-            raise
+        except dbapi.OperationalError, e:
+            raise e
 
         GenericDatabase.connect(self, db)
 
