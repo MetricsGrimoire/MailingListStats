@@ -36,7 +36,7 @@ import pprint
 import psycopg2 as dbapi
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from ..database import GenericDatabase
+from pymlstats.database import GenericDatabase
 
 
 class Database(GenericDatabase):
