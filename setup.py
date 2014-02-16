@@ -57,7 +57,7 @@ setup(
     license='GNU GPL 2 or any later version',
     url='http://metricsgrimoire.github.io/MailingListStats/',
     platforms = ['any'],
-    packages = ['pymlstats', 'pymlstats.backends'],
+    packages = ['pymlstats', 'pymlstats.db'],
     scripts = ['mlstats'],
     data_files = [('share/man/man1',['man/mlstats.1'])],
     test_suite = 'pymlstats.tests',

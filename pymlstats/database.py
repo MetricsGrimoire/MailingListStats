@@ -242,7 +242,7 @@ def create_database(driver='mysql', dbname='', username='', password='',
     if driver not in drivers:
         raise DatabaseDriverNotSupported(driver)
 
-    backend = 'pymlstats.backends.%s' % drivers[driver]
+    backend = 'pymlstats.db.%s' % drivers[driver]
     module = __import__(backend, fromlist=['Database'])
 
     try:

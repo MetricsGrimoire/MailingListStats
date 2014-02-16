@@ -35,7 +35,7 @@ import sys
 import pprint
 import MySQLdb as dbapi
 
-from pymlstats.backends import datamodel
+from pymlstats.db import datamodel
 from pymlstats.database import GenericDatabase
 
 
