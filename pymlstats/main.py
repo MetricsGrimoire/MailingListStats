@@ -35,7 +35,7 @@ import os.path
 import datetime
 import urlparse
 
-from database import create_database
+from database import get_database
 from analyzer import MailArchiveAnalyzer
 from htmlparser import MyHTMLParser
 from utils import find_current_month, create_dirs, mlstats_dot_dir,\
@@ -128,10 +128,10 @@ class Application(object):
 
         self.mail_parser = MailArchiveAnalyzer()
 
-        self.db = create_database(driver=driver, dbname=dbname, username=user,
-                                  password=password, hostname=host,
-                                  admin_user=admin_user,
-                                  admin_password=admin_password)
+        self.db = get_database(driver=driver, dbname=dbname, username=user,
+                               password=password, hostname=host,
+                               admin_user=admin_user,
+                               admin_password=admin_password)
 
         # Connect to database if exists, otherwise create it and connect
         self.db.connect()
