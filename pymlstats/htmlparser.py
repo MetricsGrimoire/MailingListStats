@@ -56,20 +56,22 @@ class MyHTMLParser(htmllib.HTMLParser):
         if not href in self.links:
             self.links.append(href)
 
-    def get_mboxes_links(self):
-
+    def get_mboxes_links(self, force=False):
         self.__get_html()
 
-        # Ignore links with not recognized extension
+        accepted_types = utils.COMPRESSED_TYPES + utils.ACCEPTED_TYPES
+
         filtered_links = []
         for l in self.links:
-            ext1 = os.path.splitext(l)[-1]
-            ext2 = os.path.splitext(l.rstrip(ext1))[-1]
-
-            accepted_types = utils.COMPRESSED_TYPES + utils.ACCEPTED_TYPES
-
-            if ext1 in accepted_types or ext1+ext2 in accepted_types:
+            if force:
                 filtered_links.append(os.path.join(self.url, l))
+            else:
+                ext1 = os.path.splitext(l)[-1]
+                ext2 = os.path.splitext(l.rstrip(ext1))[-1]
+
+                # Ignore links with not recognized extension
+                if ext1 in accepted_types or ext1+ext2 in accepted_types:
+                    filtered_links.append(os.path.join(self.url, l))
 
         self.mboxes_links = filtered_links
 

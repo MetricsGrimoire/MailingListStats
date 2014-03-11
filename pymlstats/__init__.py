@@ -57,6 +57,9 @@ General options:
   -q, --quiet       Do not show messages about the progress in the retrieval
                     and analysis of the archives.
   --version         Show the version number and exit.
+  --force           Force mlstats to download and parse any link found in a
+                    given URL (only valid for remote links, neither Gmane links
+                    nor local files).
   -                 Read URLs from the standard input. This will ignore all
                     the URLs passed via the command line.
 
@@ -104,7 +107,7 @@ def start():
     long_opts = ["help",
                  "db-driver=", "db-user=", "db-password=", "db-hostname=",
                  "db-name=", "db-admin-user=", "db-admin-password=",
-                 "report-file=", "no-report", "version", "quiet",
+                 "report-file=", "no-report", "version", "quiet", "force",
                  "web-user=", "web-password="]
 
     # Default options
@@ -120,6 +123,7 @@ def start():
     report_filename = ''
     report = True
     quiet = False
+    force = False
     urls = ''
 
     try:
@@ -158,6 +162,8 @@ def start():
             report = False
         elif opt in ("-q", "--quiet"):
             quiet = True
+        elif "--force" == opt:
+            force = True
         elif "--web-user" == opt:
             web_user = value
         elif "--web-password" == opt:
@@ -168,5 +174,5 @@ def start():
 
     myapp = Application(db_driver, db_user, db_password, db_name,
                         db_hostname, db_admin_user, db_admin_password,
-                        urls, report_filename, report, quiet,
+                        urls, report_filename, report, quiet, force,
                         web_user, web_password)

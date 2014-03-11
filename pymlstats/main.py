@@ -113,7 +113,7 @@ class Application(object):
 
     def __init__(self, driver, user, password, dbname, host,
                  admin_user, admin_password, url_list, report_filename,
-                 make_report, be_quiet, web_user, web_password):
+                 make_report, be_quiet, force, web_user, web_password):
 
         self.mail_parser = MailArchiveAnalyzer()
 
@@ -132,6 +132,9 @@ class Application(object):
 
         # Don't show messages when retrieveing and analyzing files
         self.be_quiet = be_quiet
+
+        # Force to download and parse any link found in the given URL
+        self.force = force
 
         # URLs or local files to be analyzed
         self.url_list = url_list
@@ -387,7 +390,7 @@ class Application(object):
         # to analyze in chronological order.
         htmlparser = MyHTMLParser(mailing_list.location,
                                   self.web_user, self.web_password)
-        links = htmlparser.get_mboxes_links()
+        links = htmlparser.get_mboxes_links(self.force)
         links.reverse()
 
         this_month = current_month()
@@ -398,20 +401,25 @@ class Application(object):
             basename = os.path.basename(link)
             destfilename = os.path.join(mailing_list.compressed_dir, basename)
 
-            # If the URL is for the current month, always retrieve.
-            # Otherwise, check visited status & local files first
-            if link.find(this_month) >= 0:
-                self.__print_output('Found substring %s in URL %s...' %
-                                    (this_month, link))
-                self.__print_output('Retrieving %s...' % link)
-                retrieve_remote_file(link, destfilename,
-                                     self.web_user, self.web_password)
-            elif os.path.exists(destfilename):
-                self.__print_output('Already downloaded %s' % link)
-            else:
-                self.__print_output('Retrieving %s...' % link)
-                retrieve_remote_file(link, destfilename,
-                                     self.web_user, self.web_password)
+            try:
+                # If the URL is for the current month, always retrieve.
+                # Otherwise, check visited status & local files first
+                if link.find(this_month) >= 0:
+                    self.__print_output('Found substring %s in URL %s...' %
+                                        (this_month, link))
+                    self.__print_output('Retrieving %s...' % link)
+                    retrieve_remote_file(link, destfilename,
+                                         self.web_user, self.web_password)
+                elif os.path.exists(destfilename):
+                    self.__print_output('Already downloaded %s' % link)
+                else:
+                    self.__print_output('Retrieving %s...' % link)
+                    retrieve_remote_file(link, destfilename,
+                                         self.web_user, self.web_password)
+            except IOError:
+                self.__print_output("Unknown URL: " + link + ". Skipping.")
+                continue
+
             archives.append(MBoxArchive(destfilename, link))
         return archives
 
@@ -467,7 +475,13 @@ class Application(object):
             filepath = archive.filepath
             self.__print_output('Analyzing %s' % filepath)
             self.mail_parser.filepath = filepath
-            messages, non_parsed_messages = self.mail_parser.get_messages()
+
+            try:
+                messages, non_parsed_messages = self.mail_parser.get_messages()
+            except IOError:
+                self.__print_output("Invalid file: " + filepath + ". Skipping.")
+                continue
+
             total_messages = len(messages)
             stored_messages = self.db.store_messages(messages,
                                                      mailing_list.location)
