@@ -37,6 +37,9 @@ import formatter
 import utils
 
 
+MOD_MBOX_THREAD_STR = "/thread"
+
+
 class MyHTMLParser(htmllib.HTMLParser):
     def __init__(self, url, web_user=None, web_password=None, verbose=0):
 
@@ -66,6 +69,12 @@ class MyHTMLParser(htmllib.HTMLParser):
             if force:
                 filtered_links.append(os.path.join(self.url, l))
             else:
+                # Links from Apache's 'mod_mbox' plugin contain
+                # trailing "/thread" substrings. Remove them to get
+                # the links where mbox files are stored.
+                if l.endswith(MOD_MBOX_THREAD_STR):
+                    l = l[:-len(MOD_MBOX_THREAD_STR)]
+
                 ext1 = os.path.splitext(l)[-1]
                 ext2 = os.path.splitext(l.rstrip(ext1))[-1]
 
