@@ -34,7 +34,7 @@ import datetime
 from database import create_database
 from analyzer import MailArchiveAnalyzer
 from htmlparser import MyHTMLParser
-from utils import current_month, create_dirs, mlstats_dot_dir,\
+from utils import find_current_month, create_dirs, mlstats_dot_dir,\
     retrieve_remote_file, check_compressed_file, uncompress_file
 
 
@@ -393,8 +393,6 @@ class Application(object):
         links = htmlparser.get_mboxes_links(self.force)
         links.reverse()
 
-        this_month = current_month()
-
         archives = []
 
         for link in links:
@@ -404,7 +402,9 @@ class Application(object):
             try:
                 # If the URL is for the current month, always retrieve.
                 # Otherwise, check visited status & local files first
-                if link.find(this_month) >= 0:
+                this_month = find_current_month(link)
+
+                if this_month:
                     self.__print_output('Found substring %s in URL %s...' %
                                         (this_month, link))
                     self.__print_output('Retrieving %s...' % link)
@@ -428,17 +428,14 @@ class Application(object):
 
         for archive in archives:
             # Always set Gmane archives to analyze
-            if not archive.filepath.find(GMANE_DOMAIN):
+            if archive.filepath.find(GMANE_DOMAIN) == -1:
                 # Check if already analyzed
                 status = self.db.check_compressed_file(archive.filepath)
 
-                # If the file is for the current month, re-import to update
-                this_month = -1 != archive.filepath.find(current_month())
-                if this_month:
-                    self.__print_output('Found substring %s in URL %s...' %
-                                        (this_month, archive.filepath))
+                this_month = find_current_month(archive.filepath)
 
-                # If already visited, ignore, unless it's for the current month
+                # If the file is for the current month, re-import to update.
+                # If already visited, ignore it.
                 if status == self.db.VISITED and not this_month:
                     self.__print_output('Already analyzed %s' %
                                         archive.filepath)

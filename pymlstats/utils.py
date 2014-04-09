@@ -41,15 +41,32 @@ COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar',
 ACCEPTED_TYPES = ['.mbox', '.txt']
 EMAIL_OBFUSCATION_PATTERNS = [' at ', '_at_', ' en ']
 MAILMAN_DATE_FORMAT = '%Y-%B'
+MOD_MBOX_DATE_FORMAT = '%Y%m'
 
 
 def current_month():
-    """Get the current month"""
+    """Get a tuple containing the current month in different formats"""
     # Assuming this is run daily, it's better to take yesterday's date,
     # to ensure we get all of last month's email when the month rolls over.
     yesterday = datetime.datetime.today() + datetime.timedelta(days=-1)
-    this_month = yesterday.strftime(MAILMAN_DATE_FORMAT)
+
+    this_month_mailman = yesterday.strftime(MAILMAN_DATE_FORMAT)
+    this_month_mod_mox = yesterday.strftime(MOD_MBOX_DATE_FORMAT)
+    this_month = (this_month_mailman, this_month_mod_mox, )
+
     return this_month
+
+
+def find_current_month(s):
+    """Find the current month in the given string.
+
+    If the month is found, the function will return a string
+    containing the current month. Otherwise returns None."""
+    for this_month in current_month():
+        idx = s.find(this_month)
+        if idx > -1:
+            return this_month
+    return None
 
 
 def create_dirs(dirpath):
