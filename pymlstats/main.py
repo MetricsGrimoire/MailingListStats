@@ -428,17 +428,17 @@ class Application(object):
 
         for archive in archives:
             # Always set Gmane archives to analyze
-            if archive.filepath.find(GMANE_DOMAIN) == -1:
+            if archive.url.find(GMANE_DOMAIN) == -1:
                 # Check if already analyzed
-                status = self.db.check_compressed_file(archive.filepath)
+                status = self.db.check_compressed_file(archive.url)
 
-                this_month = find_current_month(archive.filepath)
+                this_month = find_current_month(archive.url)
 
                 # If the file is for the current month, re-import to update.
                 # If already visited, ignore it.
                 if status == self.db.VISITED and not this_month:
                     self.__print_output('Already analyzed %s' %
-                                        archive.filepath)
+                                        archive.url)
                     continue
 
             # If not, set visited
