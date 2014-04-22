@@ -64,7 +64,7 @@ data_model_query_list = [
         message_body TEXT CHARACTER SET utf8 NULL,
         is_response_of VARCHAR(255) CHARACTER SET utf8 NULL,
         mail_path TEXT CHARACTER SET utf8 NULL,
-        PRIMARY KEY(message_ID),
+        PRIMARY KEY(message_ID, mailing_list_url),
         INDEX response(is_response_of),
         FOREIGN KEY(mailing_list_url)
             REFERENCES mailing_lists(mailing_list_url)
@@ -74,10 +74,11 @@ data_model_query_list = [
     """CREATE TABLE messages_people (
         type_of_recipient ENUM('From','To','Cc') NOT NULL DEFAULT 'From',
         message_id VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+        mailing_list_url VARCHAR(255) CHARACTER SET utf8 NOT NULL,
         email_address VARCHAR(255) CHARACTER SET utf8 NOT NULL,
-        PRIMARY KEY(type_of_recipient, message_id, email_address),
+        PRIMARY KEY(type_of_recipient, message_id, mailing_list_url, email_address),
         INDEX m_id(message_id),
-        FOREIGN KEY(message_ID) REFERENCES messages(message_id)
+        FOREIGN KEY(message_ID, mailing_list_url) REFERENCES messages(message_id, mailing_list_url)
             ON DELETE CASCADE
             ON UPDATE CASCADE,
         FOREIGN KEY(email_address) REFERENCES people(email_address)

@@ -179,8 +179,8 @@ class Database(GenericDatabase):
                                    %(list-id)s, %(mailing_list_url)s,
                                    %(subject)s, %(body)s);'''
         query_m_people = '''INSERT INTO messages_people
-                               (email_address, type_of_recipient, message_id)
-                            VALUES (%s, %s, %s);'''
+                               (email_address, type_of_recipient, message_id, mailing_list_url)
+                            VALUES (%s, %s, %s, %s);'''
 
         for m in message_list:
             values = m
@@ -196,7 +196,7 @@ class Database(GenericDatabase):
                 for name, email in addresses:
                     self.insert_people(name, email, mailing_list_url)
                     key = '%s-%s' % (header, email)
-                    value = (email, header.capitalize(), m['message-id'])
+                    value = (email, header.capitalize(), m['message-id'], mailing_list_url)
                     msgs_people_value.setdefault(key, value)
 
             # Write the rest of the message
