@@ -31,12 +31,12 @@ Latest version:
 
 Requirements
 -------------
-`mlstats` needs the following dependencies (either MySQL or PostgresQL):
+`mlstats` needs the following dependencies (either MySQL or PostgreSQL):
 
   * MySQL:
     * python-mysqldb
     * mysql-server
-  * Postgresql:
+  * PostgreSQL:
     * psycopg2
     * postgresql-server (it has been tested with 8.4 and 9.1)
 
@@ -47,8 +47,8 @@ You can install MLStats running setup.py script:
 
     # python setup.py install
 
-If you don't have root privileges, use the `--prefix` option to indicate 
-the directory where `mlstats` will be installed. For more details, take a 
+If you don't have root privileges, use the `--prefix` option to indicate
+the directory where `mlstats` will be installed. For more details, take a
 look at the help of the installer:
 
     $ python setup.py install --help
@@ -114,7 +114,7 @@ Credits
 the Universidad Rey Juan Carlos in Mostoles, near Madrid (Spain). It is
 part of a wider research on libre software engineering, aimed to gain
 knowledge on how libre software is developed and maintained.
- 
+
 
 Main authors
 ------------
