@@ -35,6 +35,8 @@ import urllib2
 import os
 import formatter
 import utils
+import gzip
+import cStringIO
 
 
 MOD_MBOX_THREAD_STR = "/thread"
@@ -92,7 +94,8 @@ class MyHTMLParser(htmllib.HTMLParser):
         user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
                      '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
                      'Chrome/15.0.871.0 Safari/535.2'
-        headers = {'User-Agent': user_agent}
+        headers = { 'User-Agent': user_agent,
+                    'Accept-Encoding': 'gzip, deflate' }
         postdata = None
 
         if self.user:
@@ -102,7 +105,15 @@ class MyHTMLParser(htmllib.HTMLParser):
         request = urllib2.Request(self.url, postdata, headers)
         response = urllib2.urlopen(request)
 
-        htmltxt = response.read()
+        data = response.read()
+
+        if response.info().getheader('content-encoding') == 'gzip':
+            data = cStringIO.StringIO(data)
+            htmltxt = gzip.GzipFile(mode='r', compresslevel=0,
+                                    fileobj=data).read()
+        else:
+            htmltxt = data
+
         response.close()
 
         self.feed(htmltxt)  # Read links from HTML code
