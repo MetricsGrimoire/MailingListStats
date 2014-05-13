@@ -41,6 +41,7 @@ COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar',
 ACCEPTED_TYPES = ['.mbox', '.txt']
 EMAIL_OBFUSCATION_PATTERNS = [' at ', '_at_', ' en ']
 MAILMAN_DATE_FORMAT = '%Y-%B'
+MAILMAN_ALT_DATE_FORMAT = '%Y-%m'
 MOD_MBOX_DATE_FORMAT = '%Y%m'
 
 
@@ -51,8 +52,10 @@ def current_month():
     yesterday = datetime.datetime.today() + datetime.timedelta(days=-1)
 
     this_month_mailman = yesterday.strftime(MAILMAN_DATE_FORMAT)
+    this_month_mailman_alt = yesterday.strftime(MAILMAN_ALT_DATE_FORMAT)
     this_month_mod_mox = yesterday.strftime(MOD_MBOX_DATE_FORMAT)
-    this_month = (this_month_mailman, this_month_mod_mox, )
+    this_month = (this_month_mailman, this_month_mailman_alt,
+                  this_month_mod_mox, )
 
     return this_month
 
