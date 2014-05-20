@@ -83,7 +83,6 @@ class MailArchiveAnalyzer:
                         'to',
                         'cc',
                         'date',
-                        'received',
                         'list-id',
                         'in-reply-to',
                         'subject',
@@ -111,7 +110,7 @@ class MailArchiveAnalyzer:
             try:
                 date_to_parse = unixfrom.split('  ', 1)[1]
                 parsed_date = parsedate_tz(date_to_parse)
-                msgdate = datetime.datetime(*parsed_date[:6]).isoformat(' ')
+                msgdate = datetime.datetime(*parsed_date[:6])
             except:
                 msgdate = None
 
@@ -153,15 +152,11 @@ class MailArchiveAnalyzer:
             filtered_message['cc'] = addresses or None  # [('','')]
 
             msgdate, tz_secs = self.__get_date(message)
-            filtered_message['date'] = msgdate.isoformat(' ')
+            filtered_message['date'] = msgdate
             filtered_message['date_tz'] = str(tz_secs)
 
             # Retrieve other headers requested
             for header in self.common_headers:
-                # Some messages have a received header, but it is
-                # now being ignored by MLStats and substituted by
-                # the value of the Unix From field (first line of
-                # the message)
                 msg = message.get(header)
                 if msg:
                     try:

@@ -34,13 +34,21 @@ import zipfile
 import os.path
 import datetime
 import urlparse
+import logging
 
-from database import get_database
 from analyzer import MailArchiveAnalyzer
 from htmlparser import MyHTMLParser
 from utils import find_current_month, create_dirs, mlstats_dot_dir,\
     retrieve_remote_file, check_compressed_file
 
+from sqlalchemy import create_engine
+from sqlalchemy.engine import url
+from sqlalchemy.orm import sessionmaker
+
+from contextlib import contextmanager
+
+from dbn.session import Database
+from dbn.report import Report
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 
@@ -121,20 +129,26 @@ class MBoxArchive(object):
 
 
 class Application(object):
-
     def __init__(self, driver, user, password, dbname, host,
                  admin_user, admin_password, url_list, report_filename,
                  make_report, be_quiet, force, web_user, web_password):
 
         self.mail_parser = MailArchiveAnalyzer()
 
-        self.db = get_database(driver=driver, dbname=dbname, username=user,
-                               password=password, hostname=host,
-                               admin_user=admin_user,
-                               admin_password=admin_password)
+        logging.basicConfig()
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
 
-        # Connect to database if exists, otherwise create it and connect
-        self.db.connect()
+        drv = url.URL(driver, user, password, host, database=dbname)
+        engine = create_engine(drv, encoding='utf8')
+        Database.create_tables(engine, checkfirst=True)
+
+        Session = sessionmaker()
+        Session.configure(bind=engine)
+
+        session = Session()
+
+        self.db = Database()
+        self.db.set_session(session)
 
         # User and password to make login in case the archives
         # are set to private
@@ -164,7 +178,7 @@ class Application(object):
 
         self.__print_output("%d messages analyzed" % total_messages)
         self.__print_output("%d messages stored in database %s" %
-                            (stored_messages, self.db.name))
+                            (stored_messages, dbname))
         self.__print_output("%d messages ignored by the parser" % non_parsed)
 
         difference = total_messages - stored_messages
@@ -179,9 +193,12 @@ class Application(object):
             self.__print_output("WARNING: Some messages were ignored by "
                                 "the parser (probably because they were "
                                 "ill formed messages)")
-
         if make_report:
-            self.__print_brief_report(report_filename)
+            report = Report()
+            report.set_session(session)
+            report.print_brief_report()
+
+        session.close()
 
     def __print_output(self, text):
         if not self.be_quiet:
@@ -314,7 +331,8 @@ class Application(object):
         mailing_list = MailingList(url_or_dirpath)
 
         # Check if mailing list already in database
-        today = datetime.datetime.today().strftime(datetimefmt)
+        # today = datetime.datetime.today().strftime(datetimefmt)
+        today = datetime.datetime.today()
         self.db.update_mailing_list(mailing_list.location,
                                     mailing_list.alias,
                                     today)
@@ -506,7 +524,8 @@ class Application(object):
             stored_messages_url += stored_messages
             non_parsed_messages_url += non_parsed_messages
 
-            today = datetime.datetime.today().strftime(datetimefmt)
+            # today = datetime.datetime.today().strftime(datetimefmt)
+            today = datetime.datetime.today()
             self.db.set_visited_url(archive.url, mailing_list.location, today,
                                     self.db.VISITED)
 

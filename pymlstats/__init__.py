@@ -112,8 +112,8 @@ def start():
 
     # Default options
     db_driver = 'mysql'
-    db_user = 'operator'
-    db_password = 'operator'
+    db_user = None
+    db_password = None
     db_hostname = None
     db_name = 'mlstats'
     db_admin_user = 'root'
