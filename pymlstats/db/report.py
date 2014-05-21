@@ -25,18 +25,15 @@ by mlstats.
 from sqlalchemy import func, extract
 from sqlalchemy.sql.expression import label
 from sqlalchemy.orm import aliased
-import logging
 
 import database as db
 from session import Database
 
 
 class Report(Database):
-    __log = logging.getLogger('mlstats.Report')
 
     def __init__(self):
         Database.__init__(self)
-        self.__log.setLevel(logging.INFO)
 
     def get_num_of_mailing_lists(self, session):
         '''SELECT count(distinct mailing_list_url)
@@ -359,6 +356,7 @@ class Report(Database):
 
 if __name__ == '__main__':
     import sys
+    import logging
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 

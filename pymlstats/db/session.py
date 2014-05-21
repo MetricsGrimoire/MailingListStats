@@ -25,7 +25,6 @@ by mlstats.
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError, DataError
 import logging
-import inspect
 
 import database as db
 
@@ -34,7 +33,7 @@ class Database(object):
     (VISITED, NEW, FAILED) = ('visited', 'new', 'failed')
 
     def __init__(self):
-        self.log = logging.getLogger('mlstats.Database')
+        self.log = logging.getLogger(__name__)
         self.log.setLevel(logging.WARN)
 
     @staticmethod
@@ -77,12 +76,10 @@ class Database(object):
             self.session.add(people)
             self.session.commit()
         except IntegrityError:
-            line = inspect.getlineno(inspect.currentframe())
-            logging.debug('{}: {}'.format(line, inspect.stack()[0][3]))
-            logging.debug(self.truncate(u'Integrity: {}'.format(people), 68))
+            self.log.debug(self.truncate(u'Integrity: {}'.format(people), 68))
             self.session.rollback()
         except DataError:
-            logging.warning(u'DataError: {}'.format(people))
+            self.log.warning(u'DataError: {}'.format(people))
 
     def insert_mailing_list_people(self, email, mailing_list_url):
         mlp = db.MailingListsPeople(email_address=email,
@@ -91,12 +88,10 @@ class Database(object):
             self.session.add(mlp)
             self.session.commit()
         except IntegrityError:
-            line = inspect.getlineno(inspect.currentframe())
-            logging.debug('{}: {}'.format(line, inspect.stack()[0][3]))
-            logging.debug(self.truncate(u'Integrity: {}'.format(mlp), 68))
+            self.log.debug(self.truncate(u'Integrity: {}'.format(mlp), 68))
             self.session.rollback()
         except DataError:
-            logging.warning(u'DataError: {}'.format(mlp))
+            self.log.warning(u'DataError: {}'.format(mlp))
 
     def insert_messages_people(self, msg_people_value):
         msg_people = db.MessagesPeople(type_of_recipient=msg_people_value[1],
@@ -107,13 +102,11 @@ class Database(object):
             self.session.add(msg_people)
             self.session.commit()
         except IntegrityError:
-            line = inspect.getlineno(inspect.currentframe())
-            logging.debug('{}: {}'.format(line, inspect.stack()[0][3]))
-            logging.debug(self.truncate(u'Integrity: {}'.format(msg_people),
-                                        68))
+            self.log.debug(self.truncate(u'Integrity: {}'.format(msg_people),
+                                         68))
             self.session.rollback()
         except DataError:
-            logging.warning(u'DataError: {}'.format(msg_people))
+            self.log.warning(u'DataError: {}'.format(msg_people))
 
     def insert_messages(self, message, mailing_list_url):
         result = 0
@@ -131,12 +124,10 @@ class Database(object):
             self.session.commit()
             result = 1
         except IntegrityError:
-            line = inspect.getlineno(inspect.currentframe())
-            logging.debug('{}: {}'.format(line, inspect.stack()[0][3]))
-            logging.debug(self.truncate(u'Integrity: {}'.format(msg), 68))
+            self.log.debug(self.truncate(u'Integrity: {}'.format(msg), 68))
             self.session.rollback()
         except DataError:
-            logging.warning(u'DataError: {}'.format(msg))
+            self.log.warning(u'DataError: {}'.format(msg))
 
         return result
 
