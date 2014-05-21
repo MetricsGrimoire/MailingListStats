@@ -47,8 +47,8 @@ from sqlalchemy.orm import sessionmaker
 
 from contextlib import contextmanager
 
-from dbn.session import Database
-from dbn.report import Report
+from db.session import Database
+from db.report import Report
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 
