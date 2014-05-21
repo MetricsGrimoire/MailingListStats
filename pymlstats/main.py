@@ -449,13 +449,19 @@ class Application(object):
                                     today, self.db.NEW)
 
             if archive.is_compressed():
-                # Uncompress and get the raw filepaths
-                filepaths = uncompress_file(archive.filepath,
-                                            archive.compressed_type,
-                                            mailing_list.mbox_dir)
-                uncompressed_mboxes = [MBoxArchive(fp, archive.url)
-                                       for fp in filepaths]
-                archives_to_analyze.extend(uncompressed_mboxes)
+                try:
+                    # Uncompress and get the raw filepaths
+                    filepaths = uncompress_file(archive.filepath,
+                                                archive.compressed_type,
+                                                mailing_list.mbox_dir)
+                    uncompressed_mboxes = [MBoxArchive(fp, archive.url)
+                                           for fp in filepaths]
+                    archives_to_analyze.extend(uncompressed_mboxes)
+                except IOError, e:
+                    # It could be a plain file, so let's give it a chance
+                    self.__print_output("   ***WARNING: Uncompressing file %s - %s" %
+                                        (archive.filepath, str(e)))
+                    archives_to_analyze.append(archive)
             else:
                 archives_to_analyze.append(archive)
 

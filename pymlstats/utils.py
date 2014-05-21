@@ -35,6 +35,7 @@ import urllib
 import urllib2
 import shutil
 import datetime
+import cStringIO
 
 COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar',
                     '.tar.gz', '.tar.bz2', '.tgz', '.tbz']
@@ -106,7 +107,8 @@ def retrieve_remote_file(url, destfilename=None, web_user=None,
     user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
                  '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
                  'Chrome/15.0.871.0 Safari/535.2'
-    headers = {'User-Agent': user_agent}
+    headers = {'User-Agent': user_agent,
+               'Accept-Encoding': 'gzip, deflate'}
 
     # If not dest dir, then store file in a temp file
     if not destfilename:
@@ -120,15 +122,24 @@ def retrieve_remote_file(url, destfilename=None, web_user=None,
     request = urllib2.Request(url, postdata, headers)
     response = urllib2.urlopen(request)
     subtype = response.info().getsubtype()
+    data = response.read()
+
+    if response.info().getheader('content-encoding') == 'gzip':
+        data = cStringIO.StringIO(data)
+        content = gzip.GzipFile(mode='r', compresslevel=0,
+                                fileobj=data).read()
+    else:
+        content = data
+
+    response.close()
 
     if url.endswith('.gz') and subtype and subtype.endswith('plain'):
         fd = gzip.GzipFile(destfilename, 'wb')
     else:
         fd = open(destfilename, 'wb')
 
-    fd.write(response.read())
+    fd.write(content)
     fd.close()
-    response.close()
 
     return destfilename
 
