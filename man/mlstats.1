@@ -19,8 +19,8 @@ of a URL(s), the URLs will be read from the standard input.
 Mailing List Stats is a tool to analyze mailing list archives. 
 It can retrieve the archives from a remote web page (usually, the archives web
 page), or read them from a local directory. It generates a brief report, and
-write everything to a MySQL database (called mlstats unless other name is
-indicated). 
+write everything to any database supported by SQLAlchemy (called mlstats
+unless other name is indicated). 
 .SH OPTIONS
 .IP "-h, --help"
 Print a help message containing the options of the tool.
@@ -55,10 +55,6 @@ Name of the database that contains data previously analyzed (default is
 mlstats).
 .IP --db-hostname
 Name of the host with a database server running (default is localhost).
-.IP --db-admin-user
-Username to create the mlstats database (default is root).
-.IP --db-admin-password
-Password to create the mlstats database (default is empty).
 .SH FILES
 .I ~/.mlstats/compressed/
 .RS

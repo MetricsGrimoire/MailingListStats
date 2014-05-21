@@ -92,10 +92,6 @@ Database options:
                        analyzed (default is mlstats)
   --db-hostname        Name of the host with a database server running
                        (default is localhost)
-  --db-admin-user      Username to create the mlstats database
-                       (default is root)
-  --db-admin-password  Password to create the mlstats database
-                       (default is empty)
 """
 
 
@@ -106,9 +102,8 @@ def start():
     # Long options (all started by --). Those requiring argument followed by =
     long_opts = ["help",
                  "db-driver=", "db-user=", "db-password=", "db-hostname=",
-                 "db-name=", "db-admin-user=", "db-admin-password=",
-                 "report-file=", "no-report", "version", "quiet", "force",
-                 "web-user=", "web-password="]
+                 "db-name=", "report-file=", "no-report", "version",
+                 "quiet", "force", "web-user=", "web-password="]
 
     # Default options
     db_driver = 'mysql'
@@ -116,8 +111,6 @@ def start():
     db_password = None
     db_hostname = None
     db_name = 'mlstats'
-    db_admin_user = 'root'
-    db_admin_password = ''
     web_user = None
     web_password = None
     report_filename = ''
@@ -152,10 +145,6 @@ def start():
             db_hostname = value
         elif "--db-name" == opt:
             db_name = value
-        elif "--db-admin-user" == opt:
-            db_admin_user = value
-        elif "--db-admin-password" == opt:
-            db_admin_password = value
         elif "--report-file" == opt:
             report_filename = value
         elif "--no-report" == opt:
@@ -173,6 +162,5 @@ def start():
             sys.exit(0)
 
     myapp = Application(db_driver, db_user, db_password, db_name,
-                        db_hostname, db_admin_user, db_admin_password,
-                        urls, report_filename, report, quiet, force,
-                        web_user, web_password)
+                        db_hostname, urls, report_filename, report,
+                        quiet, force, web_user, web_password)
