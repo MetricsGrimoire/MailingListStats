@@ -139,7 +139,7 @@ class Application(object):
         logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
 
         drv = url.URL(driver, user, password, host, database=dbname)
-        engine = create_engine(drv, encoding='utf8')
+        engine = create_engine(drv, encoding='utf8', convert_unicode=True)
         Database.create_tables(engine, checkfirst=True)
 
         Session = sessionmaker()
