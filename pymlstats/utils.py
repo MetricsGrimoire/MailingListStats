@@ -99,29 +99,19 @@ def check_compressed_file(filename):
     return None
 
 
-def retrieve_remote_file(url, destfilename=None, web_user=None,
-                         web_password=None):
-    """Retrieve a file from a remote location. It logins in the
-    archives private page if necessary."""
-
+def fetch_remote_resource(url, user=None, password=None):
     user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
                  '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
                  'Chrome/15.0.871.0 Safari/535.2'
     headers = {'User-Agent': user_agent,
                'Accept-Encoding': 'gzip, deflate'}
 
-    # If not dest dir, then store file in a temp file
-    if not destfilename:
-        destfilename = os.tmpnam()
-
     postdata = None
-    if web_user:
-        postdata = urllib.urlencode({'username': web_user,
-                                     'password': web_password})
+    if user:
+        postdata = urllib.urlencode({'username': user, 'password': password})
 
     request = urllib2.Request(url, postdata, headers)
     response = urllib2.urlopen(request)
-    subtype = response.info().getsubtype()
     data = response.read()
 
     if response.info().getheader('content-encoding') == 'gzip':
@@ -133,7 +123,35 @@ def retrieve_remote_file(url, destfilename=None, web_user=None,
 
     response.close()
 
-    if url.endswith('.gz') and subtype and subtype.endswith('plain'):
+    return content
+
+
+def file_type(content):
+    magic_dict = {
+        '\x1f\x8b\x08': 'gz',
+        '\x42\x5a\x68': 'bz2',
+        '\x50\x4b\x03\x04': 'zip'
+    }
+
+    for magic, filetype in magic_dict.items():
+        if content.startswith(magic):
+            return filetype
+
+    return None
+
+
+def retrieve_remote_file(url, destfilename=None, web_user=None,
+                         web_password=None):
+    """Retrieve a file from a remote location. It logins in the
+    archives private page if necessary."""
+
+    # If not dest dir, then store file in a temp file
+    if not destfilename:
+        destfilename = os.tmpnam()
+
+    content = fetch_remote_resource(url, web_user, web_password)
+
+    if url.endswith('.gz') and file_type(content) is None:
         fd = gzip.GzipFile(destfilename, 'wb')
     else:
         fd = open(destfilename, 'wb')

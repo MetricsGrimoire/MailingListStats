@@ -30,13 +30,9 @@ return a list with all the links contained in the web page.
 """
 
 import htmllib
-import urllib
-import urllib2
 import os
 import formatter
 import utils
-import gzip
-import cStringIO
 
 
 MOD_MBOX_THREAD_STR = "/thread"
@@ -62,7 +58,10 @@ class MyHTMLParser(htmllib.HTMLParser):
             self.links.append(href)
 
     def get_mboxes_links(self, force=False):
-        self.__get_html()
+        htmltxt = utils.fetch_remote_resource(self.url, self.user,
+                                              self.password)
+        self.feed(htmltxt)  # Read links from HTML code
+        self.close()
 
         accepted_types = utils.COMPRESSED_TYPES + utils.ACCEPTED_TYPES
 
@@ -87,34 +86,3 @@ class MyHTMLParser(htmllib.HTMLParser):
         self.mboxes_links = filtered_links
 
         return self.mboxes_links
-
-    def __get_html(self):
-        ''' Download index.html to a temp file '''
-
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
-                     '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
-                     'Chrome/15.0.871.0 Safari/535.2'
-        headers = { 'User-Agent': user_agent,
-                    'Accept-Encoding': 'gzip, deflate' }
-        postdata = None
-
-        if self.user:
-            postdata = urllib.urlencode({'username': self.user,
-                                         'password': self.password})
-
-        request = urllib2.Request(self.url, postdata, headers)
-        response = urllib2.urlopen(request)
-
-        data = response.read()
-
-        if response.info().getheader('content-encoding') == 'gzip':
-            data = cStringIO.StringIO(data)
-            htmltxt = gzip.GzipFile(mode='r', compresslevel=0,
-                                    fileobj=data).read()
-        else:
-            htmltxt = data
-
-        response.close()
-
-        self.feed(htmltxt)  # Read links from HTML code
-        self.close()
