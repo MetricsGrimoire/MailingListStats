@@ -1,4 +1,4 @@
-Mailing List Stats
+Mailing List Stats [![Build Status](https://travis-ci.org/MetricsGrimoire/MailingListStats.svg?branch=master)](https://travis-ci.org/MetricsGrimoire/MailingListStats)
 ==================
 
 Description
