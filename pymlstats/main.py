@@ -28,8 +28,8 @@ Main funcion of mlstats. Fun starts here!
 """
 
 import os.path
-import re
 import datetime
+import urlparse
 
 from database import create_database
 from analyzer import MailArchiveAnalyzer
@@ -52,18 +52,19 @@ GMANE_LIMIT = 2000
 class MailingList(object):
 
     def __init__(self, url_or_dirpath):
-        self._location = url_or_dirpath
-        self._alias = os.path.basename(self._location)
+        rpath = url_or_dirpath.rstrip(os.path.sep)
 
-        # Check if directory exists, if not, assume it is remote
-        if os.path.exists(self._location):
-            self._local = True
-            target = self._location.lstrip('/')
-        else:
-            self._local = False
-            target = re.sub('^(http|ftp)[s]{0,1}://', '', self._location)
+        url = urlparse.urlparse(rpath)
+        lpath = url.path.rstrip(os.path.sep)
+
+        self._local = url.scheme == 'file' or len(url.scheme) == 0
+        self._location = lpath if self._local else rpath
+        self._alias = os.path.basename(lpath) or url.netloc
 
         # Define local directories to store mboxes archives
+        target = os.path.join(url.netloc, lpath.lstrip(os.path.sep))
+        target = target.rstrip(os.path.sep)
+
         self._mbox_dir = os.path.join(MBOX_DIR, target)
         self._compressed_dir = os.path.join(COMPRESSED_DIR, target)
 
