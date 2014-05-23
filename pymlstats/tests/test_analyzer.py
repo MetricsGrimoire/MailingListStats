@@ -40,6 +40,7 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
             self.assertEqual(value, messages[0][key], output)
 
     def test_single_message_no_encoding(self):
+        '''Content-Transfer-Encoding: None'''
         maa = self.get_analyzer('pharo-single.mbox')
         messages, non_parsed = maa.get_messages()
         expected = {
@@ -52,7 +53,7 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
             'in-reply-to': None,
             'list-id': None,
             'message-id': u'<4CF64D10.9020206@domain.com>',
-            'received': None,
+            'received': '2010-12-01 08:26:40',
             'references': None,
             'subject': u'[List-name] Protocol Buffers anyone?',
             'from': [(u'Göran Lastname', u'goran@domain.com')],
@@ -80,7 +81,7 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
                 u'GNOME Desktop Development List '
                 u'<desktop-devel-list.gnome.org>',
             'message-id': u'<87iqzlofqu.fsf@avet.kvota.net>',
-            'received': None,
+            'received': '2008-03-17 09:35:25',
             'references':
                u'<1204225143.12769.9.camel@localhost.localdomain>\n'
                u'\t<1204236062.14337.5.camel@localhost.localdomain>',
@@ -122,7 +123,7 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
                 u'GNOME Desktop Development List '
                 u'<desktop-devel-list.gnome.org>',
             'message-id': u'<1205749169.7470.2.camel@aragorn>',
-            'received': None,
+            'received': '2008-03-17 10:19:47',
             'references':
                 u'<1204225143.12769.9.camel@localhost.localdomain>\n'
                 u'\t<1204236062.14337.5.camel@localhost.localdomain>\n'
@@ -169,7 +170,7 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
                 u'GNOME Desktop Development List '
                 u'<desktop-devel-list.gnome.org>',
             'message-id': u'<BAY12-DAV6Dhd2stb2e0000c0ce@hotmail.com>',
-            'received': None,
+            'received': '2004-09-22 05:05:28',
             'references': None,
             'from': [(u'Eugenia Loli-Queru', u'eloli@hotmail.com')],
             'to': [('', u'language-bindings@gnome.org'),

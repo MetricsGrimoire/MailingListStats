@@ -28,38 +28,23 @@ mboxo format, which fails to process some multipart archives.
 import mailbox
 import os
 import re
+import email
 from pymlstats.utils import EMAIL_OBFUSCATION_PATTERNS
 
 
-class strict_mbox(mailbox.mbox):
-    _fromlinepattern = (r'From \s*[^\s]+\s+\w\w\w\s+\w\w\w\s+\d?\d\s+'
-                        r'\d?\d:\d\d(:\d\d)?(\s+[^\s]+)?\s+\d\d\d\d\s*'
-                        r'[^\s]*\s*'
-                        r'$')
-    _regexp = None
+class CustomMailbox(mailbox.UnixMailbox):
+    """
+        Custom mbox that can detect obscured email addressed at
+        the beggining of each message.
 
-    def __init__(self, path, factory=None, create=True):
-        """Initialize an mbox mailbox."""
-        self._message_factory = mailbox.mboxMessage
-        mailbox.mbox.__init__(self, path, factory, create)
-
-    def _generate_toc(self):
-        """Generate key-to-(start, stop) table of contents."""
-        starts, stops = [], []
-        self._file.seek(0)
-        while True:
-            line_pos = self._file.tell()
-            line = self._file.readline()
-            if line.startswith('From ') and self._strict_isrealfromline(line):
-                if len(stops) < len(starts):
-                    stops.append(line_pos - len(os.linesep))
-                starts.append(line_pos)
-            elif line == '':
-                stops.append(line_pos)
-                break
-        self._toc = dict(enumerate(zip(starts, stops)))
-        self._next_key = len(self._toc)
-        self._file_length = self._file.tell()
+        caveats: The class UnixMailbox has been deprecated and it
+        is not available in 3.x. To add support for Python 3.x,
+        copy the relevant code here.  It was deprecated because
+        the class does not allow to modify the mbox, something
+        that MLStats does not need."
+    """
+    def __init__(self, fp, factory=email.message_from_file):
+        mailbox.UnixMailbox.__init__(self, fp, factory)
 
     def _strict_isrealfromline(self, line):
         if not self._regexp:
@@ -75,3 +60,5 @@ class strict_mbox(mailbox.mbox):
                 return line.replace(pattern, '@')
 
         return line
+
+    _isrealfromline = _strict_isrealfromline

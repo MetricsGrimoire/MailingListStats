@@ -39,7 +39,7 @@ from email.Iterators import typed_subpart_iterator
 import datetime
 import hashlib
 import sys
-from pymlstats.strictmbox import strict_mbox
+from pymlstats.strictmbox import CustomMailbox
 from pymlstats.utils import EMAIL_OBFUSCATION_PATTERNS
 
 
@@ -97,7 +97,8 @@ class MailArchiveAnalyzer:
     def get_messages(self):
 
         messages_list = []
-        mbox = strict_mbox(self.filepath)
+        fp = open(self.filepath, 'rb')
+        mbox = CustomMailbox(fp)
 
         non_parsed = 0
         for message in mbox:
@@ -199,6 +200,8 @@ class MailArchiveAnalyzer:
             # such header in the original message).
 
             messages_list.append(filtered_message)
+
+        fp.close()
 
         return messages_list, non_parsed
 
