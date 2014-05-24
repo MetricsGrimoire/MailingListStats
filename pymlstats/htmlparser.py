@@ -60,7 +60,20 @@ class MyHTMLParser(htmllib.HTMLParser):
     def get_mboxes_links(self, force=False):
         htmltxt = utils.fetch_remote_resource(self.url, self.user,
                                               self.password)
-        self.feed(htmltxt)  # Read links from HTML code
+        if self.url.startswith('ftp://'):
+            # FTP servers return a plain page that contains
+            # the list of files on the directory. Each line
+            # has the next pattern:
+            #     -rw-r--r--  1  500  500  1799055  Sep 30  2013  mbox
+            #
+            # where 'mbox' is the file name.
+            #
+            lines = htmltxt.split('\r\n')
+            self.links = [line.split()[-1] for line in lines if line]
+        else:
+            # Read links from HTML code
+            self.feed(htmltxt)
+
         self.close()
 
         accepted_types = utils.COMPRESSED_TYPES + utils.ACCEPTED_TYPES

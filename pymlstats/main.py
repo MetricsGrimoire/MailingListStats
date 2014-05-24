@@ -392,7 +392,7 @@ class Application(object):
         htmlparser = MyHTMLParser(mailing_list.location,
                                   self.web_user, self.web_password)
         links = htmlparser.get_mboxes_links(self.force)
-        links.reverse()
+        links.sort()
 
         archives = []
 
