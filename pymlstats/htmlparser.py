@@ -29,9 +29,10 @@ return a list with all the links contained in the web page.
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
+import formatter
 import htmllib
 import os
-import formatter
+import urlparse
 import utils
 
 
@@ -60,7 +61,10 @@ class MyHTMLParser(htmllib.HTMLParser):
     def get_mboxes_links(self, force=False):
         htmltxt = utils.fetch_remote_resource(self.url, self.user,
                                               self.password)
-        if self.url.startswith('ftp://'):
+
+        scheme = urlparse.urlparse(self.url).scheme
+
+        if scheme in ('ftp', 'ftps'):
             # FTP servers return a plain page that contains
             # the list of files on the directory. Each line
             # has the next pattern:
