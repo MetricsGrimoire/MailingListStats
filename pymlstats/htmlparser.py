@@ -75,8 +75,11 @@ class MyHTMLParser(htmllib.HTMLParser):
             lines = htmltxt.split('\r\n')
             self.links = [line.split()[-1] for line in lines if line]
         else:
-            # Read links from HTML code
+            # Read links from HTML code. Links usually come sorted
+            # from newest to oldest but we reverse the list to analyze
+            # oldest first.
             self.feed(htmltxt)
+            self.links.reverse()
 
         self.close()
 
