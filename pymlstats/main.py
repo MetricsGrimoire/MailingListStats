@@ -27,6 +27,10 @@ Main funcion of mlstats. Fun starts here!
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
+import bz2
+import gzip
+import zipfile
+
 import os.path
 import datetime
 import urlparse
@@ -35,13 +39,12 @@ from database import create_database
 from analyzer import MailArchiveAnalyzer
 from htmlparser import MyHTMLParser
 from utils import find_current_month, create_dirs, mlstats_dot_dir,\
-    retrieve_remote_file, check_compressed_file, uncompress_file
+    retrieve_remote_file, check_compressed_file
 
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 
 
-MBOX_DIR = os.path.join(mlstats_dot_dir(), 'mbox')
 COMPRESSED_DIR = os.path.join(mlstats_dot_dir(), 'compressed')
 GMANE_DOMAIN = 'gmane.org'
 GMANE_URL = 'http://dir.gmane.org/'
@@ -65,7 +68,6 @@ class MailingList(object):
         target = os.path.join(url.netloc, lpath.lstrip(os.path.sep))
         target = target.rstrip(os.path.sep)
 
-        self._mbox_dir = os.path.join(MBOX_DIR, target)
         self._compressed_dir = os.path.join(COMPRESSED_DIR, target)
 
     @property
@@ -75,10 +77,6 @@ class MailingList(object):
     @property
     def alias(self):
         return self._alias
-
-    @property
-    def mbox_dir(self):
-        return self._mbox_dir
 
     @property
     def compressed_dir(self):
@@ -101,6 +99,18 @@ class MBoxArchive(object):
     @property
     def filepath(self):
         return self._filepath
+
+    @property
+    def container(self):
+        if not self.is_compressed():
+            return open(self.filepath, 'rb')
+
+        if self.compressed_type == 'gz':
+            return gzip.GzipFile(self.filepath, mode='rb')
+        elif self.compressed_type == 'bz2':
+            return bz2.BZ2File(self.filepath, mode='rb')
+        elif self.compressed_type == 'zip':
+            return zipfile.ZipFile(self.filepath, mode='rb')
 
     @property
     def compressed_type(self):
@@ -366,14 +376,12 @@ class Application(object):
             filename = os.path.join(mailing_list.compressed_dir, str(from_msg))
 
             self.__print_output('Retrieving %s...' % url)
-            retrieve_remote_file(url, filename,
-                                 self.web_user, self.web_password)
+            fp, size = retrieve_remote_file(url, filename,
+                                            self.web_user, self.web_password)
 
             # Check whether we have read the last message.
             # In Gmane, an empty page means we reached the last msg
-            with open(filename, 'r') as f:
-                content = f.read()
-            if not content:
+            if not size:
                 break
 
             from_msg = to_msg
@@ -441,29 +449,11 @@ class Application(object):
                                         archive.url)
                     continue
 
-            # If not, set visited
-            # (before uncompressing, otherwise the db will point towards
-            # the uncompressed temporary file)
+            # Set visited
             today = datetime.datetime.today().strftime(datetimefmt)
             self.db.set_visited_url(archive.url, mailing_list.location,
                                     today, self.db.NEW)
-
-            if archive.is_compressed():
-                try:
-                    # Uncompress and get the raw filepaths
-                    filepaths = uncompress_file(archive.filepath,
-                                                archive.compressed_type,
-                                                mailing_list.mbox_dir)
-                    uncompressed_mboxes = [MBoxArchive(fp, archive.url)
-                                           for fp in filepaths]
-                    archives_to_analyze.extend(uncompressed_mboxes)
-                except IOError, e:
-                    # It could be a plain file, so let's give it a chance
-                    self.__print_output("   ***WARNING: Uncompressing file %s - %s" %
-                                        (archive.filepath, str(e)))
-                    archives_to_analyze.append(archive)
-            else:
-                archives_to_analyze.append(archive)
+            archives_to_analyze.append(archive)
 
         return archives_to_analyze
 
@@ -475,14 +465,15 @@ class Application(object):
         non_parsed_messages_url = 0
 
         for archive in archives_to_analyze:
-            filepath = archive.filepath
-            self.__print_output('Analyzing %s' % filepath)
-            self.mail_parser.filepath = filepath
+            self.__print_output('Analyzing %s' % archive.filepath)
+
+            self.mail_parser.archive = archive
 
             try:
                 messages, non_parsed_messages = self.mail_parser.get_messages()
-            except IOError:
-                self.__print_output("Invalid file: " + filepath + ". Skipping.")
+            except IOError, e:
+                self.__print_output("Invalid file: %s - %s. Skipping."
+                                    % (archive.filepath, str(e)))
                 continue
 
             total_messages = len(messages)
@@ -525,7 +516,6 @@ class Application(object):
 
     def __check_mlstats_dirs(self):
         '''Check if the mlstats directories exist'''
-        create_dirs(MBOX_DIR)
         create_dirs(COMPRESSED_DIR)
 
     def __create_download_dirs(self, mailing_list):
@@ -533,5 +523,3 @@ class Application(object):
         # Local compressed archives are left in their original location.
         if mailing_list.is_remote():
             create_dirs(mailing_list.compressed_dir)
-
-        create_dirs(mailing_list.mbox_dir)

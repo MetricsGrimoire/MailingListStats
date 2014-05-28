@@ -91,13 +91,13 @@ class MailArchiveAnalyzer:
     common_headers = ['message-id', 'in-reply-to', 'list-id',
                       'content-type', 'references']
 
-    def __init__(self, filepath=None):
-        self.filepath = filepath
+    def __init__(self, archive=None):
+        self.archive = archive
 
     def get_messages(self):
 
         messages_list = []
-        fp = open(self.filepath, 'rb')
+        fp = self.archive.container
         mbox = CustomMailbox(fp)
 
         non_parsed = 0
@@ -286,11 +286,15 @@ class MailArchiveAnalyzer:
 
 if __name__ == '__main__':
     import pprint
+    from main import MBoxArchive
 
     # Print analyzer's output to check manually the parsing. In can
     # be used with egrep to filter out specific fields.
     # The input is a mbox file location (local)
-    maa = MailArchiveAnalyzer()
-    maa.filepath = sys.argv[1]
+    filepath = sys.argv[1]
+    archive = MBoxArchive(filepath)
+
+    maa = MailArchiveAnalyzer(archive)
+
     for m in maa.get_messages()[0]:
         pprint.pprint(m)

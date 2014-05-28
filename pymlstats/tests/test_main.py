@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from pymlstats.main import MailingList, MBOX_DIR, COMPRESSED_DIR
+from pymlstats.main import MailingList, COMPRESSED_DIR
 
 
 class MailingListTest(unittest.TestCase):
@@ -19,7 +19,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': 'http://mlstats.org/pipermail/mlstats-list',
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': False,
             'is_remote': True,
@@ -28,7 +27,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -42,7 +40,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': 'http://mlstats.org/pipermail/mlstats-list',
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': False,
             'is_remote': True,
@@ -51,7 +48,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -65,7 +61,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': 'http://mlstats.org',
             'alias': 'mlstats.org',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': False,
             'is_remote': True,
@@ -74,7 +69,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -88,7 +82,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': 'http://mlstats.org',
             'alias': 'mlstats.org',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': False,
             'is_remote': True,
@@ -97,7 +90,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -111,7 +103,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': '/mlstats.org/pipermail/mlstats-list',
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': True,
             'is_remote': False,
@@ -120,7 +111,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -134,7 +124,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': '/mlstats.org/pipermail/mlstats-list',
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': True,
             'is_remote': False,
@@ -143,7 +132,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -152,14 +140,13 @@ class MailingListTest(unittest.TestCase):
 
     def test_mailing_list_6(self):
         '''Local directory in .mlstats with no trailing slash'''
-        base = os.path.sep.join([MBOX_DIR,
+        base = os.path.sep.join([COMPRESSED_DIR,
                                 'mlstats.org/pipermail/mlstats-list'])
         target = base.lstrip(os.path.sep)
         ml = MailingList(base)
         expected = {
             'location': base.rstrip(os.path.sep),
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': True,
             'is_remote': False,
@@ -168,7 +155,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -177,14 +163,13 @@ class MailingListTest(unittest.TestCase):
 
     def test_mailing_list_7(self):
         '''Local directory in .mlstats with trailing slash'''
-        base = os.path.sep.join([MBOX_DIR,
+        base = os.path.sep.join([COMPRESSED_DIR,
                                 'mlstats.org/pipermail/mlstats-list/'])
         ml = MailingList(base)
         target = base.strip(os.path.sep)
         expected = {
             'location': base.rstrip(os.path.sep),
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': True,
             'is_remote': False,
@@ -193,7 +178,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -208,7 +192,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': '/mlstats.org/pipermail/mlstats-list',
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': True,
             'is_remote': False,
@@ -217,7 +200,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),
@@ -232,7 +214,6 @@ class MailingListTest(unittest.TestCase):
         expected = {
             'location': '/mlstats.org/pipermail/mlstats-list',
             'alias': 'mlstats-list',
-            'mbox_dir': os.path.join(MBOX_DIR, target),
             'compressed_dir': os.path.join(COMPRESSED_DIR, target),
             'is_local': True,
             'is_remote': False,
@@ -241,7 +222,6 @@ class MailingListTest(unittest.TestCase):
         result = {
             'location': ml.location,
             'alias': ml.alias,
-            'mbox_dir': ml.mbox_dir,
             'compressed_dir': ml.compressed_dir,
             'is_local': ml.is_local(),
             'is_remote': ml.is_remote(),

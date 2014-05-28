@@ -22,6 +22,7 @@ import unittest
 import os
 
 from pymlstats import analyzer
+from pymlstats.main import MBoxArchive
 
 CUR_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(CUR_DIR, 'data')
@@ -30,7 +31,8 @@ DATA_PATH = os.path.join(CUR_DIR, 'data')
 class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
     def get_analyzer(self, path, **kwargs):
         fname = os.path.join(DATA_PATH, path)
-        return analyzer.MailArchiveAnalyzer(filepath=fname)
+        archive = MBoxArchive(fname)
+        return analyzer.MailArchiveAnalyzer(archive)
 
     def check_single_message(self, expected, messages):
         for key, value in expected.items():
