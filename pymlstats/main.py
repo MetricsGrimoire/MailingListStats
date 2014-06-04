@@ -344,11 +344,16 @@ class Application(object):
     def __retrieve_local_archives(self, mailing_list):
         """Walk the mailing list directory looking for archives"""
         archives = []
-        for root, dirs, files in os.walk(mailing_list.location):
-            files.sort()
-            for filename in files:
-                location = os.path.join(root, filename)
-                archives.append(MBoxArchive(location, location))
+
+        if os.path.isfile(mailing_list.location):
+            archives.append(MBoxArchive(mailing_list.location,
+                                        mailing_list.location))
+        else:
+            for root, dirs, files in os.walk(mailing_list.location):
+                files.sort()
+                for filename in files:
+                    location = os.path.join(root, filename)
+                    archives.append(MBoxArchive(location, location))
         return archives
 
     def __retrieve_remote_archives(self, mailing_list):
