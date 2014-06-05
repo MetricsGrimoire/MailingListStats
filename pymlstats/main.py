@@ -61,8 +61,8 @@ class MailingList(object):
         lpath = url.path.rstrip(os.path.sep)
 
         self._local = url.scheme == 'file' or len(url.scheme) == 0
-        self._location = lpath if self._local else rpath
-        self._alias = os.path.basename(lpath) or url.netloc
+        self._location = os.path.realpath(lpath) if self._local else rpath
+        self._alias = os.path.basename(self._location) or url.netloc
 
         # Define local directories to store mboxes archives
         target = os.path.join(url.netloc, lpath.lstrip(os.path.sep))
@@ -350,8 +350,7 @@ class Application(object):
                                         mailing_list.location))
         else:
             for root, dirs, files in os.walk(mailing_list.location):
-                files.sort()
-                for filename in files:
+                for filename in sorted(files):
                     location = os.path.join(root, filename)
                     archives.append(MBoxArchive(location, location))
         return archives
