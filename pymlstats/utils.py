@@ -80,23 +80,14 @@ def create_dirs(dirpath):
 
 
 def check_compressed_file(filename):
-    """Check if filename contains one of the extensions
-    recognized as compressed file."""
-
-    recognized_exts = COMPRESSED_TYPES
-
-    # Check the two last extensions
-    # (to recognize also composed extensions such as tar.gz)
-    filename_noext, ext = os.path.splitext(filename)
-    long_ext = ''.join([os.path.splitext(filename_noext)[1], ext])
-
-    if long_ext in recognized_exts:
-        return long_ext
-
-    if ext in recognized_exts:
-        return ext
-
-    return None
+    """Check if filename is a compressed file supported by the tool.
+    This function uses magic numbers to determine the type of the file.
+    """
+    # Reading the four fist bytes should be enough to
+    # guess the file type.
+    with open(filename) as f:
+        magic_number = f.read(4)
+    return file_type(magic_number)
 
 
 def fetch_remote_resource(url, user=None, password=None):
@@ -151,7 +142,7 @@ def retrieve_remote_file(url, destfilename=None, web_user=None,
 
     content = fetch_remote_resource(url, web_user, web_password)
 
-    if url.endswith('.gz') and file_type(content) is None:
+    if file_type(content) is None:
         fd = gzip.GzipFile(destfilename, 'wb')
     else:
         fd = open(destfilename, 'wb')
@@ -159,7 +150,7 @@ def retrieve_remote_file(url, destfilename=None, web_user=None,
     fd.write(content)
     fd.close()
 
-    return destfilename
+    return destfilename, len(content)
 
 
 def uncompress_file(filepath, extension, output_dir=None):
