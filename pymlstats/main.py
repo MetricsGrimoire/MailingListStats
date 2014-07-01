@@ -436,6 +436,16 @@ class Application(object):
         return archives
 
     def __set_archives_to_analyze(self, mailing_list, archives):
+        today = datetime.datetime.today().strftime(datetimefmt)
+
+        # If the given list only includes one archive, force to
+        # analyze it.
+        if len(archives) == 1:
+            archive = archives[0]
+            self.db.set_visited_url(archive.url, mailing_list.location,
+                                    today, self.db.NEW)
+            return [archive]
+
         archives_to_analyze = []
 
         for archive in archives:
@@ -453,8 +463,6 @@ class Application(object):
                                         archive.url)
                     continue
 
-            # Set visited
-            today = datetime.datetime.today().strftime(datetimefmt)
             self.db.set_visited_url(archive.url, mailing_list.location,
                                     today, self.db.NEW)
             archives_to_analyze.append(archive)
