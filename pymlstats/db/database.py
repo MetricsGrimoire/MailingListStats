@@ -107,7 +107,7 @@ class Messages(Base):
     first_date_tz = Column(NUMERIC(11))
     arrival_date = Column(DateTime)
     arrival_date_tz = Column(NUMERIC(11))
-    subject = Column(VARCHAR(255))
+    subject = Column(VARCHAR(1024))
     message_body = Column(TEXT)
     is_response_of = Column(VARCHAR(255), index=True)
     mail_path = Column(TEXT)
