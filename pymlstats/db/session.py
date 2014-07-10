@@ -96,7 +96,8 @@ class Database(object):
     def insert_messages_people(self, msg_people_value):
         msg_people = db.MessagesPeople(type_of_recipient=msg_people_value[1],
                                        email_address=msg_people_value[0],
-                                       message_id=msg_people_value[2])
+                                       message_id=msg_people_value[2],
+                                       mailing_list_url=msg_people_value[3])
 
         try:
             self.session.add(msg_people)

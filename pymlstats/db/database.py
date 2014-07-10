@@ -22,7 +22,7 @@ This module contains a the definition of the generic SQL tables used
 by mlstats.
 """
 
-from sqlalchemy import create_engine, Column, ForeignKey
+from sqlalchemy import create_engine, Column, ForeignKey, ForeignKeyConstraint
 from sqlalchemy import DateTime, Enum, NUMERIC, TEXT, VARCHAR
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -101,7 +101,7 @@ class Messages(Base):
                               ForeignKey('mailing_lists.mailing_list_url',
                                          onupdate='CASCADE',
                                          ondelete='CASCADE'),
-                              nullable=False)
+                              primary_key=True)
     mailing_list = Column(VARCHAR(255))
     first_date = Column(DateTime)
     first_date_tz = Column(NUMERIC(11))
@@ -135,7 +135,14 @@ class Messages(Base):
 
 class MessagesPeople(Base):
     __tablename__ = 'messages_people'
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+    __table_args__ = (
+                      ForeignKeyConstraint(['message_id', 'mailing_list_url'],
+                                           ['messages.message_id',
+                                            'messages.mailing_list_url'],
+                                            onupdate='CASCADE',
+                                            ondelete='CASCADE'),
+                      {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+                      )
 
     type_of_recipient = Column(Enum('From', 'To', 'Cc',
                                     native_enum=True,
@@ -143,11 +150,10 @@ class MessagesPeople(Base):
                                primary_key=True,
                                default='From')
     message_id = Column(VARCHAR(255),
-                        ForeignKey('messages.message_id',
-                                   onupdate='CASCADE',
-                                   ondelete='CASCADE'),
                         primary_key=True,
                         index=True)
+    mailing_list_url = Column(VARCHAR(255),
+                              primary_key=True)
     email_address = Column(VARCHAR(255),
                            ForeignKey('people.email_address',
                                       onupdate='CASCADE',
@@ -157,8 +163,10 @@ class MessagesPeople(Base):
     def __repr__(self):
         return u"<MessagesPeople(type_of_recipient='{0}', " \
                "message_id='{1}', " \
+               "mailing_list_url='{1}', " \
                "email_address='{2}')>".format(self.type_of_recipient,
                                               self.message_id,
+                                              self.mailing_list_url,
                                               self.email_address)
 
 
