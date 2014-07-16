@@ -203,6 +203,12 @@ class Database(object):
         self.session.merge(cf)
         self.session.commit()
 
+    def get_compressed_files(self, mailing_list_url):
+        cf = aliased(db.CompressedFiles)
+        ret = self.session.query(cf.url)\
+                          .filter(cf.mailing_list_url==mailing_list_url)
+        return ret.all()
+
     def check_compressed_file(self, url):
         cf = aliased(db.CompressedFiles)
         ret = self.session.query(cf.status).filter(cf.url == url).all()
