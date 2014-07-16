@@ -52,15 +52,30 @@ setup(
     version=mlstats_version,
     author='Libresoft Research Group',
     author_email='metrics-grimoire@lists.libresoft.es',
-    description='Mailing lists analysis tool of the Metrics Grimoire suite.',
+    description='A tool to retrieve and analyze mailing lists discussions, '
+                'part of the Metrics Grimoire suite.',
     long_description=README,
     license='GNU GPL 2 or any later version',
     url='http://metricsgrimoire.github.io/MailingListStats/',
     platforms = ['any'],
     packages = ['pymlstats', 'pymlstats.db'],
     scripts = ['mlstats'],
+    install_requires = ['SQLAlchemy >= 0.7'],
     data_files = [('share/man/man1',['man/mlstats.1'])],
     test_suite = 'pymlstats.tests',
+    classifiers = [
+        'Development Status :: 3 - Alpha',
+        'Environment :: Console',
+        'License :: OSI Approved :: GNU General Public License v2 or later '
+        '(GPLv2+)',
+        'Operating System :: POSIX',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Communications :: Email',
+        'Topic :: Internet :: Log Analysis',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
     extras_require = {
         'mysql': ['MySQL-python'],
         'postgres': ['psycopg2']

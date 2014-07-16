@@ -20,6 +20,7 @@
 
 import unittest
 import os
+from datetime import datetime
 
 from pymlstats import analyzer
 from pymlstats.main import MBoxArchive
@@ -50,12 +51,13 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
                     u'with a different encoding.\n\nregards, G?ran'
                     u'\n\n\n\n',
             'content-type': None,
-            'date': '2010-12-01 14:26:40',
+            'date': datetime.strptime('2010-12-01 14:26:40', '%Y-%m-%d %H:%M:%S'),
             'date_tz': '3600',
             'in-reply-to': None,
             'list-id': None,
             'message-id': u'<4CF64D10.9020206@domain.com>',
-            'received': '2010-12-01 08:26:40',
+            'received': datetime.strptime('2010-12-01 08:26:40', '%Y-%m-%d %H:%M:%S'),
+            'date_tz': '3600',
             'references': None,
             'subject': u'[List-name] Protocol Buffers anyone?',
             'from': [(u'Göran Lastname', u'goran@domain.com')],
@@ -73,7 +75,7 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
         messages, non_parsed = maa.get_messages()
         expected = {  # noqa
             'content-type': u'text/plain; charset=utf-8',
-            'date': '2008-03-17 10:35:05',
+            'date': datetime.strptime('2008-03-17 10:35:05', '%Y-%m-%d %H:%M:%S'),
             'date_tz': '3600',
             'in-reply-to':
                 u'<1205676169.6819.27.camel@user-computer.NETWORK> '
@@ -83,7 +85,7 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
                 u'GNOME Desktop Development List '
                 u'<desktop-devel-list.gnome.org>',
             'message-id': u'<87iqzlofqu.fsf@avet.kvota.net>',
-            'received': '2008-03-17 09:35:25',
+            'received': datetime.strptime('2008-03-17 09:35:25', '%Y-%m-%d %H:%M:%S'),
             'references':
                u'<1204225143.12769.9.camel@localhost.localdomain>\n'
                u'\t<1204236062.14337.5.camel@localhost.localdomain>',
@@ -118,14 +120,14 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
                 u'> http://mail.gnome.org/mailman/listinfo/desktop-devel-list'
                 u'\n\n',
             'content-type': u'text/plain; charset=utf-8',
-            'date': '2008-03-17 11:19:29',
+            'date': datetime.strptime('2008-03-17 11:19:29', '%Y-%m-%d %H:%M:%S'),
             'date_tz': '3600',
             'in-reply-to': u'<87iqzlofqu.fsf@avet.kvota.net>',
             'list-id':
                 u'GNOME Desktop Development List '
                 u'<desktop-devel-list.gnome.org>',
             'message-id': u'<1205749169.7470.2.camel@aragorn>',
-            'received': '2008-03-17 10:19:47',
+            'received': datetime.strptime('2008-03-17 10:19:47', '%Y-%m-%d %H:%M:%S'),
             'references':
                 u'<1204225143.12769.9.camel@localhost.localdomain>\n'
                 u'\t<1204236062.14337.5.camel@localhost.localdomain>\n'
@@ -165,14 +167,14 @@ class MailArchiveAnalyzerEncodingTest(unittest.TestCase):
             'content-type':
                 u'text/plain; format=flowed; charset="iso-8859-1";'
                 u'\n\treply-type=original',
-            'date': '2004-09-22 02:03:40',
+            'date': datetime.strptime('2004-09-22 02:03:40', '%Y-%m-%d %H:%M:%S'),
             'date_tz': '-25200',
             'in-reply-to': None,
             'list-id':
                 u'GNOME Desktop Development List '
                 u'<desktop-devel-list.gnome.org>',
             'message-id': u'<BAY12-DAV6Dhd2stb2e0000c0ce@hotmail.com>',
-            'received': '2004-09-22 05:05:28',
+            'received': datetime.strptime('2004-09-22 05:05:28', '%Y-%m-%d %H:%M:%S'),
             'references': None,
             'from': [(u'Eugenia Loli-Queru', u'eloli@hotmail.com')],
             'to': [('', u'language-bindings@gnome.org'),
