@@ -414,15 +414,30 @@ class Application(object):
         """Return the total count of messages from gmane mailing list"""
         mboxes = self.db.get_compressed_files(mailing_list_url)
 
-        ids = []
-        for mbox in mboxes:
-            msg_id = mbox.url.replace(download_url, '').strip('/')
-            msg_id = int(msg_id)
-            ids.append(msg_id)
-
-        if not ids:
+        if not mboxes:
             return 0
-        return max(ids)
+
+        # Select the minimum offset of messages that are not
+        # analyzed. This includes those downloaded and set
+        # to NEW.
+        # If all of these were analyzed, select the maximum offset
+        # to restart the analysis from that point.
+        import sys
+
+        min_new = sys.maxint
+        max_visited = 0
+
+        for mbox in mboxes:
+            msg_id = int(mbox.url.replace(download_url, '').strip('/'))
+
+            if mbox.status == self.db.NEW:
+                min_new = min(min_new, msg_id)
+            else:
+                max_visited = max(max_visited, msg_id)
+
+        offset = min(min_new, max_visited)
+
+        return offset
 
     def __check_mlstats_dirs(self):
         '''Check if the mlstats directories exist'''

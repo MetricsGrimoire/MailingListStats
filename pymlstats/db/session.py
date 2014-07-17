@@ -197,7 +197,7 @@ class Database(object):
 
     def get_compressed_files(self, mailing_list_url):
         cf = aliased(db.CompressedFiles)
-        ret = self.session.query(cf.url)\
+        ret = self.session.query(cf)\
                           .filter(cf.mailing_list_url==mailing_list_url)
         return ret.all()
 
