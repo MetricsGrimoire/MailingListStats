@@ -416,7 +416,7 @@ class Application(object):
 
         ids = []
         for mbox in mboxes:
-            msg_id = mbox.replace(download_url, '').strip('/')
+            msg_id = mbox.url.replace(download_url, '').strip('/')
             msg_id = int(msg_id)
             ids.append(msg_id)
 
