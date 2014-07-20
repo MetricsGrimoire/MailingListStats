@@ -22,14 +22,20 @@ This module contains a the definition of the generic SQL tables used
 by mlstats.
 """
 
+import sqlalchemy
 from sqlalchemy import create_engine, Column, ForeignKey, ForeignKeyConstraint
 from sqlalchemy import DateTime, Enum, NUMERIC, TEXT, VARCHAR
+from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.ext.declarative import declarative_base
 
 __all__ = ['Base', 'MailingLists', 'CompressedFiles', 'People',
            'Messages', 'MessagesPeople', 'MailingListsPeople']
 
 Base = declarative_base()
+
+
+def MediumText():
+    return sqlalchemy.Text().with_variant(MEDIUMTEXT(), 'mysql')
 
 
 class MailingLists(Base):
@@ -108,7 +114,7 @@ class Messages(Base):
     arrival_date = Column(DateTime)
     arrival_date_tz = Column(NUMERIC(11))
     subject = Column(VARCHAR(1024))
-    message_body = Column(TEXT)
+    message_body = Column(MediumText())
     is_response_of = Column(VARCHAR(255), index=True)
     mail_path = Column(TEXT)
 
