@@ -386,13 +386,17 @@ class Application(object):
                 continue
 
             total_messages = len(messages)
-            stored_messages = self.db.store_messages(messages,
-                                                     mailing_list.location)
+            stored_messages, \
+                duplicated_messages, \
+                error_messages = self.db.store_messages(messages,
+                                                        mailing_list.location)
             difference = total_messages-stored_messages
             if difference > 0:
                 self.__print_output("   ***WARNING: %d messages (out of %d) "
-                                    "parsed but not stored***" %
-                                    (difference, total_messages))
+                                    "parsed but not stored "
+                                    "(%d duplicate, %d errors)***" %
+                                    (difference, total_messages,
+                                     duplicated_messages, error_messages))
             if non_parsed_messages > 0:
                 self.__print_output("   ***WARNING: %d messages (out of %d) "
                                     "were ignored by the parser***" %
