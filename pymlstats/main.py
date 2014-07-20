@@ -314,8 +314,7 @@ class Application(object):
                 this_month = find_current_month(link)
 
                 if this_month:
-                    self.__print_output('Found substring %s in URL %s...' %
-                                        (this_month, link))
+                    self.__print_output('Current month detected: Found substring %s in URL %s...' % (this_month, link))
                     self.__print_output('Retrieving %s...' % link)
                     retrieve_remote_file(link, destfilename,
                                          self.web_user, self.web_password)
