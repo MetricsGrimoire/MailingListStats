@@ -32,6 +32,10 @@ import database as db
 class Database(object):
     (VISITED, NEW, FAILED) = ('visited', 'new', 'failed')
 
+    INSERT_ERROR_INTEGRITY_ERROR = -1
+
+    INSERT_ERROR_DATA_ERROR = -1
+
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.log.setLevel(logging.WARN)
@@ -127,10 +131,10 @@ class Database(object):
         except IntegrityError:
             self.log.debug(self.truncate(u'Integrity: {}'.format(msg), 68))
             self.session.rollback()
-            result = -1
+            result = self.INSERT_ERROR_INTEGRITY_ERROR
         except DataError:
             self.log.warning(u'DataError: {}'.format(msg))
-            result = -2
+            result = self.INSERT_ERROR_DATA_ERROR
 
         return result
 
