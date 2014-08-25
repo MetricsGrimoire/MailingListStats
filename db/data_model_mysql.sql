@@ -37,7 +37,7 @@ CREATE TABLE messages (
     arrival_date DATETIME NULL,
     arrival_date_tz INTEGER(11) NULL,
     subject VARCHAR(255) CHARACTER SET utf8 NULL,
-    message_body TEXT CHARACTER SET utf8 NULL,
+    message_body MEDIUMTEXT CHARACTER SET utf8 NULL,
     is_response_of VARCHAR(255) CHARACTER SET utf8 NULL,
     mail_path TEXT CHARACTER SET utf8 NULL,
     PRIMARY KEY(message_ID),
