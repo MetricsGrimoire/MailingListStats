@@ -34,7 +34,7 @@ class Database(object):
 
     INSERT_ERROR_INTEGRITY_ERROR = -1
 
-    INSERT_ERROR_DATA_ERROR = -1
+    INSERT_ERROR_DATA_ERROR = -2
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
