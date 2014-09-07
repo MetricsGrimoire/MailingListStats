@@ -45,7 +45,7 @@ Installation
 ------------
 You can install MLStats running setup.py script:
 
-    # python setup.py install
+    $ python setup.py install
 
 If you don't have root privileges, use the `--prefix` option to indicate
 the directory where `mlstats` will be installed. For more details, take a
