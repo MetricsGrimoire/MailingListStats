@@ -22,7 +22,7 @@ Download
 
 Releases:
 
-  * https://github.com/MetricsGrimoire/MailingListStats/downloads
+* [https://github.com/MetricsGrimoire/MailingListStats/releases](https://github.com/MetricsGrimoire/MailingListStats/releases)
 
 Latest version:
 
