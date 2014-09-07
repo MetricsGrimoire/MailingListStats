@@ -93,7 +93,7 @@ It is a very low traffic list, usually with less than one message per day.
 Contributing
 ------------
 
-When making contributions, please follow the [PEP8 specification][8].
+When making contributions, please follow the [PEP8 specification][2].
 To check your code follows the specification, use a tool like
 [pep8][3] or [flake8][4].
 
