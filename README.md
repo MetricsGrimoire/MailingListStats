@@ -54,7 +54,11 @@ look at the help of the installer:
     $ python setup.py install --help
 
 You are ready to use `mlstats`.
+## Useful settings
 
+### MySQL
+
+* `max_allowed_packet`: Raise your `max_allowed_packet`-setting of your database. 1 or 16 MB might be to low (depends on your mailinglist). In the most cases 50 MB is a good value.
 
 Running mlstats
 ---------------
