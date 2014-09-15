@@ -33,12 +33,13 @@ Requirements
 -------------
 `mlstats` needs the following dependencies (either MySQL or PostgreSQL):
 
+  * Python package "[SQLAlchemy](https://pypi.python.org/pypi/SQLAlchemy)"
   * MySQL:
-    * python-mysqldb
-    * mysql-server
+    * Python package "[MySQL-python](https://pypi.python.org/pypi/MySQL-python/)"
+    * MySQL-Server
   * PostgreSQL:
-    * psycopg2
-    * postgresql-server (it has been tested with 8.4 and 9.1)
+    * Python package "[psycopg2](https://pypi.python.org/pypi/psycopg2)"
+    * PostgreSQL-Server (tested with 8.4 and 9.1)
 
 
 Installation
