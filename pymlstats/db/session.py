@@ -99,7 +99,7 @@ class Database(object):
 
     def insert_messages_people(self, msg_people_value):
         msg_people = db.MessagesPeople(type_of_recipient=msg_people_value[1],
-                                       email_address=msg_people_value[0],
+                                       email_address=msg_people_value[0].lower(),
                                        message_id=msg_people_value[2],
                                        mailing_list_url=msg_people_value[3])
 
@@ -151,6 +151,7 @@ class Database(object):
                     continue
 
                 for name, email in addresses:
+                    email = email.lower()
                     self.insert_people(name, email)
                     self.insert_mailing_list_people(email, mailing_list_url)
                     key = '%s-%s' % (header, email)
