@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#-*- coding:utf-8 -*-
 # Copyright (C) 2013-2014 Germán Poo-Caamaño <gpoo@gnome.org>
 #
 # This program is free software; you can redistribute it and/or modify

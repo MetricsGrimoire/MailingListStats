@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 # Copyright (C) 2007-2010 Libresoft Research Group
 #
 # This program is free software; you can redistribute it and/or modify
