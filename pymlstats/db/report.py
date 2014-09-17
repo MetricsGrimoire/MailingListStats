@@ -334,17 +334,13 @@ class Report(Database):
             ml = ml.rstrip('/').split('/')[-1]
             output += '{0}\t{1}\n'.format(ml, num)
 
-        output += '''\n\n\n
-           MLStats, Copyright (C) 2007-2010 Libresoft Research Group\n
-           MLStats is Open Source Software/Free Software, licensed under
-           the GNU GPL.\n"
-           MLStats comes with ABSOLUTELY NO WARRANTY, and you are welcome
-           to\n
-           redistribute it under certain conditions as specified by
-           the GNU GPL license;\n"
-           see the documentation for details.\n
-           Please credit this data as "generated using Libresoft's 'MLStats'.
-           '''
+        output += "\n\n\n" \
+            "MLStats, Copyright (C) 2007-2010 Libresoft Research Group\n\n" \
+            "MLStats is Open Source Software/Free Software, licensed under the GNU GPL.\n" \
+            "MLStats comes with ABSOLUTELY NO WARRANTY, and you are welcome to " \
+            "redistribute it under certain conditions as specified by the GNU GPL license " \
+            "see the documentation for details.\n" \
+            "Please credit this data as generated using Libresoft's 'MLStats'."
 
         if report_filename:
             print u"Report written to {}".format(report_filename)
