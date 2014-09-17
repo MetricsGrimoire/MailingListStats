@@ -197,7 +197,7 @@ class Application(object):
         if make_report:
             report = Report()
             report.set_session(session)
-            report.print_brief_report()
+            report.print_brief_report(report_filename=report_filename)
 
         session.close()
 
