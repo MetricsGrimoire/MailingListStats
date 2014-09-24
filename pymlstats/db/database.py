@@ -40,9 +40,9 @@ def MediumText():
 
 class MailingLists(Base):
     __tablename__ = 'mailing_lists'
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8mb4'}
 
-    mailing_list_url = Column(VARCHAR(255), primary_key=True)
+    mailing_list_url = Column(VARCHAR(191), primary_key=True)
     mailing_list_name = Column(VARCHAR(255))
     project_name = Column(VARCHAR(255))
     last_analysis = Column(DateTime)
@@ -58,10 +58,10 @@ class MailingLists(Base):
 
 class CompressedFiles(Base):
     __tablename__ = 'compressed_files'
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8mb4'}
 
-    url = Column(VARCHAR(255), primary_key=True)
-    mailing_list_url = Column(VARCHAR(255),
+    url = Column(VARCHAR(191), primary_key=True)
+    mailing_list_url = Column(VARCHAR(191),
                               ForeignKey('mailing_lists.mailing_list_url'),
                               nullable=False)
     status = Column(Enum('new', 'visited', 'failed', native_enum=True,
@@ -80,9 +80,9 @@ class CompressedFiles(Base):
 class People(Base):
     __tablename__ = 'people'
     __table_args__ = {'mysql_engine': 'InnoDB',
-                      'mysql_charset': 'utf8'}
+                      'mysql_charset': 'utf8mb4'}
 
-    email_address = Column(VARCHAR(255), primary_key=True)
+    email_address = Column(VARCHAR(191), primary_key=True)
     name = Column(VARCHAR(255))
     username = Column(VARCHAR(255))
     domain_name = Column(VARCHAR(255))
@@ -100,10 +100,10 @@ class People(Base):
 
 class Messages(Base):
     __tablename__ = 'messages'
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8mb4'}
 
-    message_id = Column(VARCHAR(255), primary_key=True)
-    mailing_list_url = Column(VARCHAR(255),
+    message_id = Column(VARCHAR(191), primary_key=True)
+    mailing_list_url = Column(VARCHAR(191),
                               ForeignKey('mailing_lists.mailing_list_url',
                                          onupdate='CASCADE',
                                          ondelete='CASCADE'),
@@ -115,7 +115,7 @@ class Messages(Base):
     arrival_date_tz = Column(NUMERIC(11))
     subject = Column(VARCHAR(1024))
     message_body = Column(MediumText())
-    is_response_of = Column(VARCHAR(255), index=True)
+    is_response_of = Column(VARCHAR(191), index=True)
     mail_path = Column(TEXT)
 
     def __repr__(self):
@@ -147,7 +147,7 @@ class MessagesPeople(Base):
                                             'messages.mailing_list_url'],
                                             onupdate='CASCADE',
                                             ondelete='CASCADE'),
-                      {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+                      {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8mb4'}
                       )
 
     type_of_recipient = Column(Enum('From', 'To', 'Cc',
@@ -155,12 +155,12 @@ class MessagesPeople(Base):
                                     name='enum_type_of_recipient'),
                                primary_key=True,
                                default='From')
-    message_id = Column(VARCHAR(255),
+    message_id = Column(VARCHAR(191),
                         primary_key=True,
                         index=True)
-    mailing_list_url = Column(VARCHAR(255),
+    mailing_list_url = Column(VARCHAR(191),
                               primary_key=True)
-    email_address = Column(VARCHAR(255),
+    email_address = Column(VARCHAR(191),
                            ForeignKey('people.email_address',
                                       onupdate='CASCADE',
                                       ondelete='CASCADE'),
@@ -178,14 +178,14 @@ class MessagesPeople(Base):
 
 class MailingListsPeople(Base):
     __tablename__ = 'mailing_lists_people'
-    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}
+    __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8mb4'}
 
-    email_address = Column(VARCHAR(255),
+    email_address = Column(VARCHAR(191),
                            ForeignKey('people.email_address',
                                       onupdate='CASCADE',
                                       ondelete='CASCADE'),
                            primary_key=True)
-    mailing_list_url = Column(VARCHAR(255),
+    mailing_list_url = Column(VARCHAR(191),
                               ForeignKey('mailing_lists.mailing_list_url',
                                          onupdate='CASCADE',
                                          ondelete='CASCADE'),
