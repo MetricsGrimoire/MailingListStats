@@ -36,7 +36,7 @@ Requirements
   * Python package "[SQLAlchemy](https://pypi.python.org/pypi/SQLAlchemy)"
   * MySQL:
     * Python package "[MySQL-python](https://pypi.python.org/pypi/MySQL-python/)"
-    * MySQL-Server (minimum v5.5.3)
+    * MySQL-Server
   * PostgreSQL:
     * Python package "[psycopg2](https://pypi.python.org/pypi/psycopg2)"
     * PostgreSQL-Server (tested with 8.4 and 9.1)
