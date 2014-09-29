@@ -138,7 +138,7 @@ class MailArchiveAnalyzer:
                 address = self.__check_spam_obscuring([address])
                 addresses = []
                 for name, email in getaddresses(address):
-                    addresses.append((self.__decode(name, charset), email))
+                    addresses.append((self.__decode(name, charset), self.__decode(email, charset)))
 
                 filtered_message[header] = addresses
 
@@ -147,7 +147,7 @@ class MailArchiveAnalyzer:
             for address in (message.get_all('cc', [])):
                 address = self.__check_spam_obscuring([address])
                 for name, email in getaddresses(address):
-                    addresses.append((self.__decode(name, charset), email))
+                    addresses.append((self.__decode(name, charset), self.__decode(email, charset)))
 
             filtered_message['cc'] = addresses or None  # [('','')]
 
