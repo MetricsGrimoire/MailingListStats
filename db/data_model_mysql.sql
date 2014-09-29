@@ -29,18 +29,18 @@ CREATE TABLE people (
 ENGINE=InnoDB;
 
 CREATE TABLE messages (
-    message_ID VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+    message_id VARCHAR(255) CHARACTER SET utf8 NOT NULL,
     mailing_list_url VARCHAR(255) CHARACTER SET utf8 NOT NULL,
     mailing_list VARCHAR(255) CHARACTER SET utf8 NULL,
     first_date DATETIME NULL,
     first_date_tz INTEGER(11) NULL,
     arrival_date DATETIME NULL,
     arrival_date_tz INTEGER(11) NULL,
-    subject VARCHAR(255) CHARACTER SET utf8 NULL,
+    subject VARCHAR(1024) CHARACTER SET utf8 NULL,
     message_body MEDIUMTEXT CHARACTER SET utf8 NULL,
     is_response_of VARCHAR(255) CHARACTER SET utf8 NULL,
     mail_path TEXT CHARACTER SET utf8 NULL,
-    PRIMARY KEY(message_ID),
+    PRIMARY KEY(message_id, mailing_list_url),
     INDEX response(is_response_of),
     FOREIGN KEY(mailing_list_url)
         REFERENCES mailing_lists(mailing_list_url)
@@ -51,10 +51,11 @@ ENGINE=InnoDB;
 CREATE TABLE messages_people (
     type_of_recipient ENUM('From','To','Cc') NOT NULL DEFAULT 'From',
     message_id VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+    mailing_list_url VARCHAR(255) CHARACTER SET utf8 NOT NULL,
     email_address VARCHAR(255) CHARACTER SET utf8 NOT NULL,
-    PRIMARY KEY(type_of_recipient, message_id, email_address),
-    INDEX m_id(message_id),
-    FOREIGN KEY(message_ID) REFERENCES messages(message_id)
+    PRIMARY KEY(type_of_recipient, message_id, mailing_list_url, email_address),
+    INDEX message_id(message_id, mailing_list_url),
+    FOREIGN KEY(message_id, mailing_list_url) REFERENCES messages(message_id, mailing_list_url)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY(email_address) REFERENCES people(email_address)
