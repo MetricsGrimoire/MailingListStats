@@ -63,7 +63,7 @@ GMANE_LIMIT = 2000
 
 class MailingList(object):
 
-    def __init__(self, url_or_dirpath):
+    def __init__(self, url_or_dirpath, compressed_dir):
         rpath = url_or_dirpath.rstrip(os.path.sep)
 
         url = urlparse.urlparse(rpath)
@@ -77,7 +77,7 @@ class MailingList(object):
         target = os.path.join(url.netloc, lpath.lstrip(os.path.sep))
         target = target.rstrip(os.path.sep)
 
-        self._compressed_dir = os.path.join(COMPRESSED_DIR, target)
+        self._compressed_dir = os.path.join(compressed_dir, target)
 
     @property
     def location(self):
@@ -132,7 +132,11 @@ class MBoxArchive(object):
 class Application(object):
     def __init__(self, driver, user, password, dbname, host,
                  url_list, report_filename, make_report, be_quiet,
-                 force, web_user, web_password):
+                 force, web_user, web_password, compressed_dir=None):
+
+        # If no "--compressed-dir" parameter is set, use default
+        if compressed_dir is None:
+            compressed_dir = COMPRESSED_DIR
 
         self.mail_parser = MailArchiveAnalyzer()
 
@@ -165,13 +169,13 @@ class Application(object):
         # URLs or local files to be analyzed
         self.url_list = url_list
 
-        self.__check_mlstats_dirs()
+        self.__check_mlstats_dirs(compressed_dir)
 
         total_messages = 0
         stored_messages = 0
         non_parsed = 0
         for mailing_list in url_list:
-            t, s, np = self.__analyze_mailing_list(mailing_list)
+            t, s, np = self.__analyze_mailing_list(mailing_list, compressed_dir)
 
             total_messages += t
             stored_messages += s
@@ -205,10 +209,10 @@ class Application(object):
         if not self.be_quiet:
             print text
 
-    def __analyze_mailing_list(self, url_or_dirpath):
+    def __analyze_mailing_list(self, url_or_dirpath, compressed_dir):
         """Look for mbox archives, retrieve, uncompress and analyze them"""
 
-        mailing_list = MailingList(url_or_dirpath)
+        mailing_list = MailingList(url_or_dirpath, compressed_dir)
 
         # Check if mailing list already in database
         # today = datetime.datetime.today().strftime(datetimefmt)
@@ -445,9 +449,9 @@ class Application(object):
 
         return offset
 
-    def __check_mlstats_dirs(self):
+    def __check_mlstats_dirs(self, compressed_dir):
         '''Check if the mlstats directories exist'''
-        create_dirs(COMPRESSED_DIR)
+        create_dirs(compressed_dir)
 
     def __create_download_dirs(self, mailing_list):
         # Remote archives are retrieved and stored in compressed_dir.

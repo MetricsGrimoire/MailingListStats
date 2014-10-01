@@ -63,6 +63,8 @@ General options:
                     nor local files).
   -                 Read URLs from the standard input. This will ignore all
                     the URLs passed via the command line.
+  --compressed-dir  Path to a folder where the archives of the mailing list will be stored.
+
 
 Report options:
 
@@ -104,7 +106,7 @@ def start():
     long_opts = ["help",
                  "db-driver=", "db-user=", "db-password=", "db-hostname=",
                  "db-name=", "report-file=", "no-report", "version",
-                 "quiet", "force", "web-user=", "web-password="]
+                 "quiet", "force", "web-user=", "web-password=", "compressed-dir="]
 
     # Default options
     db_driver = 'mysql'
@@ -114,6 +116,7 @@ def start():
     db_name = 'mlstats'
     web_user = None
     web_password = None
+    compressed_dir = None
     report_filename = ''
     report = True
     quiet = False
@@ -158,10 +161,12 @@ def start():
             web_user = value
         elif "--web-password" == opt:
             web_password = value
+        elif "--compressed-dir" == opt:
+            compressed_dir = value.rstrip('/')
         elif "--version" == opt:
             print mlstats_version
             sys.exit(0)
 
     myapp = Application(db_driver, db_user, db_password, db_name,
                         db_hostname, urls, report_filename, report,
-                        quiet, force, web_user, web_password)
+                        quiet, force, web_user, web_password, compressed_dir)
