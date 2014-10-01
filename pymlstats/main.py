@@ -63,7 +63,7 @@ GMANE_LIMIT = 2000
 
 class MailingList(object):
 
-    def __init__(self, url_or_dirpath, compressed_dir):
+    def __init__(self, url_or_dirpath, compressed_dir=COMPRESSED_DIR):
         rpath = url_or_dirpath.rstrip(os.path.sep)
 
         url = urlparse.urlparse(rpath)
