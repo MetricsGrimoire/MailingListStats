@@ -189,7 +189,6 @@ class Database(GenericDatabase):
             # FIXME: If primary key check fails, ignore and continue
             msgs_people_value = {}
             for header in ('from', 'to', 'cc'):
-                print m[header]
                 addresses = self.filter(m[header])
                 if not addresses:
                     continue
@@ -207,6 +206,8 @@ class Database(GenericDatabase):
                 # Duplicated message
                 stored_messages -= 1
             except:
+                import sys, traceback
+                traceback.print_exc(file=sys.stdout)
                 error_message = """ERROR: Runtime error while trying to write
                 message with message-id '%s'. That message has not been written
                 to the database, but the execution has not been stopped. Please

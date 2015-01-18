@@ -82,15 +82,17 @@ class FudForumsDBAnalyzer:
 
         def get_messages(self):
 
+            from time import strftime
+            from datetime import datetime
+
             messages_list = []
             sql = "SELECT "
             sql += "fm.id, thread_id, poster_id, reply_to, post_stamp, "
             sql += "update_stamp, updated_by, subject, mlist_msg_id, "
             sql += "name, email "
             sql += "FROM fud_msg fm JOIN fud_users fu ON fm.poster_id = fu.id "
-            sql += "LIMIT 10"
-
-            print sql
+            sql += "ORDER BY post_stamp "
+            # sql += "LIMIT 1000"
 
             cursor = self.db_con.cursor()
 
@@ -107,7 +109,7 @@ class FudForumsDBAnalyzer:
 #                | updated_by      | int(11)      | NO   |     | 0       |                |
 #                | subject         | varchar(100) | NO   | MUL |         |                |
 #                | mlist_msg_id    | varchar(100) | YES  | MUL | NULL    |                |
-                filtered_message['received'] = msg[4]
+                filtered_message['received'] = datetime.fromtimestamp(msg[4])
                 filtered_message['message-id'] = msg[0]
                 filtered_message['from'] = ((msg[9], msg[10]),)
                 filtered_message['to'] = None
@@ -115,12 +117,11 @@ class FudForumsDBAnalyzer:
                 filtered_message['cc'] = None
                 filtered_message['body'] = None
                 filtered_message['subject'] = msg[7]
-                filtered_message['date'] = msg[4]
+                filtered_message['date'] = datetime.fromtimestamp(msg[4])
                 filtered_message['date_tz'] = None
                 filtered_message['list-id'] = msg[8]
                 messages_list.append(filtered_message)
             non_parsed = 0
-            print messages_list
             return messages_list, non_parsed
 
 class MailArchiveAnalyzer:
