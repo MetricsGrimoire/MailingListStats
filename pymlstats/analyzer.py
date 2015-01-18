@@ -76,6 +76,45 @@ def to_unicode(string, charset='latin-1'):
     else:
         raise TypeError('string should be of str type')
 
+class FudForumsDBAnalyzer:
+        def __init__(self, db_con):
+            self.db_con = db_con
+
+        def get_messages(self):
+
+            messages_list = []
+            sql = "SELECT "
+            sql += "id, thread_id, poster_id, reply_to, post_stamp, "
+            sql += "update_stamp, updated_by, subject, mlist_msg_id"
+            sql += "FROM fud_msg"
+
+            self.db_con.read_cursor.execute(sql)
+
+            for msg in messages:
+                filtered_message = {}
+#                | id              | int(11)      | NO   | PRI | NULL    | auto_increment |
+#                | thread_id       | int(11)      | NO   | MUL | 0       |                |
+#                | poster_id       | int(11)      | NO   | MUL | 0       |                |
+#                | reply_to        | int(11)      | NO   |     | 0       |                |
+#                | post_stamp      | bigint(20)   | NO   | MUL | 0       |                |
+#                | update_stamp    | bigint(20)   | NO   |     | 0       |                |
+#                | updated_by      | int(11)      | NO   |     | 0       |                |
+#                | subject         | varchar(100) | NO   | MUL |         |                |
+#                | mlist_msg_id    | varchar(100) | YES  | MUL | NULL    |                |
+                filtered_message['received'] = fields[4]
+                filtered_message['message-id'] = fields[0]
+                filtered_message['from'] = fields[2]
+                filtered_message['to'] = None
+                filtered_message['in-reply-to'] = fields[3]
+                filtered_message['cc'] = None
+                filtered_message['body'] = None
+                filtered_message['subject'] = fields[7]
+                filtered_message['date'] = fields[4]
+                filtered_message['date_tz'] = None
+                filtered_message['list-id'] = fields[8]
+                messages_list.append(filtered_message)
+            non_parsed = 0
+            return messages_list, non_parsed
 
 class MailArchiveAnalyzer:
 

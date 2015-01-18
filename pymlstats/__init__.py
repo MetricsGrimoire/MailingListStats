@@ -90,6 +90,7 @@ Database options:
                        (default is operator)
   --db-name            Name of the database that contains data previously
                        analyzed (default is mlstats)
+  --db-fudforums       Name of the database with fudforums data to be analyzed
   --db-hostname        Name of the host with a database server running
                        (default is localhost)
   --db-admin-user      Username to create the mlstats database
@@ -152,6 +153,8 @@ def start():
             db_hostname = value
         elif "--db-name" == opt:
             db_name = value
+        elif "--db-fudforums" == opt:
+            db_fudforums = value
         elif "--db-admin-user" == opt:
             db_admin_user = value
         elif "--db-admin-password" == opt:

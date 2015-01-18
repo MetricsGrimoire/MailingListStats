@@ -126,8 +126,6 @@ class Application(object):
                  admin_user, admin_password, url_list, report_filename,
                  make_report, be_quiet, force, web_user, web_password):
 
-        self.mail_parser = MailArchiveAnalyzer()
-
         self.db = create_database(driver=driver, dbname=dbname, username=user,
                                   password=password, hostname=host,
                                   admin_user=admin_user,
@@ -135,6 +133,8 @@ class Application(object):
 
         # Connect to database if exists, otherwise create it and connect
         self.db.connect()
+
+        self.mail_parser = FudForumsDBAnalyzer(self.db)
 
         # User and password to make login in case the archives
         # are set to private
