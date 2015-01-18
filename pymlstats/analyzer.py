@@ -85,8 +85,9 @@ class FudForumsDBAnalyzer:
             messages_list = []
             sql = "SELECT "
             sql += "id, thread_id, poster_id, reply_to, post_stamp, "
-            sql += "update_stamp, updated_by, subject, mlist_msg_id "
-            sql += "FROM fud_msg"
+            sql += "update_stamp, updated_by, subject, mlist_msg_id, "
+            sql += "email "
+            sql += "FROM fud_msg fm JOIN fud_users fu ON fm.poster_id = fu.id "
 
             print sql
 
@@ -107,7 +108,7 @@ class FudForumsDBAnalyzer:
 #                | mlist_msg_id    | varchar(100) | YES  | MUL | NULL    |                |
                 filtered_message['received'] = fields[4]
                 filtered_message['message-id'] = fields[0]
-                filtered_message['from'] = fields[2]
+                filtered_message['from'] = fields[9]
                 filtered_message['to'] = None
                 filtered_message['in-reply-to'] = fields[3]
                 filtered_message['cc'] = None
