@@ -151,6 +151,7 @@ class Application(object):
         # Force to download and parse any link found in the given URL
         self.force = force
 
+
         # URLs or local files to be analyzed
         self.url_list = url_list
 
@@ -159,6 +160,7 @@ class Application(object):
         total_messages = 0
         stored_messages = 0
         non_parsed = 0
+        if url_list == []: url_list= ["fudforums"]
         for mailing_list in url_list:
             t, s, np = self.__analyze_mailing_list(mailing_list)
 
@@ -480,8 +482,11 @@ class Application(object):
         stored_messages_url = 0
         non_parsed_messages_url = 0
 
+        if mailing_list.location.endswith('fudforums'):
+            archives_to_analyze= ['fudforums']
+
         for archive in archives_to_analyze:
-            self.__print_output('Analyzing %s' % archive.filepath)
+            self.__print_output('Analyzing %s' % archive)
 
             self.mail_parser.archive = archive
 
@@ -511,7 +516,7 @@ class Application(object):
             non_parsed_messages_url += non_parsed_messages
 
             today = datetime.datetime.today().strftime(datetimefmt)
-            self.db.set_visited_url(archive.url, mailing_list.location, today,
+            self.db.set_visited_url(archive, mailing_list.location, today,
                                     self.db.VISITED)
 
         return total_messages_url, stored_messages_url, non_parsed_messages_url

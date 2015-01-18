@@ -189,6 +189,7 @@ class Database(GenericDatabase):
             # FIXME: If primary key check fails, ignore and continue
             msgs_people_value = {}
             for header in ('from', 'to', 'cc'):
+                print m[header]
                 addresses = self.filter(m[header])
                 if not addresses:
                     continue

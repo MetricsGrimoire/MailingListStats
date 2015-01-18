@@ -118,7 +118,7 @@ def start():
     db_password = 'operator'
     db_hostname = None
     db_name = 'mlstats'
-    db_fudforums = 'fudforums'
+    db_fudforums = 'fudforum'
     db_admin_user = 'root'
     db_admin_password = ''
     web_user = None
