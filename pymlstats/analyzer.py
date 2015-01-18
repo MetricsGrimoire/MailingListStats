@@ -85,10 +85,14 @@ class FudForumsDBAnalyzer:
             messages_list = []
             sql = "SELECT "
             sql += "id, thread_id, poster_id, reply_to, post_stamp, "
-            sql += "update_stamp, updated_by, subject, mlist_msg_id"
+            sql += "update_stamp, updated_by, subject, mlist_msg_id "
             sql += "FROM fud_msg"
 
-            self.db_con.read_cursor.execute(sql)
+            print sql
+
+            cursor = self.db_con.cursor()
+
+            cursor.execute(sql)
 
             for msg in messages:
                 filtered_message = {}

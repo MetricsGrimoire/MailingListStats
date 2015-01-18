@@ -91,6 +91,7 @@ Database options:
   --db-name            Name of the database that contains data previously
                        analyzed (default is mlstats)
   --db-fudforums       Name of the database with fudforums data to be analyzed
+                       (default is fudforums)
   --db-hostname        Name of the host with a database server running
                        (default is localhost)
   --db-admin-user      Username to create the mlstats database
@@ -107,7 +108,7 @@ def start():
     # Long options (all started by --). Those requiring argument followed by =
     long_opts = ["help",
                  "db-driver=", "db-user=", "db-password=", "db-hostname=",
-                 "db-name=", "db-admin-user=", "db-admin-password=",
+                 "db-name=", "db-fudforums=", "db-admin-user=", "db-admin-password=",
                  "report-file=", "no-report", "version", "quiet", "force",
                  "web-user=", "web-password="]
 
@@ -117,6 +118,7 @@ def start():
     db_password = 'operator'
     db_hostname = None
     db_name = 'mlstats'
+    db_fudforums = 'fudforums'
     db_admin_user = 'root'
     db_admin_password = ''
     web_user = None
@@ -175,7 +177,7 @@ def start():
             print mlstats_version
             sys.exit(0)
 
-    myapp = Application(db_driver, db_user, db_password, db_name,
+    myapp = Application(db_driver, db_user, db_password, db_name, db_fudforums,
                         db_hostname, db_admin_user, db_admin_password,
                         urls, report_filename, report, quiet, force,
                         web_user, web_password)

@@ -18,11 +18,11 @@
 # Authors : Israel Herraiz <herraiz@gsyc.escet.urjc.es>
 
 """
-Main funcion of mlstats. Fun starts here!
+Main funcion of mlstats (for fudforums). Fun starts here!
 
-@author:       Israel Herraiz
-@organization: Libresoft Research Group, Universidad Rey Juan Carlos
-@copyright:    Universidad Rey Juan Carlos (Madrid, Spain)
+@author:       Israel Herraiz, Alvaro del Castillo
+@organization: Libresoft Research Group, Universidad Rey Juan Carlos, Bitergia
+@copyright:    Universidad Rey Juan Carlos (Madrid, Spain), Bitergia
 @license:      GNU GPL version 2 or any later version
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
@@ -36,7 +36,7 @@ import datetime
 import urlparse
 
 from database import create_database
-from analyzer import MailArchiveAnalyzer
+from analyzer import FudForumsDBAnalyzer
 from htmlparser import MyHTMLParser
 from utils import find_current_month, create_dirs, mlstats_dot_dir,\
     retrieve_remote_file, check_compressed_file
@@ -122,7 +122,7 @@ class MBoxArchive(object):
 
 class Application(object):
 
-    def __init__(self, driver, user, password, dbname, host,
+    def __init__(self, driver, user, password, dbname, dbfudforums, host,
                  admin_user, admin_password, url_list, report_filename,
                  make_report, be_quiet, force, web_user, web_password):
 
@@ -130,11 +130,15 @@ class Application(object):
                                   password=password, hostname=host,
                                   admin_user=admin_user,
                                   admin_password=admin_password)
+        import MySQLdb as dbapi
+        if host is None: host = 'localhost'
+        self.dbfud = dbapi.connect(host, admin_user, admin_password, dbfudforums,
+                                   charset='utf8', use_unicode=True)
 
         # Connect to database if exists, otherwise create it and connect
         self.db.connect()
 
-        self.mail_parser = FudForumsDBAnalyzer(self.db)
+        self.mail_parser = FudForumsDBAnalyzer(self.dbfud)
 
         # User and password to make login in case the archives
         # are set to private
