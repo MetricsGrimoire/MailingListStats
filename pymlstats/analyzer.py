@@ -87,10 +87,13 @@ class FudForumsDBAnalyzer:
 
             messages_list = []
             sql = "SELECT "
-            sql += "fm.id, thread_id, poster_id, reply_to, post_stamp, "
+            sql += "fm.id, fm.thread_id, poster_id, reply_to, post_stamp, "
             sql += "update_stamp, updated_by, subject, mlist_msg_id, "
-            sql += "name, email "
-            sql += "FROM fud_msg fm JOIN fud_users fu ON fm.poster_id = fu.id "
+            sql += "name, email, ff.name "
+            sql += "FROM fud_msg fm "
+            sql += "JOIN fud_users fu ON fm.poster_id = fu.id "
+            sql += "JOIN fud_thread ft ON fm.thread_id = ft.id "
+            sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
             sql += "ORDER BY post_stamp "
             # sql += "LIMIT 1000"
 
@@ -100,15 +103,6 @@ class FudForumsDBAnalyzer:
 
             for msg in cursor:
                 filtered_message = {}
-#                | id              | int(11)      | NO   | PRI | NULL    | auto_increment |
-#                | thread_id       | int(11)      | NO   | MUL | 0       |                |
-#                | poster_id       | int(11)      | NO   | MUL | 0       |                |
-#                | reply_to        | int(11)      | NO   |     | 0       |                |
-#                | post_stamp      | bigint(20)   | NO   | MUL | 0       |                |
-#                | update_stamp    | bigint(20)   | NO   |     | 0       |                |
-#                | updated_by      | int(11)      | NO   |     | 0       |                |
-#                | subject         | varchar(100) | NO   | MUL |         |                |
-#                | mlist_msg_id    | varchar(100) | YES  | MUL | NULL    |                |
                 filtered_message['received'] = datetime.fromtimestamp(msg[4])
                 filtered_message['message-id'] = msg[0]
                 filtered_message['from'] = ((msg[9], msg[10]),)
@@ -119,7 +113,7 @@ class FudForumsDBAnalyzer:
                 filtered_message['subject'] = msg[7]
                 filtered_message['date'] = datetime.fromtimestamp(msg[4])
                 filtered_message['date_tz'] = None
-                filtered_message['list-id'] = msg[8]
+                filtered_message['list-id'] = msg[11]
                 messages_list.append(filtered_message)
             non_parsed = 0
             return messages_list, non_parsed
