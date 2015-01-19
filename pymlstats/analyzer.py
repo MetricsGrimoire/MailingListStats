@@ -89,13 +89,14 @@ class FudForumsDBAnalyzer:
             sql = "SELECT "
             sql += "fm.id, fm.thread_id, poster_id, reply_to, post_stamp, "
             sql += "update_stamp, updated_by, subject, mlist_msg_id, "
-            sql += "name, email, ff.name "
+            sql += "fu.name, email, ff.name "
             sql += "FROM fud_msg fm "
             sql += "JOIN fud_users fu ON fm.poster_id = fu.id "
             sql += "JOIN fud_thread ft ON fm.thread_id = ft.id "
             sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
             sql += "ORDER BY post_stamp "
             # sql += "LIMIT 1000"
+            # print sql
 
             cursor = self.db_con.cursor()
 
