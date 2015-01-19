@@ -80,6 +80,45 @@ class FudForumsDBAnalyzer:
         def __init__(self, db_con):
             self.db_con = db_con
 
+        def parse_message(self, data):
+            filtered_message = {}
+            filtered_message['received'] = datetime.fromtimestamp(msg[4])
+            filtered_message['message-id'] = msg[0]
+            filtered_message['from'] = ((msg[9], msg[10]),)
+            filtered_message['to'] = None
+            filtered_message['in-reply-to'] = msg[3]
+            filtered_message['cc'] = None
+            filtered_message['body'] = None
+            filtered_message['subject'] = msg[7]
+            filtered_message['date'] = datetime.fromtimestamp(msg[4])
+            filtered_message['date_tz'] = None
+            filtered_message['list-id'] = msg[11]
+
+            return filtered_message
+
+        def get_messages_user_0(self):
+
+            from time import strftime
+            from datetime import datetime
+
+            messages_list = []
+            sql = "SELECT "
+            sql += "fm.id, fm.thread_id, reply_to, post_stamp, "
+            sql += "update_stamp, updated_by, subject, mlist_msg_id, "
+            sql += "'Eclipse user','eclipse_user@eclipse.org', ff.name "
+            sql += "FROM fud_msg fm "
+            sql += "JOIN fud_thread ft ON fm.thread_id = ft.id "
+            sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
+
+            cursor = self.db_con.cursor()
+
+            cursor.execute(sql)
+
+            for msg in cursor:
+                messages_list.append(self.parse_message(msg))
+            return messages_list
+
+
         def get_messages(self):
 
             from time import strftime
@@ -103,19 +142,8 @@ class FudForumsDBAnalyzer:
             cursor.execute(sql)
 
             for msg in cursor:
-                filtered_message = {}
-                filtered_message['received'] = datetime.fromtimestamp(msg[4])
-                filtered_message['message-id'] = msg[0]
-                filtered_message['from'] = ((msg[9], msg[10]),)
-                filtered_message['to'] = None
-                filtered_message['in-reply-to'] = msg[3]
-                filtered_message['cc'] = None
-                filtered_message['body'] = None
-                filtered_message['subject'] = msg[7]
-                filtered_message['date'] = datetime.fromtimestamp(msg[4])
-                filtered_message['date_tz'] = None
-                filtered_message['list-id'] = msg[11]
-                messages_list.append(filtered_message)
+                messages_list.append(self.parse_message(msg))
+            messages_list += self.get_messages_user_0()
             non_parsed = 0
             return messages_list, non_parsed
 
