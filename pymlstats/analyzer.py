@@ -80,7 +80,10 @@ class FudForumsDBAnalyzer:
         def __init__(self, db_con):
             self.db_con = db_con
 
-        def parse_message(self, data):
+        def parse_message(self, msg):
+            from time import strftime
+            from datetime import datetime
+
             filtered_message = {}
             filtered_message['received'] = datetime.fromtimestamp(msg[4])
             filtered_message['message-id'] = msg[0]
@@ -97,18 +100,18 @@ class FudForumsDBAnalyzer:
             return filtered_message
 
         def get_messages_user_0(self):
-
-            from time import strftime
-            from datetime import datetime
-
             messages_list = []
             sql = "SELECT "
-            sql += "fm.id, fm.thread_id, reply_to, post_stamp, "
+            sql += "fm.id, fm.thread_id, 0, reply_to, post_stamp, "
             sql += "update_stamp, updated_by, subject, mlist_msg_id, "
             sql += "'Eclipse user','eclipse_user@eclipse.org', ff.name "
             sql += "FROM fud_msg fm "
             sql += "JOIN fud_thread ft ON fm.thread_id = ft.id "
             sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
+            sql += "WHERE fm.poster_id=0 "
+            sql += "ORDER BY post_stamp "
+            # sql += "LIMIT 10"
+            print sql
 
             cursor = self.db_con.cursor()
 
@@ -120,10 +123,6 @@ class FudForumsDBAnalyzer:
 
 
         def get_messages(self):
-
-            from time import strftime
-            from datetime import datetime
-
             messages_list = []
             sql = "SELECT "
             sql += "fm.id, fm.thread_id, poster_id, reply_to, post_stamp, "
@@ -134,8 +133,8 @@ class FudForumsDBAnalyzer:
             sql += "JOIN fud_thread ft ON fm.thread_id = ft.id "
             sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
             sql += "ORDER BY post_stamp "
-            # sql += "LIMIT 1000"
-            # print sql
+            # sql += "LIMIT 10"
+            print sql
 
             cursor = self.db_con.cursor()
 

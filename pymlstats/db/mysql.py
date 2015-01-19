@@ -184,7 +184,8 @@ class Database(GenericDatabase):
 
         for m in message_list:
             values = m
-            values['mailing_list_url'] = mailing_list_url
+            # values['mailing_list_url'] = mailing_list_url
+            values['mailing_list_url'] = values['list-id']
 
             # FIXME: If primary key check fails, ignore and continue
             msgs_people_value = {}
