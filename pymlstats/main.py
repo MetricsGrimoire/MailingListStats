@@ -519,6 +519,15 @@ class Application(object):
             self.db.set_visited_url(archive, mailing_list.location, today,
                                     self.db.VISITED)
 
+        if mailing_list.location.endswith('fudforums'):
+            # Insert INTO the db all mailing lists using forums names
+            sql =  "insert into mailing_lists "
+            sql += "(mailing_list_url,mailing_list_name,project_name) "
+            sql += "select  t.m, t.m, t.m "
+            sql += "from (select distinct(mailing_list) as m from messages) t"
+
+            self.db.write_cursor.execute(sql)
+
         return total_messages_url, stored_messages_url, non_parsed_messages_url
 
     def __get_gmane_total_count(self, mailing_list_url, download_url):
