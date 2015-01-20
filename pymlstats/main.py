@@ -521,12 +521,7 @@ class Application(object):
 
         if mailing_list.location.endswith('fudforums'):
             # Insert INTO the db all mailing lists using forums names
-            sql =  "insert into mailing_lists "
-            sql += "(mailing_list_url,mailing_list_name,project_name) "
-            sql += "select  t.m, t.m, t.m "
-            sql += "from (select distinct(mailing_list) as m from messages) t"
-
-            self.db.write_cursor.execute(sql)
+            self.mail_parser.create_mailing_lists_forums(self.db)
 
         return total_messages_url, stored_messages_url, non_parsed_messages_url
 

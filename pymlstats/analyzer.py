@@ -110,7 +110,7 @@ class FudForumsDBAnalyzer:
             sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
             sql += "WHERE fm.poster_id=0 "
             sql += "ORDER BY post_stamp "
-            # sql += "LIMIT 10"
+            # sql += "LIMIT 100"
             print sql
 
             cursor = self.db_con.cursor()
@@ -133,7 +133,7 @@ class FudForumsDBAnalyzer:
             sql += "JOIN fud_thread ft ON fm.thread_id = ft.id "
             sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
             sql += "ORDER BY post_stamp "
-            # sql += "LIMIT 10"
+            # sql += "LIMIT 100"
             print sql
 
             cursor = self.db_con.cursor()
@@ -145,6 +145,21 @@ class FudForumsDBAnalyzer:
             messages_list += self.get_messages_user_0()
             non_parsed = 0
             return messages_list, non_parsed
+
+        def create_mailing_lists_forums(self, db_con_mls):
+            cursor = db_con_mls.write_cursor
+            # remove all
+            # to avoid probs with constraints
+            sql = "delete from mailing_lists"
+            cursor.execute(sql)
+            # Insert INTO the db all mailing lists using forums names
+            sql =  "insert into mailing_lists "
+            sql += "(mailing_list_url,mailing_list_name,project_name) "
+            sql += "select  t.m, t.m, t.m "
+            sql += "from (select distinct(mailing_list) as m from messages) t"
+            print sql
+            cursor.execute(sql)
+            db_con_mls.dbobj.commit()
 
 class MailArchiveAnalyzer:
 

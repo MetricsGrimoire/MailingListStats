@@ -40,9 +40,7 @@ data_model_query_list = [
         mailing_list_url varchar(255) CHARACTER SET utf8 not null,
         status enum('new','visited','failed') null,
         last_analysis datetime null,
-        primary key(url),
-        foreign key(mailing_list_url)
-            references mailing_lists(mailing_list_url))
+        primary key(url))
     ENGINE=INNODB;""",
     """CREATE TABLE people (
         email_address VARCHAR(255) CHARACTER SET utf8 NOT NULL,
@@ -65,11 +63,7 @@ data_model_query_list = [
         is_response_of VARCHAR(255) CHARACTER SET utf8 NULL,
         mail_path TEXT CHARACTER SET utf8 NULL,
         PRIMARY KEY(message_ID, mailing_list_url),
-        INDEX response(is_response_of),
-        FOREIGN KEY(mailing_list_url)
-            REFERENCES mailing_lists(mailing_list_url)
-            ON DELETE CASCADE
-            ON UPDATE CASCADE)
+        INDEX response(is_response_of))
     ENGINE=InnoDB;""",
     """CREATE TABLE messages_people (
         type_of_recipient ENUM('From','To','Cc') NOT NULL DEFAULT 'From',
@@ -89,10 +83,6 @@ data_model_query_list = [
         email_address VARCHAR(255) CHARACTER SET utf8 NOT NULL,
         mailing_list_url VARCHAR(255) CHARACTER SET utf8 NOT NULL,
         PRIMARY KEY(email_address, mailing_list_url),
-        FOREIGN KEY(mailing_list_url)
-            REFERENCES mailing_lists(mailing_list_url)
-            ON DELETE CASCADE
-            ON UPDATE CASCADE,
         FOREIGN KEY(email_address)
             REFERENCES people(email_address)
             ON DELETE CASCADE
