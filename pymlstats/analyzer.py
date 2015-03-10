@@ -89,7 +89,11 @@ class FudForumsDBAnalyzer:
             filtered_message['message-id'] = msg[0]
             filtered_message['from'] = ((msg[9], msg[10]),)
             filtered_message['to'] = None
-            filtered_message['in-reply-to'] = msg[3]
+            if msg[3] != 0:
+                filtered_message['in-reply-to'] = msg[3]
+            else:
+                # Root messages should have in-reply-to NULL
+                filtered_message['in-reply-to'] = None
             filtered_message['cc'] = None
             filtered_message['body'] = None
             filtered_message['subject'] = msg[7]
@@ -134,7 +138,6 @@ class FudForumsDBAnalyzer:
             sql += "JOIN fud_forum ff ON ff.id = ft.forum_id "
             sql += "ORDER BY post_stamp "
             # sql += "LIMIT 100"
-            print sql
 
             cursor = self.db_con.cursor()
 
