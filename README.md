@@ -64,13 +64,24 @@ You are ready to use `mlstats`.
 Running mlstats
 ---------------
 
-More options, and a more detailed info about the options, can be
-learnt by running `mlstats --help`
+The backend MySQL requires the database already exists. Use the following
+command to create the database. The tables will be automatically created 
+when mlstats runs.
+
+    mysql> create database mlstats;
 
 The backend postgres requires the database already exists. The creation
 of tables must be done manually. There is a SQL script with the schema
 in `db/data_model_pg.sql` that can be used for this purpose.
 
+Assuming you have a MySQL database running on localhost, you might run mlstats
+with these commonly used options (replace the text in ALL CAPS with your db username, 
+db password and mailing list URL):
+
+    $ mlstats --db-user=USERNAME --db-password=PASS http://URLOFYOURLIST
+
+If you have a different configuration or need more options, more detailed information
+about the options, can be learnt by running `mlstats --help`
 
 Analysis
 --------
