@@ -86,7 +86,21 @@ about the options, can be learnt by running `mlstats --help`
 Analysis
 --------
 
-[To be written]
+Analysis of mlstats data is completed by writing database queries. mlstats does the hard
+work of parsing the mailing list archives and storing all of this data into a database 
+that can be used to extract meaningful data about a mailing list. Because what is meaningful
+varies by project, the flexibility of being able to write any query is a necessity.
+
+While this does require a bit of knowledge about database queries, there are a few resources
+to help you get started.
+
+* Use the **[Database Schema](https://github.com/MetricsGrimoire/MailingListStats/wiki/Database-Schema)**
+wiki page to learn more about the database structure. This will help you write your queries, but 
+it also gives you a comprehensive list of everything that can be found in the database and 
+retrieved in your queries.
+* Because we don't want you to start from zero, use the **[Queries](https://github.com/MetricsGrimoire/MailingListStats/wiki/Queries)**
+wiki page to find some commonly used queries and examples. If you have some interesting examples,
+please add them to the wiki page.
 
 
 Improving MailingListStats
