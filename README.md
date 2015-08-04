@@ -55,24 +55,31 @@ look at the help of the installer:
     $ python setup.py install --help
 
 You are ready to use `mlstats`.
-## Useful settings
 
-### MySQL
+## Running mlstats
 
+### With MySQL
+
+* If you just installed mysql, you may need to start the service before continuing. 
+	* To do so on OS X, run `/usr/local/bin/mysql.server start`
 * `max_allowed_packet`: Raise your `max_allowed_packet`-setting of your database. 1 or 16 MB might be too low (depends on your mailinglist). In the most cases 50 MB is a good value.
+	* To set this at runtime, use `SET GLOBAL max_allowed_packet=16*1024*1024;` on the mysql prompt
+* To have the privileges to create the database below, you'll want to run `mysql -u root` followed by a `CREATE USER` statement like: 
 
-Running mlstats
----------------
+	```
+	$ mysql -u root
+	mysql> CREATE USER 'jeffrey'@'localhost' IDENTIFIED BY 'mypass';
+	mysql> GRANT ALL PRIVILEGES ON * . * TO 'jeffrey'@'localhost';
+	mysql> FLUSH PRIVILEGES;
+	```
 
-The backend MySQL requires the database already exists. Use the following
+The MySQL backend requires the database already exists. Use the following
 command to create the database. The tables will be automatically created 
 when mlstats runs.
 
     mysql> create database mlstats;
 
-The backend postgres requires the database already exists. The creation
-of tables must be done manually. There is a SQL script with the schema
-in `db/data_model_pg.sql` that can be used for this purpose.
+You can now leave the mysql prompt by running `exit;`.
 
 Assuming you have a MySQL database running on localhost, you might run mlstats
 with these commonly used options (replace the text in ALL CAPS with your db username, 
@@ -82,6 +89,12 @@ db password and mailing list URL):
 
 If you have a different configuration or need more options, more detailed information
 about the options, can be learnt by running `mlstats --help`
+
+### With Postgres
+
+The postgres backend requires the database already exists. The creation
+of tables must be done manually. There is a SQL script with the schema
+in `db/data_model_pg.sql` that can be used for this purpose.
 
 Analysis
 --------
