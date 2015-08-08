@@ -56,25 +56,26 @@ def usage():
 General options:
 
   -h, --help        Print this usage message.
-  -q, --quiet       Do not show messages about the progress in the retrieval
-                    and analysis of the archives.
+  -q, --quiet       Do not show messages about the progress in the
+                    retrieval and analysis of the archives.
   --version         Show the version number and exit.
-  --force           Force mlstats to download and parse any link found in a
-                    given URL (only valid for remote links, neither Gmane links
-                    nor local files).
-  -                 Read URLs from the standard input. This will ignore all
-                    the URLs passed via the command line.
-  --compressed-dir  Path to a folder where the archives of the mailing list will be stored.
+  --force           Force mlstats to download and parse any link found
+                    in a given URL (only valid for remote links, neither
+                    Gmane links nor local files).
+  -                 Read URLs from the standard input. This will ignore
+                    all the URLs passed via the command line.
+  --compressed-dir  Path to a folder where the archives of the mailing
+                    list will be stored.
 
 
 Report options:
 
   --report-file     Filename for the report generated after the analysis
                     (default is standard output)
-                    WARNING: The report file will be overwritten if already
-                    exists.
-  --no-report       Do not generate report after the retrieval and parsing
-                    of the archives.
+                    WARNING: The report file will be overwritten if
+                    already exists.
+  --no-report       Do not generate a report after the retrieval and
+                    parsing of the archives.
 
 
 Private archives options:
@@ -102,12 +103,13 @@ Database options:
 def start():
     # Short (one letter) options. Those requiring argument followed by :
     short_opts = "hq"
-    #short_opts = "h:t:b:r:l:n:p:d:s:i:r"
+    # short_opts = "h:t:b:r:l:n:p:d:s:i:r"
     # Long options (all started by --). Those requiring argument followed by =
     long_opts = ["help",
                  "db-driver=", "db-user=", "db-password=", "db-hostname=",
                  "db-name=", "report-file=", "no-report", "version",
-                 "quiet", "force", "web-user=", "web-password=", "compressed-dir="]
+                 "quiet", "force", "web-user=", "web-password=",
+                 "compressed-dir="]
 
     # Default options
     db_driver = 'mysql'
