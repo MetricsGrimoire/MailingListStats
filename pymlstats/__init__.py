@@ -85,7 +85,7 @@ Private archives options:
 
 Database options:
 
-  --db-driver          Database backend: mysql or postgres
+  --db-driver          Database backend: mysql, postgres, or sqlite
                        (default is mysql)
   --db-user            Username to connect to the database
                        (default is operator)
