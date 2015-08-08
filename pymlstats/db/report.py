@@ -260,6 +260,10 @@ class Report(Database):
         :return: dict
         """
 
+        # Check for data, otherwise stop right here. Fixes #58
+        if not keyed_tuple:
+            return {0: 0, 1: 0}
+
         # Determine how many attributes are in one row
         num_of_attributes = len(keyed_tuple[0])
 
