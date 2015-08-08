@@ -31,6 +31,7 @@ options are changed.
 
 import sys
 import getopt
+import os.path
 from main import Application
 from version import mlstats_version
 
@@ -162,7 +163,7 @@ def start():
         elif "--web-password" == opt:
             web_password = value
         elif "--compressed-dir" == opt:
-            compressed_dir = value.rstrip('/')
+            compressed_dir = value.rstrip(os.path.sep)
         elif "--version" == opt:
             print mlstats_version
             sys.exit(0)
