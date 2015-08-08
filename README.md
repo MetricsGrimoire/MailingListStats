@@ -26,57 +26,69 @@ Releases:
 
 Latest version:
 
-```bash
+```
 $ git clone git://github.com/MetricsGrimoire/MailingListStats.git
 ```
 
 Requirements
 -------------
-`mlstats` needs the following dependencies (either MySQL or PostgreSQL):
+`mlstats` requires "[SQLAlchemy](https://pypi.python.org/pypi/SQLAlchemy)"
+to work with multiple database engines.  `mlstats` has been tested against
+Sqlite3, MySQL and PostgreSQL.
 
-  * Python package "[SQLAlchemy](https://pypi.python.org/pypi/SQLAlchemy)"
+To work with MySQL or PostgreSQL, `mlstats` needs the following extra
+dependencies:
+
   * MySQL:
     * Python package "[MySQL-python](https://pypi.python.org/pypi/MySQL-python/)"
     * MySQL-Server
   * PostgreSQL:
     * Python package "[psycopg2](https://pypi.python.org/pypi/psycopg2)"
-    * PostgreSQL-Server (tested with 8.4 and 9.1)
+    * PostgreSQL-Server (tested with 8.4 and 9.x series)
 
 
 Installation
 ------------
-You can install MLStats running setup.py script:
+You can install `mlstats` running setup.py script:
 
-```python
+```
 $ python setup.py install
 ```
 
-If you don't have root privileges, use the `--prefix` option to indicate
-the directory where `mlstats` will be installed. For more details, take a
-look at the help of the installer:
+`mlstats` can be installed without privileges, use the `--prefix` option
+to indicate the directory where `mlstats` will be installed. For more
+details, take a look at the help of the installer:
 
-```python
+```
 $ python setup.py install --help
 ```
 
 You are ready to use `mlstats`.
 
-## Running mlstats
+Running MLStats
+---------------
 
-### With MySQL
+### Basic Setup Using Sqlite
 
-If you just installed mysql, you may need to start the service before continuing. To do so on OS X, run `/usr/local/bin/mysql.server start`. 
+To run `mlstats` without the hassle of setting a database, you can use
+the builtin Sqlite3.
 
-You may also want to increase your `max_allowed_packet`: 1 or 16 MB may be too low (depends on your mailinglist). In the most cases 50 MB is a good value. To set this at runtime, use `SET GLOBAL max_allowed_packet=16*1024*1024;` on the mysql prompt.
-
-To have the privileges to create the database below, you'll want to run `mysql -u root` followed by a `CREATE USER` statement like:
-
-```sql
-$ mysql -u root
-mysql> CREATE USER 'jeffrey'@'localhost' IDENTIFIED BY 'mypass';
-mysql> GRANT ALL PRIVILEGES ON * . * TO 'jeffrey'@'localhost';
-mysql> FLUSH PRIVILEGES;
 ```
+$ mlstats --db-engine=slqlite --db-name=MLS-DATA.DB http://URL-OF-YOUR-LIST/
+```
+
+Just replace the text in ALL CAPS with your database name, and mailing list
+URL to work on.
+
+In this example, if the file `MLS-DATA.DB` does not exists, `mlstats` will
+create it for you.
+
+### Using MLStats with MySQL
+
+You are required to have MySQL installed and running in a computer.
+Please, refer to the manual of your distribution (if you are using Linux)
+or MySQL (if you are running other operating system) to install it,
+checking the database is running, and handling the database.
 
 The MySQL backend requires the database already exists. Use the following
 command to create the database. The tables will be automatically created 
@@ -86,24 +98,41 @@ when mlstats runs.
 mysql> create database mlstats;
 ```
 
-You can now leave the mysql prompt by running `exit;`.
+Assuming you have a MySQL database running on localhost, you might run
+mlstats with these commonly used options (replace the text in ALL CAPS
+with your database username, database password and mailing list URL):
 
-Assuming you have a MySQL database running on localhost, you might run mlstats
-with these commonly used options (replace the text in ALL CAPS with your db username, 
-db password and mailing list URL):
-
-```bash
-$ mlstats --db-user=USERNAME --db-password=PASS http://URLOFYOURLIST
+```
+$ mlstats --db-engine=mysql --db-user=USERNAME --db-password=PASS http://URL-OF-YOUR-LIST
 ```
 
-If you have a different configuration or need more options, more detailed information
-about the options, can be learnt by running `mlstats --help`
+#### MySQL Tweaks
 
-### With Postgres
+You may want to increase your `max_allowed_packet`: 1 or 16 MB may be
+too low (depends on your mailinglist). It has been reported that 50 MB
+might be a good value. To set this at runtime, use
+`SET GLOBAL max_allowed_packet=16*1024*1024;` on the mysql prompt.
+
+### Using MLStats with Postgres
 
 The postgres backend requires the database already exists. The creation
 of tables must be done manually. There is a SQL script with the schema
 in `db/data_model_pg.sql` that can be used for this purpose.
+
+Assuming you have a PostgreSQL database running on localhost, you might run
+mlstats with these commonly used options (replace the text in ALL CAPS
+with your database username, database password and mailing list URL):
+
+
+```
+$ mlstats --db-engine=postgres --db-user=USERNAME --db-password=PASS http://URLOFYOURLIST
+```
+
+### Other MLStats Options
+
+If you have a different configuration or need more options, more detailed
+information about the options, can be learnt by running `mlstats --help`.
+
 
 Analysis
 --------
