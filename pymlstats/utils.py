@@ -132,28 +132,6 @@ def file_type(content):
     return None
 
 
-def retrieve_remote_file(url, destfilename=None, web_user=None,
-                         web_password=None):
-    """Retrieve a file from a remote location. It logins in the
-    archives private page if necessary."""
-
-    # If not dest dir, then store file in a temp file
-    if not destfilename:
-        destfilename = os.tmpnam()
-
-    content = fetch_remote_resource(url, web_user, web_password)
-
-    if file_type(content) is None:
-        fd = gzip.GzipFile(destfilename, 'wb')
-    else:
-        fd = open(destfilename, 'wb')
-
-    fd.write(content)
-    fd.close()
-
-    return destfilename, len(content)
-
-
 def uncompress_file(filepath, extension, output_dir=None):
     """This function uncompress the file, and return
     the extension for the uncompressed file."""

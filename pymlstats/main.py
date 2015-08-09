@@ -28,105 +28,24 @@ Main funcion of mlstats. Fun starts here!
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
-import bz2
-import gzip
-import zipfile
-
-import os.path
 import datetime
-import urlparse
 import logging
 
 from analyzer import MailArchiveAnalyzer
-from htmlparser import MyHTMLParser
-from utils import find_current_month, create_dirs, mlstats_dot_dir,\
-    retrieve_remote_file, check_compressed_file
+from utils import find_current_month, create_dirs
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import url
 from sqlalchemy.orm import sessionmaker
 
-from contextlib import contextmanager
-
 from db.session import Database
 from db.report import Report
 
+from archives import MailingList, COMPRESSED_DIR
+from backends import LocalArchive, GmaneArchive, MailmanArchive,\
+    GMANE_URL, GMANE_DOMAIN, GMANE_DOWNLOAD_URL
+
 datetimefmt = '%Y-%m-%d %H:%M:%S'
-
-
-COMPRESSED_DIR = os.path.join(mlstats_dot_dir(), 'compressed')
-GMANE_DOMAIN = 'gmane.org'
-GMANE_URL = 'http://dir.gmane.org/'
-GMANE_DOWNLOAD_URL = 'http://download.gmane.org/'
-GMANE_LIMIT = 2000
-
-
-class MailingList(object):
-
-    def __init__(self, url_or_dirpath, compressed_dir=COMPRESSED_DIR):
-        rpath = url_or_dirpath.rstrip(os.path.sep)
-
-        url = urlparse.urlparse(rpath)
-        lpath = url.path.rstrip(os.path.sep)
-
-        self._local = url.scheme == 'file' or len(url.scheme) == 0
-        self._location = os.path.realpath(lpath) if self._local else rpath
-        self._alias = os.path.basename(self._location) or url.netloc
-
-        # Define local directories to store mboxes archives
-        target = os.path.join(url.netloc, lpath.lstrip(os.path.sep))
-        target = target.rstrip(os.path.sep)
-
-        self._compressed_dir = os.path.join(compressed_dir, target)
-
-    @property
-    def location(self):
-        return self._location
-
-    @property
-    def alias(self):
-        return self._alias
-
-    @property
-    def compressed_dir(self):
-        return self._compressed_dir
-
-    def is_local(self):
-        return self._local
-
-    def is_remote(self):
-        return not self.is_local()
-
-
-class MBoxArchive(object):
-
-    def __init__(self, filepath, url=None):
-        self._filepath = filepath
-        self.url = url
-        self._compressed = check_compressed_file(filepath)
-
-    @property
-    def filepath(self):
-        return self._filepath
-
-    @property
-    def container(self):
-        if not self.is_compressed():
-            return open(self.filepath, 'rb')
-
-        if self.compressed_type == 'gz':
-            return gzip.GzipFile(self.filepath, mode='rb')
-        elif self.compressed_type == 'bz2':
-            return bz2.BZ2File(self.filepath, mode='rb')
-        elif self.compressed_type == 'zip':
-            return zipfile.ZipFile(self.filepath, mode='rb')
-
-    @property
-    def compressed_type(self):
-        return self._compressed
-
-    def is_compressed(self):
-        return self._compressed is not None
 
 
 class Application(object):
@@ -174,8 +93,8 @@ class Application(object):
         total_messages = 0
         stored_messages = 0
         non_parsed = 0
-        for mailing_list in url_list:
-            t, s, np = self.__analyze_mailing_list(mailing_list, compressed_dir)
+        for url_ml in url_list:
+            t, s, np = self.__analyze_mailing_list(url_ml, compressed_dir)
 
             total_messages += t
             stored_messages += s
@@ -223,8 +142,22 @@ class Application(object):
 
         total, stored, non_parsed = (0, 0, 0)
 
+        if mailing_list.is_local():
+            mla = LocalArchive(mailing_list)
+        elif mailing_list.location.startswith(GMANE_URL):
+            gmane_url = GMANE_DOWNLOAD_URL + mailing_list.alias
+            offset = self.__get_gmane_total_count(mailing_list.location,
+                                                  gmane_url)
+            mla = GmaneArchive(mailing_list, self.be_quiet, self.force,
+                               self.web_user, self.web_password, offset)
+        else:
+            mla = MailmanArchive(mailing_list, self.be_quiet, self.force,
+                               self.web_user, self.web_password)
+
+        mla._create_download_dirs()
+
         try:
-            archives = self.__retrieve_mailing_list_archives(mailing_list)
+            archives = [a for a in mla.fetch()]
             archives_to_analyze = self.__set_archives_to_analyze(mailing_list,
                                                                  archives)
             total, stored, non_parsed = self.__analyze_list_of_files(mailing_list, archives_to_analyze)
@@ -233,110 +166,6 @@ class Application(object):
                                 url_or_dirpath + ". Skipping.")
 
         return total, stored, non_parsed
-
-    def __retrieve_mailing_list_archives(self, mailing_list):
-        self.__create_download_dirs(mailing_list)
-
-        if mailing_list.is_local():
-            archives = self.__retrieve_local_archives(mailing_list)
-        else:
-            archives = self.__retrieve_remote_archives(mailing_list)
-        return archives
-
-    def __retrieve_local_archives(self, mailing_list):
-        """Walk the mailing list directory looking for archives"""
-        archives = []
-
-        if os.path.isfile(mailing_list.location):
-            archives.append(MBoxArchive(mailing_list.location,
-                                        mailing_list.location))
-        else:
-            for root, dirs, files in os.walk(mailing_list.location):
-                for filename in sorted(files):
-                    location = os.path.join(root, filename)
-                    archives.append(MBoxArchive(location, location))
-        return archives
-
-    def __retrieve_remote_archives(self, mailing_list):
-        """Download mboxes archives from the remote mailing list"""
-
-        if (mailing_list.location.startswith(GMANE_URL)):
-            archives = self.__retrieve_from_gmane(mailing_list)
-        else:
-            archives = self.__retrieve_from_mailman(mailing_list)
-        return archives
-
-    def __retrieve_from_gmane(self, mailing_list):
-        """Download mboxes from gmane interface"""
-
-        gmane_url = GMANE_DOWNLOAD_URL + mailing_list.alias
-        from_msg = self.__get_gmane_total_count(mailing_list.location,
-                                                gmane_url)
-
-        archives = []
-
-        while(True):
-            to_msg = from_msg + GMANE_LIMIT
-            url = gmane_url + '/' + str(from_msg) + '/' + str(to_msg)
-            arch_url = gmane_url + '/' + str(from_msg)
-            filename = os.path.join(mailing_list.compressed_dir, str(from_msg))
-
-            self.__print_output('Retrieving %s...' % url)
-            fp, size = retrieve_remote_file(url, filename,
-                                            self.web_user, self.web_password)
-
-            # Check whether we have read the last message.
-            # In Gmane, an empty page means we reached the last msg
-            if not size:
-                break
-
-            from_msg = to_msg
-
-            archives.append(MBoxArchive(filename, arch_url))
-        return archives
-
-    def __retrieve_from_mailman(self, mailing_list):
-        """Download mboxes from mailman interface"""
-        # Get all the links listed in the URL
-        #
-        # The archives are usually retrieved in descending
-        # chronological order (newest archives are always
-        # shown on the top of the archives). Reverse the list
-        # to analyze in chronological order.
-        htmlparser = MyHTMLParser(mailing_list.location,
-                                  self.web_user, self.web_password)
-        links = htmlparser.get_mboxes_links(self.force)
-
-        archives = []
-
-        for link in links:
-            basename = os.path.basename(link)
-            destfilename = os.path.join(mailing_list.compressed_dir, basename)
-
-            try:
-                # If the URL is for the current month, always retrieve.
-                # Otherwise, check visited status & local files first
-                this_month = find_current_month(link)
-
-                if this_month:
-                    self.__print_output(
-                        'Current month detected: '
-                        'Found substring %s in URL %s...' % (this_month, link))
-                    self.__print_output('Retrieving %s...' % link)
-                    retrieve_remote_file(link, destfilename,
-                                         self.web_user, self.web_password)
-                elif os.path.exists(destfilename):
-                    self.__print_output('Already downloaded %s' % link)
-                else:
-                    self.__print_output('Retrieving %s...' % link)
-                    retrieve_remote_file(link, destfilename,
-                                         self.web_user, self.web_password)
-            except IOError:
-                self.__print_output("Unknown URL: " + link + ". Skipping.")
-                continue
-
-            archives.append(MBoxArchive(destfilename, link))
-        return archives
 
     def __set_archives_to_analyze(self, mailing_list, archives):
         # today = datetime.datetime.today().strftime(datetimefmt)
@@ -453,9 +282,3 @@ class Application(object):
     def __check_mlstats_dirs(self, compressed_dir):
         '''Check if the mlstats directories exist'''
         create_dirs(compressed_dir)
-
-    def __create_download_dirs(self, mailing_list):
-        # Remote archives are retrieved and stored in compressed_dir.
-        # Local compressed archives are left in their original location.
-        if mailing_list.is_remote():
-            create_dirs(mailing_list.compressed_dir)
