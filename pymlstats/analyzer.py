@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 # Copyright (C) 2007-2010 Libresoft Research Group
 # Copyright (C) 2011-2014 Germán Poo-Caamaño <gpoo@gnome.org>
 #
