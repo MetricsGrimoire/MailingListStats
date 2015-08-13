@@ -56,7 +56,7 @@ class MyHTMLParser(htmllib.HTMLParser):
     def anchor_bgn(self, href, name, type):
         self.save_bgn()
 
-        if not href in self.links:
+        if href not in self.links:
             self.links.append(href)
 
     def get_mboxes_links(self, force=False):
