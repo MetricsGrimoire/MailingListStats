@@ -339,7 +339,8 @@ class Application(object):
         return archives
 
     def __set_archives_to_analyze(self, mailing_list, archives):
-        today = datetime.datetime.today().strftime(datetimefmt)
+        # today = datetime.datetime.today().strftime(datetimefmt)
+        today = datetime.datetime.today()
 
         # If the given list only includes one archive, force to
         # analyze it.
