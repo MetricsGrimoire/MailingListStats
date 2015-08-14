@@ -29,14 +29,10 @@ Some utils functions for MLStats
 """
 
 from fileextractor import FileExtractor
-import gzip
 import os.path
 import tempfile
-import urllib
-import urllib2
 import shutil
 import datetime
-import cStringIO
 
 COMPRESSED_TYPES = ['.gz', '.bz2', '.zip', '.tar',
                     '.tar.gz', '.tar.bz2', '.tgz', '.tbz']
@@ -89,33 +85,6 @@ def check_compressed_file(filename):
     with open(filename) as f:
         magic_number = f.read(4)
     return file_type(magic_number)
-
-
-def fetch_remote_resource(url, user=None, password=None):
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
-                 '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
-                 'Chrome/15.0.871.0 Safari/535.2'
-    headers = {'User-Agent': user_agent,
-               'Accept-Encoding': 'gzip, deflate'}
-
-    postdata = None
-    if user:
-        postdata = urllib.urlencode({'username': user, 'password': password})
-
-    request = urllib2.Request(url, postdata, headers)
-    response = urllib2.urlopen(request)
-    data = response.read()
-
-    if response.info().getheader('content-encoding') == 'gzip':
-        data = cStringIO.StringIO(data)
-        content = gzip.GzipFile(mode='r', compresslevel=0,
-                                fileobj=data).read()
-    else:
-        content = data
-
-    response.close()
-
-    return content
 
 
 def file_type(content):

@@ -24,9 +24,8 @@
 import gzip
 import os.path
 
-from htmlparser import MyHTMLParser
-from utils import find_current_month, create_dirs, fetch_remote_resource,\
-    file_type
+from htmlparser import MyHTMLParser, fetch_remote_resource
+from utils import find_current_month, create_dirs, file_type
 from archives import MBoxArchive, MailingList
 
 
