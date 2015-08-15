@@ -43,7 +43,8 @@ from db.report import Report
 
 from archives import MailingList, COMPRESSED_DIR
 from backends import LocalArchive, GmaneArchive, MailmanArchive,\
-    GMANE_URL, GMANE_DOMAIN, GMANE_DOWNLOAD_URL
+    WebdirectoryArchive, GMANE_URL, GMANE_DOMAIN, GMANE_DOWNLOAD_URL,\
+    REMOTE_BACKENDS
 
 datetimefmt = '%Y-%m-%d %H:%M:%S'
 
@@ -51,7 +52,8 @@ datetimefmt = '%Y-%m-%d %H:%M:%S'
 class Application(object):
     def __init__(self, driver, user, password, dbname, host,
                  url_list, report_filename, make_report, be_quiet,
-                 force, web_user, web_password, compressed_dir=None):
+                 force, web_user, web_password, compressed_dir=None,
+                 backend=None):
 
         # If no "--compressed-dir" parameter is set, use default
         if compressed_dir is None:
@@ -87,6 +89,8 @@ class Application(object):
 
         # URLs or local files to be analyzed
         self.url_list = url_list
+
+        self.backend = backend
 
         self.__check_mlstats_dirs(compressed_dir)
 
@@ -128,6 +132,42 @@ class Application(object):
         if not self.be_quiet:
             print text
 
+    def __get_backend(self, mailing_list):
+        def guess_backend(ml):
+            if self.backend and self.backend not in REMOTE_BACKENDS:
+                self.__print_output('Unknown backend "%s".'
+                                    'Assuming "mailman" backend' %
+                                    self.backend)
+                return 'mailman'
+            elif self.backend:
+                return self.backend
+
+            # Unset backend, we try to guess:
+            is_gmane = ml.location.startswith(GMANE_URL)
+            backend = 'gmane' if is_gmane else 'mailman'
+
+            return backend
+
+        if mailing_list.is_local():
+            return LocalArchive(mailing_list)
+
+        # Remote backend
+        backend_name = guess_backend(mailing_list)
+
+        if backend_name == 'gmane':
+            gmane_url = GMANE_DOWNLOAD_URL + mailing_list.alias
+            offset = self.__get_gmane_total_count(mailing_list.location,
+                                                  gmane_url)
+            return GmaneArchive(mailing_list, self.be_quiet, self.force,
+                                self.web_user, self.web_password, offset)
+        elif backend_name == 'webdirectory':
+            return WebdirectoryArchive(mailing_list, self.be_quiet,
+                                       self.force, self.web_user,
+                                       self.web_password)
+        else:  # Assuming mailman
+            return MailmanArchive(mailing_list, self.be_quiet, self.force,
+                                  self.web_user, self.web_password)
+
     def __analyze_mailing_list(self, url_or_dirpath, compressed_dir):
         """Look for mbox archives, retrieve, uncompress and analyze them"""
 
@@ -143,24 +183,17 @@ class Application(object):
         total, stored, non_parsed = (0, 0, 0)
 
         if mailing_list.is_local():
-            mla = LocalArchive(mailing_list)
-        elif mailing_list.location.startswith(GMANE_URL):
-            gmane_url = GMANE_DOWNLOAD_URL + mailing_list.alias
-            offset = self.__get_gmane_total_count(mailing_list.location,
-                                                  gmane_url)
-            mla = GmaneArchive(mailing_list, self.be_quiet, self.force,
-                               self.web_user, self.web_password, offset)
+            backend = LocalArchive(mailing_list)
         else:
-            mla = MailmanArchive(mailing_list, self.be_quiet, self.force,
-                               self.web_user, self.web_password)
+            backend = self.__get_backend(mailing_list)
 
-        mla._create_download_dirs()
+        backend._create_download_dirs()
 
         try:
-            archives = [a for a in mla.fetch()]
-            archives_to_analyze = self.__set_archives_to_analyze(mailing_list,
-                                                                 archives)
-            total, stored, non_parsed = self.__analyze_list_of_files(mailing_list, archives_to_analyze)
+            archives = [a for a in backend.fetch()]
+            to_analyze = self.__set_archives_to_analyze(mailing_list, archives)
+            total, stored, non_parsed = self.__analyze_list_of_files(mailing_list,
+                                                                     to_analyze)
         except IOError:
             self.__print_output("Unknown URL or directory: " +
                                 url_or_dirpath + ". Skipping.")

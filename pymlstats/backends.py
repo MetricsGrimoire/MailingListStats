@@ -23,9 +23,11 @@
 
 import gzip
 import os.path
+import urlparse
 
 from htmlparser import MyHTMLParser, fetch_remote_resource
-from utils import find_current_month, create_dirs, file_type
+from utils import find_current_month, create_dirs, file_type,\
+    COMPRESSED_TYPES, ACCEPTED_TYPES
 from archives import MBoxArchive, MailingList
 
 
@@ -33,6 +35,10 @@ GMANE_DOMAIN = 'gmane.org'
 GMANE_URL = 'http://dir.gmane.org/'
 GMANE_DOWNLOAD_URL = 'http://download.gmane.org/'
 GMANE_LIMIT = 2000
+
+MOD_MBOX_THREAD_STR = "/thread"
+
+REMOTE_BACKENDS = ['gmane', 'mailman', 'webdirectory']
 
 
 class BaseArchive(object):
@@ -121,7 +127,8 @@ class MailmanArchive(RemoteArchive):
 
         htmlparser = MyHTMLParser(mailing_list.location,
                                   self.web_user, self.web_password)
-        links = htmlparser.get_mboxes_links(self.force)
+        # links = htmlparser.get_mboxes_links(self.force)
+        links = self.filter_links(htmlparser.get_links())
 
         for link in links:
             basename = os.path.basename(link)
@@ -138,7 +145,7 @@ class MailmanArchive(RemoteArchive):
                         'Found substring %s in URL %s...' % (this_month, link))
                     self._print_output('Retrieving %s...' % link)
                     self._retrieve_remote_file(link, destfilename)
-                elif os.path.exists(destfilename):
+                elif os.path.exists(destfilename) and not self.force:
                     self._print_output('Already downloaded %s' % link)
                 else:
                     self._print_output('Retrieving %s...' % link)
@@ -148,6 +155,50 @@ class MailmanArchive(RemoteArchive):
                 continue
 
             yield MBoxArchive(destfilename, link)
+
+    def filter_links(self, links):
+        """Filter according to file types found in a Mailman archive index."""
+        accepted_types = COMPRESSED_TYPES + ACCEPTED_TYPES
+
+        filtered_links = []
+        for l in links:
+            # Links from Apache's 'mod_mbox' plugin contain
+            # trailing "/thread" substrings. Remove them to get
+            # the links where mbox files are stored.
+            if l.endswith(MOD_MBOX_THREAD_STR):
+                l = l[:-len(MOD_MBOX_THREAD_STR)]
+
+            ext1 = os.path.splitext(l)[-1]
+            ext2 = os.path.splitext(l.rstrip(ext1))[-1]
+
+            # Ignore links with not recognized extension
+            if ext1 in accepted_types or ext1+ext2 in accepted_types:
+                filtered_links.append(os.path.join(self.url, l))
+
+        return filtered_links
+
+
+class WebdirectoryArchive(MailmanArchive):
+    """Class to download mboxes from a Web directory-like page."""
+
+    def filter_links(self, links):
+        """Do not filter any link from the site, only external links."""
+        netloc = urlparse.urlparse(self.url).netloc
+        filtered_links = []
+
+        for l in links:
+            l_netloc = urlparse.urlparse(l).netloc
+            if l_netloc and l_netloc != netloc:
+                # URL pointing to an external site
+                continue
+            if l_netloc:
+                # full url (likely the same as querying for scheme
+                filtered_links.append(l)
+            else:
+                # a relative URL converted to a full one
+                filtered_links.append(os.path.join(self.url, l))
+
+        return filtered_links
 
 
 class GmaneArchive(RemoteArchive):
@@ -170,7 +221,10 @@ class GmaneArchive(RemoteArchive):
         mailing_list = self.mailing_list
 
         gmane_url = GMANE_DOWNLOAD_URL + mailing_list.alias
-        from_msg = self.offset if self.offset else self.__get_gmane_offset()
+        if self.force:
+            from_msg = 0
+        else:
+            from_msg = self.offset if self.offset else self.__get_gmane_offset()
 
         while True:
             to_msg = from_msg + GMANE_LIMIT

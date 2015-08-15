@@ -59,14 +59,14 @@ General options:
   -q, --quiet       Do not show messages about the progress in the
                     retrieval and analysis of the archives.
   --version         Show the version number and exit.
-  --force           Force mlstats to download and parse any link found
-                    in a given URL (only valid for remote links, neither
-                    Gmane links nor local files).
+  --force           Force mlstats to download even the mboxes/messages
+                    already found locally for a given URL.  This option
+                    is only valid for remote links. For Gmane links, it
+                    overrides the offset value to 0.
   -                 Read URLs from the standard input. This will ignore
                     all the URLs passed via the command line.
   --compressed-dir  Path to a folder where the archives of the mailing
                     list will be stored.
-
 
 Report options:
 
@@ -97,6 +97,12 @@ Database options:
                        analyzed (default is mlstats)
   --db-hostname        Name of the host with a database server running
                        (default is localhost)
+
+Backend options:
+
+  --backend       Mailing list backend for remote repositories: gmane,
+                  mailman, or webdirectory. (default is autodetected for
+                  gmane and mailman)
 """
 
 
@@ -109,7 +115,7 @@ def start():
                  "db-driver=", "db-user=", "db-password=", "db-hostname=",
                  "db-name=", "report-file=", "no-report", "version",
                  "quiet", "force", "web-user=", "web-password=",
-                 "compressed-dir="]
+                 "compressed-dir=", "backend="]
 
     # Default options
     db_driver = 'mysql'
@@ -125,6 +131,7 @@ def start():
     quiet = False
     force = False
     urls = ''
+    backend = None
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_opts, long_opts)
@@ -166,10 +173,13 @@ def start():
             web_password = value
         elif "--compressed-dir" == opt:
             compressed_dir = value.rstrip(os.path.sep)
+        elif "--backend" == opt:
+            backend = value
         elif "--version" == opt:
             print mlstats_version
             sys.exit(0)
 
     myapp = Application(db_driver, db_user, db_password, db_name,
                         db_hostname, urls, report_filename, report,
-                        quiet, force, web_user, web_password, compressed_dir)
+                        quiet, force, web_user, web_password, compressed_dir,
+                        backend)
