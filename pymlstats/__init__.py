@@ -31,7 +31,7 @@ options are changed.
 
 import sys
 import getopt
-import os.path
+import os
 from main import Application
 from version import mlstats_version
 
@@ -112,18 +112,18 @@ def start():
                  "compressed-dir="]
 
     # Default options
-    db_driver = 'mysql'
-    db_user = None
-    db_password = None
-    db_hostname = None
-    db_name = 'mlstats'
-    web_user = None
-    web_password = None
-    compressed_dir = None
-    report_filename = ''
-    report = True
-    quiet = False
-    force = False
+    db_driver = os.getenv('MLSTATS_DB_DRIVER', 'mysql')
+    db_user = os.getenv('MLSTATS_DB_USERNAME', None)
+    db_password = os.getenv('MLSTATS_DB_PASSWORD', None)
+    db_hostname = os.getenv('MLSTATS_DB_HOSTNAME', None)
+    db_name = os.getenv('MLSTATS_DB_NAME', 'mlstats')
+    web_user = os.getenv('MLSTATS_WEB_USERNAME', None)
+    web_password = os.getenv('MLSTATS_WEB_PASSWORD', None)
+    compressed_dir = os.getenv('MLSTATS_COMPRESSED_DIR', None)
+    report_filename = os.getenv('MLSTATS_REPORT_FILENAME', '')
+    report = os.getenv('MLSTATS_REPORT', True)
+    quiet = os.getenv('MLSTATS_QUIET', False)
+    force = os.getenv('MLSTATS_FORCE', False)
     urls = ''
 
     try:
