@@ -58,14 +58,17 @@ General options:
   -h, --help        Print this usage message.
   -q, --quiet       Do not show messages about the progress in the
                     retrieval and analysis of the archives.
+                    Environment variable "MLSTATS_QUIET"
   --version         Show the version number and exit.
   --force           Force mlstats to download and parse any link found
                     in a given URL (only valid for remote links, neither
                     Gmane links nor local files).
+                    Environment variable "MLSTATS_FORCE"
   -                 Read URLs from the standard input. This will ignore
                     all the URLs passed via the command line.
   --compressed-dir  Path to a folder where the archives of the mailing
                     list will be stored.
+                    Environment variable "MLSTATS_COMPRESSED_DIR"
 
 
 Report options:
@@ -74,29 +77,38 @@ Report options:
                     (default is standard output)
                     WARNING: The report file will be overwritten if
                     already exists.
+                    Environment variable "MLSTATS_REPORT_FILENAME"
   --no-report       Do not generate a report after the retrieval and
                     parsing of the archives.
+                    Environment variable "MLSTATS_REPORT"
 
 
 Private archives options:
 
   --web-user        If the archives of the mailing list are private, use
                     this username to login in order to retrieve the files.
+                    Environment variable "MLSTATS_WEB_USERNAME"
   --web-password    If the archives of the mailing list are private, use
                     this password to login in order to retrieve the files.
+                    Environment variable "MLSTATS_WEB_PASSWORD"
 
 Database options:
 
   --db-driver          Database backend: mysql, postgres, or sqlite
                        (default is mysql)
+                       Environment variable "MLSTATS_DB_DRIVER"
   --db-user            Username to connect to the database
                        (default is operator)
+                       Environment variable "MLSTATS_DB_USERNAME"
   --db-password        Password to connect to the database
                        (default is operator)
+                       Environment variable "MLSTATS_DB_PASSWORD"
   --db-name            Name of the database that contains data previously
                        analyzed (default is mlstats)
+                       Environment variable "MLSTATS_DB_NAME"
   --db-hostname        Name of the host with a database server running
                        (default is localhost)
+                       Environment variable "MLSTATS_DB_HOSTNAME"
 """
 
 
