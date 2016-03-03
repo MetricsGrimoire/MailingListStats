@@ -23,7 +23,7 @@ import os
 from datetime import datetime
 
 from pymlstats import analyzer
-from pymlstats.main import MBoxArchive
+from pymlstats.archives import MBoxArchive
 
 CUR_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(CUR_DIR, 'data')

@@ -281,7 +281,7 @@ class MailArchiveAnalyzer:
 
 if __name__ == '__main__':
     import pprint
-    from main import MBoxArchive
+    from archives import MBoxArchive
 
     # Print analyzer's output to check manually the parsing. In can
     # be used with egrep to filter out specific fields.

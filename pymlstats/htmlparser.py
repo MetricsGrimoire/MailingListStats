@@ -34,6 +34,10 @@ import formatter
 import htmllib
 import os
 import urlparse
+import urllib
+import urllib2
+import cStringIO
+import gzip
 import utils
 
 
@@ -60,9 +64,7 @@ class MyHTMLParser(htmllib.HTMLParser):
             self.links.append(href)
 
     def get_mboxes_links(self, force=False):
-        htmltxt = utils.fetch_remote_resource(self.url, self.user,
-                                              self.password)
-
+        htmltxt = fetch_remote_resource(self.url, self.user, self.password)
         scheme = urlparse.urlparse(self.url).scheme
 
         if scheme in ('ftp', 'ftps'):
@@ -107,3 +109,30 @@ class MyHTMLParser(htmllib.HTMLParser):
         self.mboxes_links = filtered_links
 
         return self.mboxes_links
+
+
+def fetch_remote_resource(url, user=None, password=None):
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
+                 '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
+                 'Chrome/15.0.871.0 Safari/535.2'
+    headers = {'User-Agent': user_agent,
+               'Accept-Encoding': 'gzip, deflate'}
+
+    postdata = None
+    if user:
+        postdata = urllib.urlencode({'username': user, 'password': password})
+
+    request = urllib2.Request(url, postdata, headers)
+    response = urllib2.urlopen(request)
+    data = response.read()
+
+    if response.info().getheader('content-encoding') == 'gzip':
+        data = cStringIO.StringIO(data)
+        content = gzip.GzipFile(mode='r', compresslevel=0,
+                                fileobj=data).read()
+    else:
+        content = data
+
+    response.close()
+
+    return content
