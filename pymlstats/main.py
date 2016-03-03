@@ -53,7 +53,7 @@ class Application(object):
     def __init__(self, driver, user, password, dbname, host,
                  url_list, report_filename, make_report, be_quiet,
                  force, web_user, web_password, compressed_dir=None,
-                 backend=None):
+                 backend=None, offset=0):
 
         # If no "--compressed-dir" parameter is set, use default
         if compressed_dir is None:
@@ -91,6 +91,7 @@ class Application(object):
         self.url_list = url_list
 
         self.backend = backend
+        self.offset = offset
 
         self.__check_mlstats_dirs(compressed_dir)
 
@@ -156,8 +157,9 @@ class Application(object):
 
         if backend_name == 'gmane':
             gmane_url = GMANE_DOWNLOAD_URL + mailing_list.alias
-            offset = self.__get_gmane_total_count(mailing_list.location,
-                                                  gmane_url)
+            last_offset = self.__get_gmane_total_count(mailing_list.location,
+                                                       gmane_url)
+            offset = self.offset or last_offset
             return GmaneArchive(mailing_list, self.be_quiet, self.force,
                                 self.web_user, self.web_password, offset)
         elif backend_name == 'webdirectory':

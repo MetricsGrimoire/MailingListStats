@@ -103,6 +103,8 @@ Backend options:
   --backend       Mailing list backend for remote repositories: gmane,
                   mailman, or webdirectory. (default is autodetected for
                   gmane and mailman)
+  --offset        Start from a given message. Only works with the gmane
+                  backend. (default is 0)
 """
 
 
@@ -115,7 +117,7 @@ def start():
                  "db-driver=", "db-user=", "db-password=", "db-hostname=",
                  "db-name=", "report-file=", "no-report", "version",
                  "quiet", "force", "web-user=", "web-password=",
-                 "compressed-dir=", "backend="]
+                 "compressed-dir=", "backend=", "offset="]
 
     # Default options
     db_driver = 'mysql'
@@ -132,6 +134,7 @@ def start():
     force = False
     urls = ''
     backend = None
+    offset = 0
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_opts, long_opts)
@@ -175,6 +178,8 @@ def start():
             compressed_dir = value.rstrip(os.path.sep)
         elif "--backend" == opt:
             backend = value
+        elif "--offset" == opt:
+            offset = int(value)
         elif "--version" == opt:
             print mlstats_version
             sys.exit(0)
@@ -182,4 +187,4 @@ def start():
     myapp = Application(db_driver, db_user, db_password, db_name,
                         db_hostname, urls, report_filename, report,
                         quiet, force, web_user, web_password, compressed_dir,
-                        backend)
+                        backend, offset)
