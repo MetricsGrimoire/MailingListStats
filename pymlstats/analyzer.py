@@ -32,6 +32,7 @@ from the standard Python modules (for instance, Maildir).
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
+import re
 import datetime
 import hashlib
 import sys
@@ -78,8 +79,11 @@ def to_unicode(string, charset='latin-1'):
 
 
 class ParseMessage:
-    common_headers = ['message-id', 'list-id', 'content-type',
-                      'in-reply-to', 'references']
+    common_headers = ['message-id', 'list-id', 'content-type', 'references']
+
+    # Some In-reply-to headers add some noise after the message-id. We
+    # can clean it up.
+    re_reply_to = re.compile('^.*[^<]*(<.*>).*', re.IGNORECASE)
 
     def parse_message(self, message):
         filtered_message = {}
@@ -135,6 +139,11 @@ class ParseMessage:
         msgdate, tz_secs = self.__get_date(message)
         filtered_message['date'] = msgdate
         filtered_message['date_tz'] = str(tz_secs)
+
+        in_reply_to = message.get('in-reply-to')
+        # filtered_message['in-reply-to'] = self.re_reply_to.sub(r'\1',
+        #                                                        in_reply_to)
+        filtered_message['in-reply-to'] = in_reply_to
 
         # Retrieve other headers requested
         for header in self.common_headers:
