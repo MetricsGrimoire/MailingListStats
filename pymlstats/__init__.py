@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 # Copyright (C) 2007-2010 Libresoft Research Group
+# Copyright (C) 2016 Germán Poo-Caamaño <gpoo@gnome.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +18,7 @@
 # MA 02111-1301, USA.
 #
 # Authors : Israel Herraiz <herraiz@gsyc.escet.urjc.es>
+# Authors : Germán Poo-Caamaño <gpoo@gnome.org>
 
 """
 Usage and launch functions. Should not change unless command line
@@ -30,159 +32,105 @@ options are changed.
 """
 
 import sys
-import getopt
-import os.path
+import argparse
 from main import Application
 from version import mlstats_version
 
-# Some stuff about the project
-author = "(C) 2007-2010 %s <%s>" % \
-         ("Libresoft", "libresoft-tools-devel@lists.morfeo-project.org")
-name = "mlstats %s - Libresoft Research Group http://libresoft.es" % \
-       mlstats_version
-credits = "%s\n%s\n" % (name, author)
-
-
-def usage():
-    print credits
-    print "Usage: %s [options] [URL1] [URL2] ... [URLn]" % (sys.argv[0])
-    print """
-    where URL1, URL2, ...., URLn are the urls of the archive web pages
-    of the mailing list. If they are a local dir instead of a remote URL,
-    the directory will be recursively scanned for mbox files.
-    If the option \"-\" is passed instead of a URL(s), the URLs will be
-    read from the standard input.
-
-General options:
-
-  -h, --help        Print this usage message.
-  -q, --quiet       Do not show messages about the progress in the
-                    retrieval and analysis of the archives.
-  --version         Show the version number and exit.
-  --force           Force mlstats to download even the mboxes/messages
-                    already found locally for a given URL.  This option
-                    is only valid for remote links. For Gmane links, it
-                    overrides the offset value to 0.
-  -                 Read URLs from the standard input. This will ignore
-                    all the URLs passed via the command line.
-  --compressed-dir  Path to a folder where the archives of the mailing
-                    list will be stored.
-
-Report options:
-
-  --report-file     Filename for the report generated after the analysis
-                    (default is standard output)
-                    WARNING: The report file will be overwritten if
-                    already exists.
-  --no-report       Do not generate a report after the retrieval and
-                    parsing of the archives.
-
-
-Private archives options:
-
-  --web-user        If the archives of the mailing list are private, use
-                    this username to login in order to retrieve the files.
-  --web-password    If the archives of the mailing list are private, use
-                    this password to login in order to retrieve the files.
-
-Database options:
-
-  --db-driver          Database backend: mysql, postgres, or sqlite
-                       (default is mysql)
-  --db-user            Username to connect to the database
-                       (default is operator)
-  --db-password        Password to connect to the database
-                       (default is operator)
-  --db-name            Name of the database that contains data previously
-                       analyzed (default is mlstats)
-  --db-hostname        Name of the host with a database server running
-                       (default is localhost)
-
-Backend options:
-
-  --backend       Mailing list backend for remote repositories: gmane,
-                  mailman, or webdirectory. (default is autodetected for
-                  gmane and mailman)
-  --offset        Start from a given message. Only works with the gmane
-                  backend. (default is 0)
-"""
+name = 'mlstats - A tool to retrieve, parse and analyze archived mail boxes'
 
 
 def start():
-    # Short (one letter) options. Those requiring argument followed by :
-    short_opts = "hq"
-    # short_opts = "h:t:b:r:l:n:p:d:s:i:r"
-    # Long options (all started by --). Those requiring argument followed by =
-    long_opts = ["help",
-                 "db-driver=", "db-user=", "db-password=", "db-hostname=",
-                 "db-name=", "report-file=", "no-report", "version",
-                 "quiet", "force", "web-user=", "web-password=",
-                 "compressed-dir=", "backend=", "offset="]
+    args = argparse.ArgumentParser(description=name)
 
-    # Default options
-    db_driver = 'mysql'
-    db_user = None
-    db_password = None
-    db_hostname = None
-    db_name = 'mlstats'
-    web_user = None
-    web_password = None
-    compressed_dir = None
-    report_filename = ''
-    report = True
-    quiet = False
-    force = False
-    urls = ''
-    backend = None
-    offset = 0
+    args.add_argument('url', nargs='+',
+                      help='Urls of the archive web pages of the mailing '
+                           'list. If they are a local dir instead of a '
+                           'remote URL, the directory will be recursively '
+                           'scanned for mbox files. If the option \'-\' is '
+                           'passed instead of a URL(s), the URLs will be '
+                           'read from the standard input.')
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], short_opts, long_opts)
-    except getopt.GetoptError, (msg, opt):
-        print >>sys.stderr, msg
-        usage()
-        sys.exit(2)
+    argen = args.add_argument_group('General options')
+    argen.add_argument('-q', '--quiet', action='store_true',
+                       help='Do not show messages about the progress in the '
+                            'retrieval and analysis of the archives.')
+    argen.add_argument('--version', action='version', version=mlstats_version,
+                       help='Show the version number and exit.')
+    argen.add_argument('--force', action='store_true',
+                       help='Force mlstats to download even the '
+                            'mboxes/messages already found locally for a '
+                            'given URL.  This option is only valid for remote '
+                            'links. For Gmane links, it overrides the offset '
+                            'value to 0.')
+    argen.add_argument('--compressed-dir',
+                       help='Path to a folder where the archives of the '
+                            'mailing list will be stored.')
 
-    urls = args
-    if "-" in args:
+    argrp = args.add_argument_group('Report options')
+    argrp.add_argument('--report-file',
+                       help='Filename for the report generated after the '
+                            'analysis (default is standard output) WARNING: '
+                            'The report file will be overwritten if already '
+                            'exists.')
+    argrp.add_argument('--no-report', action='store_true',
+                       help='Do not generate a report after the retrieval '
+                            'and parsing of the archives.')
+
+    argweb = args.add_argument_group('Private archive options')
+    argweb.add_argument('--web-user',
+                        help='If the archives of the mailing list are '
+                             'private, use this username to login in order '
+                             'to retrieve the files.')
+    argweb.add_argument('--web-password',
+                        help='If the archives of the mailing list are '
+                             'private, this password to login in order to '
+                             'retrieve the files.')
+
+    argdb = args.add_argument_group('Database options')
+    argdb.add_argument('--db-driver', default='mysql',
+                       help='Database backend: mysql, postgres, or sqlite '
+                            '(default is mysql)')
+    argdb.add_argument('--db-user',
+                       help='Username to connect to the database')
+    argdb.add_argument('--db-password',
+                       help='Password to connect to the database')
+    argdb.add_argument('--db-name', default='mlstats',
+                       help='Name of the database that contains data '
+                            'previously analyzed')
+    argdb.add_argument('--db-hostname',
+                       help='Name of the host with a database server running')
+
+    argbnd = args.add_argument_group('Backend options')
+    argbnd.add_argument('--backend',
+                        help='Mailing list backend for remote repositories: '
+                             'gmane, mailman, or webdirectory. (default is '
+                             'autodetected for gmane and mailman)')
+    argbnd.add_argument('--offset', default=0, type=int,
+                        help='Start from a given message. Only works with the '
+                             'gmane, backend. (default is 0) ')
+
+    opts = args.parse_args()
+
+    if '-' in opts.url:
         # Read URLs from standard input instead of command line
-        urls = [url.rstrip('\n').rstrip('\t') for url in sys.stdin.readlines()]
+        urls = [url.strip() for url in sys.stdin.readlines()]
+    else:
+        urls = opts.url
 
-    for opt, value in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            sys.exit(0)
-        elif "--db-driver" == opt:
-            db_driver = value
-        elif "--db-user" == opt:
-            db_user = value
-        elif "--db-password" == opt:
-            db_password = value
-        elif "--db-hostname" == opt:
-            db_hostname = value
-        elif "--db-name" == opt:
-            db_name = value
-        elif "--report-file" == opt:
-            report_filename = value
-        elif "--no-report" == opt:
-            report = False
-        elif opt in ("-q", "--quiet"):
-            quiet = True
-        elif "--force" == opt:
-            force = True
-        elif "--web-user" == opt:
-            web_user = value
-        elif "--web-password" == opt:
-            web_password = value
-        elif "--compressed-dir" == opt:
-            compressed_dir = value.rstrip(os.path.sep)
-        elif "--backend" == opt:
-            backend = value
-        elif "--offset" == opt:
-            offset = int(value)
-        elif "--version" == opt:
-            print mlstats_version
-            sys.exit(0)
+    db_driver = opts.db_driver
+    db_user = opts.db_user
+    db_password = opts.db_password
+    db_hostname = opts.db_hostname
+    db_name = opts.db_name
+    web_user = opts.web_user
+    web_password = opts.web_password
+    compressed_dir = opts.compressed_dir
+    report_filename = opts.report_file
+    report = not opts.no_report
+    quiet = opts.quiet
+    force = opts.force
+    backend = opts.backend
+    offset = opts.offset
 
     myapp = Application(db_driver, db_user, db_password, db_name,
                         db_hostname, urls, report_filename, report,
