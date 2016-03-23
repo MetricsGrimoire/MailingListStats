@@ -191,8 +191,14 @@ class ParseMessage:
 
         try:
             msgdate = datetime.datetime(*parsed_date[:6])
-            if msgdate.year < 100:
-                msgdate = msgdate.replace(year=msgdate.year + 1900)
+            # Workaround for `strftime` which allow dates higher than 1900.
+            # And the MySQL module uses `strftime` to convert a datetime.
+            if msgdate.year < 1900:
+                # Usually we see years like 0102, but in case someboedy
+                # set the date to 1800 or something alike, we leave only
+                # the centuries before adding 1900.
+                fixed_year = (msgdate.year % 1000) + 1900
+                msgdate = msgdate.replace(year=msgdate.year + fixed_year)
         except ValueError:
             msgdate = datetime.datetime(*(1979, 2, 4, 0, 0))
 
