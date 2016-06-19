@@ -45,6 +45,7 @@ CREATE INDEX response ON messages (is_response_of);
 CREATE TABLE messages_people (
     type_of_recipient VARCHAR(25) NOT NULL DEFAULT 'From'
         CHECK (type_of_recipient IN ('From', 'To', 'Cc')),
+    mailing_list_url VARCHAR(255) NOT NULL,
     message_id VARCHAR(255) NOT NULL,
     email_address VARCHAR(255) NOT NULL,
     PRIMARY KEY(type_of_recipient, message_id, email_address)

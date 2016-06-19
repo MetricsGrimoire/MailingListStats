@@ -32,12 +32,11 @@ return a list with all the links contained in the web page.
 
 import formatter
 import htmllib
-import os
 import urlparse
-import utils
-
-
-MOD_MBOX_THREAD_STR = "/thread"
+import urllib
+import urllib2
+import cStringIO
+import gzip
 
 
 class MyHTMLParser(htmllib.HTMLParser):
@@ -59,10 +58,8 @@ class MyHTMLParser(htmllib.HTMLParser):
         if href not in self.links:
             self.links.append(href)
 
-    def get_mboxes_links(self, force=False):
-        htmltxt = utils.fetch_remote_resource(self.url, self.user,
-                                              self.password)
-
+    def get_links(self):
+        htmltxt = fetch_remote_resource(self.url, self.user, self.password)
         scheme = urlparse.urlparse(self.url).scheme
 
         if scheme in ('ftp', 'ftps'):
@@ -84,26 +81,31 @@ class MyHTMLParser(htmllib.HTMLParser):
 
         self.close()
 
-        accepted_types = utils.COMPRESSED_TYPES + utils.ACCEPTED_TYPES
+        return self.links
 
-        filtered_links = []
-        for l in self.links:
-            if force:
-                filtered_links.append(os.path.join(self.url, l))
-            else:
-                # Links from Apache's 'mod_mbox' plugin contain
-                # trailing "/thread" substrings. Remove them to get
-                # the links where mbox files are stored.
-                if l.endswith(MOD_MBOX_THREAD_STR):
-                    l = l[:-len(MOD_MBOX_THREAD_STR)]
 
-                ext1 = os.path.splitext(l)[-1]
-                ext2 = os.path.splitext(l.rstrip(ext1))[-1]
+def fetch_remote_resource(url, user=None, password=None):
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.2 ' \
+                 '(KHTML, like Gecko) Ubuntu/11.04 Chromium/15.0.871.0 ' \
+                 'Chrome/15.0.871.0 Safari/535.2'
+    headers = {'User-Agent': user_agent,
+               'Accept-Encoding': 'gzip, deflate'}
 
-                # Ignore links with not recognized extension
-                if ext1 in accepted_types or ext1+ext2 in accepted_types:
-                    filtered_links.append(os.path.join(self.url, l))
+    postdata = None
+    if user:
+        postdata = urllib.urlencode({'username': user, 'password': password})
 
-        self.mboxes_links = filtered_links
+    request = urllib2.Request(url, postdata, headers)
+    response = urllib2.urlopen(request)
+    data = response.read()
 
-        return self.mboxes_links
+    if response.info().getheader('content-encoding') == 'gzip':
+        data = cStringIO.StringIO(data)
+        content = gzip.GzipFile(mode='r', compresslevel=0,
+                                fileobj=data).read()
+    else:
+        content = data
+
+    response.close()
+
+    return content

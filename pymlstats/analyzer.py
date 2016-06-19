@@ -32,13 +32,14 @@ from the standard Python modules (for instance, Maildir).
 @contact:      libresoft-tools-devel@lists.morfeo-project.org
 """
 
+import re
+import datetime
+import hashlib
+import sys
 
 from email.header import decode_header
 from email.utils import getaddresses, parsedate_tz
 from email.Iterators import typed_subpart_iterator
-import datetime
-import hashlib
-import sys
 from pymlstats.strictmbox import CustomMailbox
 from pymlstats.utils import EMAIL_OBFUSCATION_PATTERNS
 
@@ -77,128 +78,86 @@ def to_unicode(string, charset='latin-1'):
         raise TypeError('string should be of str type')
 
 
-class MailArchiveAnalyzer:
+class ParseMessage:
+    common_headers = ['message-id', 'list-id', 'content-type', 'references']
 
-    accepted_headers = ['message-id', 'from',
-                        'to',
-                        'cc',
-                        'date',
-                        'list-id',
-                        'in-reply-to',
-                        'subject',
-                        'body']
-    common_headers = ['message-id', 'in-reply-to', 'list-id',
-                      'content-type', 'references']
+    # Some In-reply-to headers add some noise after the message-id. We
+    # can clean it up.
+    re_reply_to = re.compile('^.*[^<]*(<.*>).*', re.IGNORECASE)
 
-    def __init__(self, archive=None):
-        self.archive = archive
+    def parse_message(self, message):
+        filtered_message = {}
 
-    def get_messages(self):
+        # Read unix from before headers
+        unixfrom = message.get_unixfrom()
+        charset = message.get_content_charset()
 
-        messages_list = []
-        fp = self.archive.container
-        mbox = CustomMailbox(fp)
+        try:
+            date_to_parse = unixfrom.split('  ', 1)[1]
+            parsed_date = parsedate_tz(date_to_parse)
+            msgdate = datetime.datetime(*parsed_date[:6])
+        except:
+            msgdate = None
 
-        non_parsed = 0
-        for message in mbox:
-            filtered_message = {}
+        # Some messages have a received header, but it is now being
+        # ignored by MLStats and substituted by the value of the Unix
+        # From field (first line of the message)
+        filtered_message['received'] = msgdate
 
-            # Read unix from before headers
-            unixfrom = message.get_unixfrom()
-            charset = message.get_content_charset()
+        # The 'body' is not actually part of the header, but it will be
+        # treated as any other header
+        body, patches = self.__get_body(message, charset)
+        filtered_message['body'] = u'\n'.join(body)
 
-            try:
-                date_to_parse = unixfrom.split('  ', 1)[1]
-                parsed_date = parsedate_tz(date_to_parse)
-                msgdate = datetime.datetime(*parsed_date[:6])
-            except:
-                msgdate = None
+        filtered_message['subject'] = self.__decode(message.get('subject'),
+                                                    charset)
 
-            # Some messages have a received header, but it is
-            # now being ignored by MLStats and substituted by
-            # the value of the Unix From field (first line of
-            # the message)
-            filtered_message['received'] = msgdate
+        # message.getaddrlist returns a list of tuples
+        # Each one of the tuples is like this
+        # (name,email_address)
+        #
+        # For instance, if the header is
+        #      To: Alice <alice@alice.com>, Bob <bob@bob.com>
+        # it will return
+        #      [('Alice','alice@alice.com'), ('Bob','bob@bob.com')]
+        #
+        # If the header is 'from', this list will contain only one element.
+        # If the header is 'to' or 'cc', it may contain several items
+        # (or it could also be an empty list when such header is missing
+        #  in the original message).
+        for header in ('from', 'to', 'cc'):
+            address = message.get(header)
 
-            # The 'body' is not actually part of the headers,
-            # but it will be treated as any other header
-            body, patches = self.__get_body(message, charset)
-            filtered_message['body'] = u'\n'.join(body)
+            if not address:
+                filtered_message[header] = None  # [('','')]
+                continue
 
-            filtered_message['subject'] = self.__decode(message.get('subject'),
-                                                        charset)
+            address = self.__check_spam_obscuring(address)
+            addresses = self.__get_decoded_addresses(address, charset)
+            filtered_message[header] = addresses or None
 
-            for header in ('from', 'to'):
-                address = message.get(header)
+        msgdate, tz_secs = self.__get_date(message)
+        filtered_message['date'] = msgdate
+        filtered_message['date_tz'] = str(tz_secs)
 
-                if not address:
-                    filtered_message[header] = None  # [('','')]
-                    continue
+        in_reply_to = message.get('in-reply-to')
+        # filtered_message['in-reply-to'] = self.re_reply_to.sub(r'\1',
+        #                                                        in_reply_to)
+        filtered_message['in-reply-to'] = in_reply_to
 
-                address = self.__check_spam_obscuring([address])
-                addresses = []
-                for name, email in getaddresses(address):
-                    addresses.append((self.__decode(name, charset), self.__decode(email, charset)))
+        # Retrieve other headers requested
+        for header in self.common_headers:
+            msg = message.get(header)
+            if msg:
+                try:
+                    msg = to_unicode(msg, charset)
+                except TypeError:
+                    print >> sys.stderr, 'TypeError: msg: %s % msg'
+                    msg = [to_unicode(e, charset) for e in msg]
 
-                filtered_message[header] = addresses
+            filtered_message[header] = msg
 
-            # CC is a list of addresses
-            addresses = []
-            for address in (message.get_all('cc', [])):
-                address = self.__check_spam_obscuring([address])
-                for name, email in getaddresses(address):
-                    addresses.append((self.__decode(name, charset), self.__decode(email, charset)))
-
-            filtered_message['cc'] = addresses or None  # [('','')]
-
-            msgdate, tz_secs = self.__get_date(message)
-            filtered_message['date'] = msgdate
-            filtered_message['date_tz'] = str(tz_secs)
-
-            # Retrieve other headers requested
-            for header in self.common_headers:
-                msg = message.get(header)
-                if msg:
-                    try:
-                        msg = to_unicode(msg, charset)
-                    except TypeError:
-                        print >> sys.stderr, 'TypeError: msg: %s % msg'
-                        msg = [to_unicode(e, charset) for e in msg]
-
-                filtered_message[header] = msg
-
-            # if there is no message-id, we try to create one unique (but
-            # repeatable) using the from address and the message body.
-            # Otherwise, several messages without message-id could be
-            # considered duplicated erroneously.
-            if not filtered_message['message-id']:
-                msgid = self.make_msgid(filtered_message['from'],
-                                        filtered_message['body'])
-                filtered_message['message-id'] = msgid
-                print >> sys.stderr, '=> message-id not present for:'
-                print >> sys.stderr, message
-
-            # message.getaddrlist returns a list of tuples
-            # Each one of the tuples is like this
-            # (name,email_address)
-            #
-            # For instance, if the header is
-            # To: Alice <alice@alice.com>, Bob <bob@bob.com>
-            # it will return
-            # [('Alice','alice@alice.com'), ('Bob','bob@bob.com')]
-            #
-            # If the header is 'from', this list will contain only
-            # 1 element
-            #
-            # If the header is 'to' or 'cc', it may contain several
-            # items (or it could be also an empty list if there is not
-            # such header in the original message).
-
-            messages_list.append(filtered_message)
-
-        fp.close()
-
-        return messages_list, non_parsed
+        return filtered_message
 
     def __get_body(self, msg, charset):
         body = []
@@ -232,8 +191,14 @@ class MailArchiveAnalyzer:
 
         try:
             msgdate = datetime.datetime(*parsed_date[:6])
-            if msgdate.year < 100:
-                msgdate = msgdate.replace(year=msgdate.year + 1900)
+            # Workaround for `strftime` which allow dates higher than 1900.
+            # And the MySQL module uses `strftime` to convert a datetime.
+            if msgdate.year < 1900:
+                # Usually we see years like 0102, but in case someboedy
+                # set the date to 1800 or something alike, we leave only
+                # the centuries before adding 1900.
+                fixed_year = (msgdate.year % 1000) + 1900
+                msgdate = msgdate.replace(year=msgdate.year + fixed_year)
         except ValueError:
             msgdate = datetime.datetime(*(1979, 2, 4, 0, 0))
 
@@ -241,13 +206,20 @@ class MailArchiveAnalyzer:
 
         return msgdate, tz_secs
 
+    def __get_decoded_addresses(self, address, charset):
+        result = []
+        for name, email in getaddresses([address]):
+            result.append((self.__decode(name, charset),
+                           self.__decode(email, charset)))
+        return result
+
     def __check_spam_obscuring(self, field):
         if not field:
             return field
 
         for pattern in EMAIL_OBFUSCATION_PATTERNS:
-            if field[0].find(pattern) != -1:
-                return [field[0].replace(pattern, '@')]
+            if field.find(pattern) != -1:
+                return field.replace(pattern, '@')
 
         return field
 
@@ -269,6 +241,41 @@ class MailArchiveAnalyzer:
 
         return r
 
+
+class MailArchiveAnalyzer:
+    def __init__(self, archive=None):
+        self.archive = archive
+
+    def get_messages(self):
+        messages_list = []
+        fp = self.archive.container
+        mbox = CustomMailbox(fp)
+
+        without_message_id = 0
+        for message in mbox:
+            filtered_message = {}
+
+            msg = ParseMessage()
+            filtered_message = msg.parse_message(message)
+
+            # if there is no message-id, we try to create one unique (but
+            # repeatable) using the from address and the message body.
+            # Otherwise, several messages without message-id could be
+            # considered duplicated erroneously.
+            if not filtered_message['message-id']:
+                msgid = self.make_msgid(filtered_message['from'],
+                                        filtered_message['body'])
+                filtered_message['message-id'] = msgid
+                print >> sys.stderr, '=> message-id not present for:'
+                print >> sys.stderr, message
+                without_message_id += 1
+
+            messages_list.append(filtered_message)
+
+        fp.close()
+
+        return messages_list, without_message_id
+
     def make_msgid(self, from_addr, message):
         try:
             domain = from_addr[0][1].split('@')[1]
@@ -281,7 +288,7 @@ class MailArchiveAnalyzer:
 
 if __name__ == '__main__':
     import pprint
-    from main import MBoxArchive
+    from archives import MBoxArchive
 
     # Print analyzer's output to check manually the parsing. In can
     # be used with egrep to filter out specific fields.

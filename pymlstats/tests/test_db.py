@@ -38,7 +38,7 @@ DB_NAME = '__mlstats_unit_tests'
 
 class DatabaseTest(unittest.TestCase):
     def setUp(self):
-        self.driver = os.getenv('DB')
+        self.driver = os.getenv('DB') or 'sqlite'
         dbname = ':memory:' if self.driver == 'sqlite' else DB_NAME
         # Ask for DBUSER and DBPASSWORD in case of running the unit test
         # in a different setting (local). 'None' is enough for Travis,

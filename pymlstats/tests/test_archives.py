@@ -20,7 +20,7 @@
 import unittest
 import os
 
-from pymlstats.main import MailingList, COMPRESSED_DIR
+from pymlstats.archives import MailingList, COMPRESSED_DIR
 
 
 class MailingListTest(unittest.TestCase):
