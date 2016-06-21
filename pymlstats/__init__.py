@@ -33,6 +33,7 @@ options are changed.
 
 import sys
 import argparse
+import os
 from main import Application
 from version import mlstats_version
 
@@ -52,62 +53,87 @@ def start():
 
     argen = args.add_argument_group('General options')
     argen.add_argument('-q', '--quiet', action='store_true',
+                       default=os.getenv('MLSTATS_QUIET', False),
                        help='Do not show messages about the progress in the '
-                            'retrieval and analysis of the archives.')
+                            'retrieval and analysis of the archives.'
+                            'Environment variable "MLSTATS_QUIET"')
     argen.add_argument('--version', action='version', version=mlstats_version,
                        help='Show the version number and exit.')
     argen.add_argument('--force', action='store_true',
+                       default=os.getenv('MLSTATS_FORCE', False),
                        help='Force mlstats to download even the '
                             'mboxes/messages already found locally for a '
                             'given URL.  This option is only valid for remote '
                             'links. For Gmane links, it overrides the offset '
-                            'value to 0.')
+                            'value to 0.'
+                            'Environment variable "MLSTATS_FORCE"')
     argen.add_argument('--compressed-dir',
+                       default=os.getenv('MLSTATS_COMPRESSED_DIR', None),
                        help='Path to a folder where the archives of the '
-                            'mailing list will be stored.')
+                            'mailing list will be stored.'
+                            'Environment variable "MLSTATS_COMPRESSED_DIR"'
+                       )
 
     argrp = args.add_argument_group('Report options')
     argrp.add_argument('--report-file',
+                       default=os.getenv('MLSTATS_REPORT_FILENAME', ''),
                        help='Filename for the report generated after the '
                             'analysis (default is standard output) WARNING: '
                             'The report file will be overwritten if already '
-                            'exists.')
+                            'exists.'
+                            'Environment variable "MLSTATS_REPORT_FILENAME"')
     argrp.add_argument('--no-report', action='store_true',
+                       default=os.getenv('MLSTATS_REPORT', True),
                        help='Do not generate a report after the retrieval '
-                            'and parsing of the archives.')
+                            'and parsing of the archives.'
+                            'Environment variable "MLSTATS_REPORT"')
 
     argweb = args.add_argument_group('Private archive options')
     argweb.add_argument('--web-user',
+                        default=os.getenv('MLSTATS_WEB_USERNAME', None),
                         help='If the archives of the mailing list are '
                              'private, use this username to login in order '
-                             'to retrieve the files.')
+                             'to retrieve the files.'
+                             'Environment variable "MLSTATS_WEB_USERNAME"')
     argweb.add_argument('--web-password',
+                        default=os.getenv('MLSTATS_WEB_PASSWORD', None),
                         help='If the archives of the mailing list are '
                              'private, this password to login in order to '
-                             'retrieve the files.')
+                             'retrieve the files.'
+                             'Environment variable "MLSTATS_WEB_PASSWORD"')
 
     argdb = args.add_argument_group('Database options')
-    argdb.add_argument('--db-driver', default='mysql',
+    argdb.add_argument('--db-driver', default=os.getenv('MLSTATS_DB_DRIVER', 'mysql'),
                        help='Database backend: mysql, postgres, or sqlite '
-                            '(default is mysql)')
+                            '(default is mysql)'
+                            'Environment variable "MLSTATS_DB_DRIVER"')
     argdb.add_argument('--db-user',
-                       help='Username to connect to the database')
+                       default=os.getenv('MLSTATS_DB_USERNAME', None),
+                       help='Username to connect to the database'
+                            'Environment variable "MLSTATS_DB_USERNAME"')
     argdb.add_argument('--db-password',
-                       help='Password to connect to the database')
-    argdb.add_argument('--db-name', default='mlstats',
+                       default=os.getenv('MLSTATS_DB_PASSWORD', None),
+                       help='Password to connect to the database'
+                            'Environment variable "MLSTATS_DB_PASSWORD"')
+    argdb.add_argument('--db-name', default=os.getenv('MLSTATS_DB_NAME', 'mlstats'),
                        help='Name of the database that contains data '
-                            'previously analyzed')
+                            'previously analyzed'
+                            'Environment variable "MLSTATS_DB_NAME"')
     argdb.add_argument('--db-hostname',
-                       help='Name of the host with a database server running')
+                       default=os.getenv('MLSTATS_DB_HOSTNAME', None),
+                       help='Name of the host with a database server running'
+                            'Environment variable "MLSTATS_DB_HOSTNAME"')
 
     argbnd = args.add_argument_group('Backend options')
-    argbnd.add_argument('--backend',
+    argbnd.add_argument('--backend', default=os.getenv('MLSTATS_BACKEND', None),
                         help='Mailing list backend for remote repositories: '
                              'gmane, mailman, or webdirectory. (default is '
-                             'autodetected for gmane and mailman)')
-    argbnd.add_argument('--offset', default=0, type=int,
+                             'autodetected for gmane and mailman)'
+                             'Environment variable "MLSTATS_BACKEND"')
+    argbnd.add_argument('--offset', default=os.getenv('MLSTATS_OFFSET', 0), type=int,
                         help='Start from a given message. Only works with the '
-                             'gmane, backend. (default is 0) ')
+                             'gmane, backend. (default is 0) '
+                             'Environment variable "MLSTATS_OFFSET"')
 
     opts = args.parse_args()
 

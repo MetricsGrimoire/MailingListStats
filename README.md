@@ -68,6 +68,9 @@ You are ready to use `mlstats`.
 Running MLStats
 ---------------
 
+In general configuration is applied by command line arguments or environment variables.
+Checkout existing arguments and environment variables via `mlstats --help`.
+
 ### Basic Setup Using Sqlite
 
 To run `mlstats` without the hassle of setting a database, you can use
